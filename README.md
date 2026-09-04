@@ -103,6 +103,24 @@ Oyunun greed döngüsü **Kasa** sistemiyle çalışır:
 - Temiz kaçış: pot'u kasaya alıp sonra ışkalarsan kayıp **0** olur ("TEMİZ
   KAÇTIN") — akıllıca oynamayı ödüllendirir.
 
+## Power-up'lar (toplanabilir)
+
+Oyun sırasında **çemberin üstünde** parlayan power-up küreleri belirir; dönen
+kıvılcım üzerinden **geçince otomatik toplanır** (ekstra dokunuş yok). Aktif
+etkiler üstte küçük sayaçlı çiplerle görünür.
+
+| Power-up | Etki | Süre |
+|---|---|---|
+| 🛡️ **Kalkan** | Sıradaki ıskayı emer — ölmezsin, kapı tazelenir | Kullanılınca biter |
+| ✨ **x2 Altın** | Kazanılan altın 2 katı | 8 sn |
+| 🐌 **Yavaşlat** | Kıvılcım yavaşlar (kolay nişan) | 6 sn |
+| 🎯 **Geniş Kapı** | Kapı genişler (hem çizim hem isabet) | 8 sn |
+
+Küreler ~4-7 sn'de bir doğar (aynı anda en çok 2), toplanmazsa ~8 sn sonra
+solar. Kalkan aktifken çemberin dışında mavi bir koruma halkası parlar.
+**Neden:** "her el aynı" hissini kırar, sürpriz/ödül (dopamin) ve risk-yönetimi
+kararları ekler — oturumu çeşitlendirir.
+
 ## Revive (İkinci Şans) — reklam izleyerek
 
 Işkalayıp öldüğünde, oyun-sonu ekranından **önce** bir teklif çıkar:

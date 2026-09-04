@@ -65,6 +65,19 @@
   #streak{position:absolute;top:calc(15% + 17vw);left:0;right:0;text-align:center;
     font-size:13px;font-weight:800;letter-spacing:5px;color:var(--coin);opacity:0;text-transform:uppercase;}
 
+  /* active power-up chips */
+  #buffs{position:absolute;top:calc(env(safe-area-inset-top) + 62px);left:0;right:0;
+    display:flex;justify-content:center;gap:8px;}
+  .buff{width:42px;padding:6px 0 5px;border-radius:14px;display:flex;flex-direction:column;align-items:center;gap:4px;
+    background:var(--surface-2);border:1px solid var(--brd);backdrop-filter:blur(8px);
+    box-shadow:0 4px 14px rgba(0,0,0,.3);}
+  .buff span{font-size:19px;line-height:1;}
+  .buff i{display:block;width:26px;height:4px;border-radius:100px;background:rgba(255,255,255,.18);overflow:hidden;position:relative;}
+  .buff i::after{content:"";position:absolute;inset:0;transform-origin:left;
+    background:linear-gradient(90deg,var(--coin),#fff);border-radius:100px;transform:scaleX(var(--t,1));}
+  #buff-shield i{display:none;}
+  #buff-shield{box-shadow:0 0 16px rgba(90,200,255,.5);border-color:rgba(90,200,255,.6);}
+
   /* sound toggle */
   #sound{position:absolute;bottom:calc(env(safe-area-inset-bottom) + 20px);right:20px;
     width:48px;height:48px;border-radius:50%;pointer-events:auto;cursor:pointer;z-index:8;
@@ -223,6 +236,12 @@
       </div>
     </div>
     <div id="tier">SEVİYE 1</div>
+    <div id="buffs">
+      <div class="buff hidden" id="buff-shield"><span>🛡️</span><i></i></div>
+      <div class="buff hidden" id="buff-x2"><span>✨</span><i></i></div>
+      <div class="buff hidden" id="buff-slow"><span>🐌</span><i></i></div>
+      <div class="buff hidden" id="buff-wide"><span>🎯</span><i></i></div>
+    </div>
     <div id="combo">x2</div>
     <div id="streak">SERİ</div>
     <button id="cashout" class="hidden"><span class="ico">🏦</span>KASAYA AL <span id="pot">0</span></button>
@@ -410,6 +429,23 @@
   const STATE = { MENU:0, PLAY:1, OVER:2, REVIVE:3, AD:4 };
   let state = STATE.MENU;
 
+  // ---- Power-up'lar ----
+  const POWERUPS = {
+    shield:{ emoji:'🛡️', col:[90,200,255],  label:'KALKAN!',     w:0.9 },
+    x2:    { emoji:'✨', col:[255,210,80],  label:'x2 ALTIN!',   w:1.1 },
+    slow:  { emoji:'🐌', col:[130,230,150], label:'YAVAŞ!',      w:1.0 },
+    wide:  { emoji:'🎯', col:[255,120,200], label:'GENİŞ KAPI!', w:1.0 },
+  };
+  const PU_KEYS = Object.keys(POWERUPS);
+  const PU_DUR = { x2:8, slow:6, wide:8 };   // saniye (shield süresiz, kullanılınca biter)
+  function pickPowerup(){
+    let tot=0; for(const k of PU_KEYS) tot+=POWERUPS[k].w;
+    let r=Math.random()*tot;
+    for(const k of PU_KEYS){ r-=POWERUPS[k].w; if(r<=0) return k; }
+    return PU_KEYS[0];
+  }
+  let orbs = [];
+
   let g = null;
   function newGame(){
     g = {
@@ -418,8 +454,86 @@
       pot: 0, maxPot: 0, hits: 0, streak: 0, mult: 1, tier: 0,
       shake: 0, flash: 0, hitstop: 0, pulse: 0, gatePop: 0,
       col: activeSkin.ramp[0].slice(), colTarget: activeSkin.ramp[0].slice(),
-      over: false, revived: false, countdown: 0
+      over: false, revived: false, countdown: 0,
+      shield:false, x2Time:0, slowTime:0, wideTime:0, spawnTimer:rand(3,5)
     };
+    orbs = [];
+  }
+  function effGate(){ return g.gateHalf * (g.wideTime>0 ? 1.7 : 1); }
+  function newGateAway(){
+    let ng; do{ ng = rand(0,TAU); }while(Math.abs(angDiff(ng, g.angle)) < 1.1);
+    g.gateCenter = ng; g.gatePop = 1;
+  }
+
+  function spawnOrb(){
+    // kıvılcımdan ve kapıdan uzağa yerleştir
+    let a;
+    do{ a = rand(0,TAU); }while(Math.abs(angDiff(a,g.angle))<1.0 || Math.abs(angDiff(a,g.gateCenter))<0.6);
+    orbs.push({ type:pickPowerup(), angle:a, t:8, pop:1 });
+  }
+  function applyPU(type){
+    if(type==='shield') g.shield = true;
+    else if(type==='x2') g.x2Time = PU_DUR.x2;
+    else if(type==='slow') g.slowTime = PU_DUR.slow;
+    else if(type==='wide') g.wideTime = PU_DUR.wide;
+  }
+  function collectOrb(o){
+    const P = POWERUPS[o.type];
+    applyPU(o.type);
+    const [ox,oy]=pos(o.angle);
+    burst(ox,oy, 22, {color:P.col, smax:420, grav:900});
+    ring(ox,oy, P.col); ring(CX,CY, P.col);
+    floatText(P.label, CX, CY - R - 42, rgb(P.col), 32);
+    g.flash = Math.max(g.flash,0.35); g.pulse = 1;
+    beep(660,0.1,'triangle',0.2); setTimeout(()=>beep(990,0.16,'sine',0.2),80); setTimeout(()=>beep(1320,0.18,'triangle',0.16),160);
+    vibe([0,15,20,15]);
+  }
+  function updateOrbs(dt){
+    if(!g || state!==STATE.PLAY || g.over || g.countdown>0) return;
+    // doğuş zamanlayıcısı
+    g.spawnTimer -= dt;
+    if(g.spawnTimer<=0){ if(orbs.length<2) spawnOrb(); g.spawnTimer = rand(4,7); }
+    for(let i=orbs.length-1;i>=0;i--){
+      const o=orbs[i]; o.t-=dt; o.pop=1+0.12*Math.sin(performance.now()/180+i);
+      if(o.t<=0){ orbs.splice(i,1); continue; }
+      // kıvılcım üstünden geçince topla
+      if(Math.abs(angDiff(g.angle,o.angle)) < 0.20){ collectOrb(o); orbs.splice(i,1); }
+    }
+  }
+  function drawOrbs(){
+    for(const o of orbs){
+      const P=POWERUPS[o.type]; const [ox,oy]=pos(o.angle);
+      const fade = o.t<1.5 ? o.t/1.5 : 1;
+      ctx.save(); ctx.globalAlpha=fade;
+      ctx.shadowColor=rgb(P.col,0.9); ctx.shadowBlur=18;
+      ctx.fillStyle=rgb(P.col); ctx.beginPath(); ctx.arc(ox,oy,15*o.pop,0,TAU); ctx.fill();
+      ctx.shadowBlur=0; ctx.fillStyle='rgba(10,6,20,0.85)'; ctx.beginPath(); ctx.arc(ox,oy,12*o.pop,0,TAU); ctx.fill();
+      ctx.globalAlpha=fade; ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.font=`${16*o.pop}px -apple-system,Segoe UI,Roboto,sans-serif`;
+      ctx.fillText(P.emoji, ox, oy+1);
+      ctx.restore();
+    }
+    ctx.globalAlpha=1;
+  }
+
+  // aktif etki çipleri
+  const buffEls = {
+    shield:document.getElementById('buff-shield'), x2:document.getElementById('buff-x2'),
+    slow:document.getElementById('buff-slow'), wide:document.getElementById('buff-wide'),
+  };
+  function setBuff(key, on, frac){
+    const e=buffEls[key]; if(!e) return;
+    e.classList.toggle('hidden', !on);
+    if(on && frac!=null){ const bar=e.querySelector('i'); if(bar) bar.style.setProperty('--t', clamp(frac,0,1)); }
+  }
+  function updateBuffs(){
+    if(!g || state!==STATE.PLAY || g.over){
+      setBuff('shield',false); setBuff('x2',false); setBuff('slow',false); setBuff('wide',false); return;
+    }
+    setBuff('shield', g.shield);
+    setBuff('x2', g.x2Time>0, g.x2Time/PU_DUR.x2);
+    setBuff('slow', g.slowTime>0, g.slowTime/PU_DUR.slow);
+    setBuff('wide', g.wideTime>0, g.wideTime/PU_DUR.wide);
   }
 
   // ---- Ambient zerreler ----
@@ -700,8 +814,9 @@
 
   function tap(){
     if(g.over || g.countdown>0) return;   // geri sayım sırasında dokunma yok
+    const gh = effGate();
     const d = Math.abs(angDiff(g.angle, g.gateCenter));
-    if(d <= g.gateHalf){ onHit(d <= g.gateHalf*0.34, d); }
+    if(d <= gh){ onHit(d <= gh*0.34, d); }
     else{ onMiss(); }
   }
   function pos(angle){ return [CX + Math.cos(angle)*R, CY + Math.sin(angle)*R]; }
@@ -714,7 +829,7 @@
 
     if(perfect){ g.streak++; g.mult = 1 + g.streak; }
     else{ g.streak = 0; g.mult = 1; }
-    const gain = (perfect ? 10 : 5) * g.mult;
+    const gain = (perfect ? 10 : 5) * g.mult * (g.x2Time>0 ? 2 : 1);
     g.pot += gain;
     if(g.pot > g.maxPot) g.maxPot = g.pot;
     el.money.textContent = g.pot;
@@ -746,12 +861,25 @@
 
     g.speed = Math.min(g.speed + 0.14, 8.5);
     g.gateHalf = Math.max(g.gateHalf * 0.965, 0.20);
-    let ng; do{ ng = rand(0,TAU); }while(Math.abs(angDiff(ng, g.angle)) < 1.1);
-    g.gateCenter = ng; g.gatePop = 1;
+    newGateAway();
     if(g.hits % 5 === 0){ g.dir *= -1; floatText('YÖN!', CX, CY+R+50, rgb(curTier.col), 26); }
   }
 
   function onMiss(){
+    // Kalkan varsa ölümü emer
+    if(g.shield && !g.over){
+      g.shield = false;
+      g.shake = 14; g.flash = 0.4; g.pulse = 1;
+      g.streak = 0; g.mult = 1;
+      const sc=[90,200,255];
+      burst(CX,CY, 26, {color:sc, smax:480, grav:900});
+      ring(CX,CY,sc); ring(CX,CY,[255,255,255]);
+      floatText('KALKAN KIRILDI!', CX, CY - R - 42, '#7cd4ff', 30);
+      newGateAway();
+      beep(300,0.18,'square',0.2,180); setTimeout(()=>beep(180,0.24,'sine',0.16,90),80);
+      vibe([0,25,20,25]);
+      return;
+    }
     g.over = true;
     g.shake = 26; g.flash = 0.5; g.hitstop = 0.12;
     el.cashout.classList.add('hidden');
@@ -843,9 +971,7 @@
     adScreen.classList.add('hidden');
     g.over = false; g.revived = true;
     g.streak = 0; g.mult = 1;               // seri sıfırlanır (pot korunur)
-    // taze kapı, kıvılcımdan uzağa
-    let ng; do{ ng = rand(0,TAU); }while(Math.abs(angDiff(ng, g.angle)) < 1.2);
-    g.gateCenter = ng; g.gatePop = 1;
+    newGateAway();                          // taze kapı, kıvılcımdan uzağa
     g.speed = Math.max(1.7, g.speed*0.82);  // ufak nefes payı
     g.countdown = 3; g.hitstop = 0;
     state = STATE.PLAY;
@@ -893,10 +1019,17 @@
     ctx.lineWidth = 12;
     ctx.strokeStyle = rgb(lerpCol([120,95,190], accent, 0.35), 0.20);
     ctx.beginPath(); ctx.arc(CX,CY,R,0,TAU); ctx.stroke();
+    // kalkan halkası (aktifken çemberin dışında parlar)
+    if(g.shield){
+      const sp=0.4+0.2*Math.sin(performance.now()/200);
+      ctx.shadowColor='rgba(90,200,255,0.9)'; ctx.shadowBlur=18;
+      ctx.lineWidth=4; ctx.strokeStyle=`rgba(120,215,255,${sp})`;
+      ctx.beginPath(); ctx.arc(CX,CY,R+13,0,TAU); ctx.stroke(); ctx.shadowBlur=0;
+    }
 
     // kapı — katmanlı neon-bloom
     const c=g.col;
-    const gh = g.gateHalf * (1 + g.gatePop*0.4);
+    const gh = effGate() * (1 + g.gatePop*0.4);
     // 1) geniş, yumuşak dış parıltı
     ctx.shadowColor=rgb(c,0.95); ctx.shadowBlur = 34 + g.pulse*34;
     ctx.lineWidth = 26; ctx.strokeStyle = rgb(c, 0.28);
@@ -911,10 +1044,12 @@
     ctx.beginPath(); ctx.arc(CX,CY,R, g.gateCenter-gh, g.gateCenter+gh); ctx.stroke();
     // 3) perfect çekirdek
     ctx.shadowBlur=10; ctx.lineWidth=5; ctx.strokeStyle='rgba(255,255,255,0.92)';
-    const pz=g.gateHalf*0.34;
+    const pz=effGate()*0.34;
     ctx.beginPath(); ctx.arc(CX,CY,R, g.gateCenter-pz, g.gateCenter+pz); ctx.stroke();
     ctx.shadowBlur=0;
     ctx.restore();
+
+    drawOrbs();
 
     // merkez madalyon + seri
     ctx.save();
@@ -980,8 +1115,16 @@
     if(state===STATE.PLAY && g && !g.over){
       if(g.countdown>0){ g.countdown -= dt; if(g.countdown<0) g.countdown=0; }
       else if(g.hitstop>0){ g.hitstop -= dt; }
-      else{ g.angle += g.dir * g.speed * dt; g.angle = (g.angle%TAU+TAU)%TAU; }
+      else{
+        // power-up süre sayaçları
+        if(g.x2Time>0) g.x2Time=Math.max(0,g.x2Time-dt);
+        if(g.slowTime>0) g.slowTime=Math.max(0,g.slowTime-dt);
+        if(g.wideTime>0) g.wideTime=Math.max(0,g.wideTime-dt);
+        const spd = g.speed * (g.slowTime>0 ? 0.5 : 1);   // yavaşlatma
+        g.angle += g.dir * spd * dt; g.angle = (g.angle%TAU+TAU)%TAU;
+      }
     }
+    updateOrbs(dt); updateBuffs();
 
     ctx.save();
     let sh = g? g.shake:0;
