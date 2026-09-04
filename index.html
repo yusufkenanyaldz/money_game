@@ -173,6 +173,38 @@
   #go-bank{margin:18px 0 2px;font-size:16px;font-weight:900;letter-spacing:.5px;color:#4a2e00;
     background:linear-gradient(180deg,#ffe08a,var(--gold));padding:11px 24px;border-radius:100px;
     display:inline-flex;align-items:center;gap:8px;box-shadow:0 0 30px rgba(255,204,77,.5);}
+
+  /* ---- Revive ---- */
+  #reviveScreen{background:radial-gradient(120% 90% at 50% 40%, rgba(30,18,54,.55), rgba(8,4,16,.96));}
+  .rev-heart{font-size:64px;animation:softpulse 1s ease-in-out infinite;filter:drop-shadow(0 0 24px rgba(255,204,77,.5));}
+  .rev-title{font-size:12vw;font-weight:900;letter-spacing:-1px;color:#fff;line-height:1;margin-top:6px;}
+  .rev-sub{font-size:16px;color:#e6ddf7;font-weight:600;margin-top:10px;}
+  .rev-sub b{color:var(--gold);font-weight:900;font-size:20px;}
+  .ad-btn{background:linear-gradient(180deg,#7CF0A8,#22b866)!important;color:#053a1c!important;
+    box-shadow:0 12px 34px rgba(40,190,110,.55), inset 0 1px 0 rgba(255,255,255,.5)!important;
+    display:inline-flex;align-items:center;gap:10px;font-size:18px!important;padding:18px 40px!important;}
+  .ad-btn span{font-size:15px;}
+  .rev-timer{margin-top:22px;width:min(320px,72vw);height:8px;border-radius:100px;overflow:hidden;
+    background:rgba(255,255,255,.12);}
+  .rev-timer-bar{height:100%;width:100%;border-radius:100px;
+    background:linear-gradient(90deg,var(--gold),var(--danger));}
+  .rev-timer-bar.run{width:0%;transition:width var(--revdur,6s) linear;}
+
+  /* ---- Mock ad ---- */
+  #adScreen{background:linear-gradient(160deg,#1c1730,#0a0714);}
+  .ad-badge{position:absolute;top:calc(env(safe-area-inset-top) + 18px);left:18px;
+    font-size:11px;font-weight:900;letter-spacing:2px;color:#0a0714;background:#ffd24a;
+    padding:5px 12px;border-radius:8px;}
+  .ad-card{width:min(340px,84vw);padding:34px 24px;border-radius:26px;text-align:center;
+    background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.03));
+    border:1px solid var(--brd);display:flex;flex-direction:column;align-items:center;gap:10px;}
+  .ad-emoji{font-size:74px;animation:bob 1.4s ease-in-out infinite;}
+  .ad-name{font-size:13px;letter-spacing:3px;color:var(--ink2);text-transform:uppercase;font-weight:800;}
+  .ad-desc{font-size:20px;font-weight:800;color:#fff;}
+  .ad-count{margin-top:8px;font-size:44px;font-weight:900;color:var(--gold);
+    width:74px;height:74px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    border:3px solid rgba(255,204,77,.35);font-variant-numeric:tabular-nums;}
+  .ad-note{margin-top:26px;font-size:13px;color:var(--ink2);font-weight:600;letter-spacing:.5px;}
 </style>
 </head>
 <body>
@@ -239,6 +271,29 @@
     <button class="pulse-btn" id="retryBtn">TEKRAR</button>
     <button class="ghost-btn" id="shopBtn2">🛒 Dükkan</button>
     <div class="hint">Dokun · Tıkla · Boşluk tuşu</div>
+  </div>
+
+  <!-- Revive offer -->
+  <div class="overlay hidden" id="reviveScreen">
+    <div class="rev-heart">💛</div>
+    <div class="rev-title">DEVAM ET?</div>
+    <div class="rev-sub" id="rev-sub">Riskteki <b id="rev-amt">0</b> altını kurtar</div>
+    <button class="pulse-btn ad-btn" id="reviveBtn"><span>▶</span> REKLAM İZLE &amp; DEVAM</button>
+    <div class="rev-timer"><div class="rev-timer-bar" id="rev-bar"></div></div>
+    <button class="ghost-btn" id="reviveSkip">Hayır, bitir</button>
+    <div class="hint">Tur başına 1 kez</div>
+  </div>
+
+  <!-- Mock rewarded ad -->
+  <div class="overlay hidden" id="adScreen">
+    <div class="ad-badge">REKLAM</div>
+    <div class="ad-card">
+      <div class="ad-emoji">🎁</div>
+      <div class="ad-name">Sponsor</div>
+      <div class="ad-desc">Ödülün hazırlanıyor…</div>
+      <div class="ad-count" id="ad-count">5</div>
+    </div>
+    <div class="ad-note">Reklam bitince kaldığın yerden devam edeceksin</div>
   </div>
 
 <script>
@@ -352,7 +407,7 @@
   function vibe(ms){ if(navigator.vibrate){ try{navigator.vibrate(ms);}catch(e){} } }
 
   // ---- Oyun durumu ----
-  const STATE = { MENU:0, PLAY:1, OVER:2 };
+  const STATE = { MENU:0, PLAY:1, OVER:2, REVIVE:3, AD:4 };
   let state = STATE.MENU;
 
   let g = null;
@@ -363,7 +418,7 @@
       pot: 0, maxPot: 0, hits: 0, streak: 0, mult: 1, tier: 0,
       shake: 0, flash: 0, hitstop: 0, pulse: 0, gatePop: 0,
       col: activeSkin.ramp[0].slice(), colTarget: activeSkin.ramp[0].slice(),
-      over: false
+      over: false, revived: false, countdown: 0
     };
   }
 
@@ -644,7 +699,7 @@
   }
 
   function tap(){
-    if(g.over) return;
+    if(g.over || g.countdown>0) return;   // geri sayım sırasında dokunma yok
     const d = Math.abs(angDiff(g.angle, g.gateCenter));
     if(d <= g.gateHalf){ onHit(d <= g.gateHalf*0.34, d); }
     else{ onMiss(); }
@@ -697,9 +752,8 @@
   }
 
   function onMiss(){
-    g.over = true; state = STATE.OVER;
+    g.over = true;
     g.shake = 26; g.flash = 0.5; g.hitstop = 0.12;
-    const lost = g.pot;
     el.cashout.classList.add('hidden');
     const fc=[255,71,111];
     const [px,py]=pos(g.angle);
@@ -707,27 +761,105 @@
     ring(CX,CY,fc);
     failSound(); vibe([0,40,30,80]);
 
+    if(!g.revived){                 // tur başına 1 ikinci şans
+      state = STATE.REVIVE;
+      setTimeout(showReviveOffer, 560);
+    }else{
+      state = STATE.OVER;
+      setTimeout(showGameOver, 480);
+    }
+  }
+
+  function showGameOver(){
+    const lost = g.pot;
     let isBest=false;
     if(g.maxPot > best){ best=g.maxPot; isBest=true; try{localStorage.setItem('midas_best',String(best));}catch(e){} }
     refreshMenu();
-
     overCooldown = 0.75;
     const finalTier = tierIndex(g.hits)+1;
-    setTimeout(()=>{
-      el.goMoney.textContent = lost>0 ? '−'+lost : '0';
-      el.goMoney.style.color = lost>0 ? 'var(--danger)' : '#4bd67d';
-      el.goSub.textContent = lost>0 ? 'Riskteki altın yandı' : 'Temiz kaçtın — kasan sağlam';
-      el.goBankVal.textContent = bank;
-      el.goHits.textContent = g.hits;
-      el.goTier.textContent = finalTier;
-      el.goBest.textContent = best;
-      el.newbest.style.display = isBest ? 'inline-block' : 'none';
-      el.goTitle.textContent = isBest ? 'EFSANE!' : 'SONA GELDİN';
-      el.top.style.opacity='0';
-      el.over.classList.remove('hidden');
-      if(isBest){ cashSound(); setTimeout(()=>burstScreen(),120); }
-    }, 480);
+    el.goMoney.textContent = lost>0 ? '−'+lost : '0';
+    el.goMoney.style.color = lost>0 ? 'var(--danger)' : '#4bd67d';
+    el.goSub.textContent = lost>0 ? 'Riskteki altın yandı' : 'Temiz kaçtın — kasan sağlam';
+    el.goBankVal.textContent = bank;
+    el.goHits.textContent = g.hits;
+    el.goTier.textContent = finalTier;
+    el.goBest.textContent = best;
+    el.newbest.style.display = isBest ? 'inline-block' : 'none';
+    el.goTitle.textContent = isBest ? 'EFSANE!' : 'SONA GELDİN';
+    el.top.style.opacity='0';
+    el.over.classList.remove('hidden');
+    if(isBest){ cashSound(); setTimeout(()=>burstScreen(),120); }
   }
+
+  // ---- Revive / ödüllü reklam ----
+  const reviveScreen = document.getElementById('reviveScreen');
+  const adScreen = document.getElementById('adScreen');
+  const revBar = document.getElementById('rev-bar');
+  let reviveTimer = null;
+  const REVIVE_WINDOW = 6; // saniye
+
+  function showReviveOffer(){
+    if(state!==STATE.REVIVE) return;
+    const amt = g.pot;
+    document.getElementById('rev-amt').textContent = amt;
+    document.getElementById('rev-sub').innerHTML = amt>0
+      ? 'Riskteki <b id="rev-amt">'+amt+'</b> altını kurtar'
+      : 'Serine kaldığın yerden devam et';
+    el.top.style.opacity='0';
+    reviveScreen.classList.remove('hidden');
+    // süre çubuğu (baskı için)
+    reviveScreen.style.setProperty('--revdur', REVIVE_WINDOW+'s');
+    revBar.classList.remove('run'); revBar.style.width='100%';
+    void revBar.offsetWidth;
+    revBar.classList.add('run');
+    beep(880,0.12,'triangle',0.2); setTimeout(()=>beep(660,0.12,'sine',0.16),120);
+    clearTimeout(reviveTimer);
+    reviveTimer = setTimeout(declineRevive, REVIVE_WINDOW*1000);
+  }
+  function declineRevive(){
+    clearTimeout(reviveTimer);
+    reviveScreen.classList.add('hidden');
+    state = STATE.OVER;
+    showGameOver();
+  }
+  function watchAd(){
+    clearTimeout(reviveTimer);
+    reviveScreen.classList.add('hidden');
+    state = STATE.AD;
+    adScreen.classList.remove('hidden');
+    // ---- SAHTE ÖDÜLLÜ REKLAM ----
+    // GERÇEK ENTEGRASYON: burada AdMob/Unity Ads rewarded video show();
+    // onUserEarnedReward -> grantRevive();  reklam kapatılırsa -> declineRevive().
+    let n = 5;
+    const cd = document.getElementById('ad-count');
+    cd.textContent = n;
+    const iv = setInterval(()=>{
+      n--;
+      if(n<=0){ clearInterval(iv); grantRevive(); return; }
+      cd.textContent = n; beep(520,0.06,'sine',0.12);
+    }, 1000);
+  }
+  function grantRevive(){
+    adScreen.classList.add('hidden');
+    g.over = false; g.revived = true;
+    g.streak = 0; g.mult = 1;               // seri sıfırlanır (pot korunur)
+    // taze kapı, kıvılcımdan uzağa
+    let ng; do{ ng = rand(0,TAU); }while(Math.abs(angDiff(ng, g.angle)) < 1.2);
+    g.gateCenter = ng; g.gatePop = 1;
+    g.speed = Math.max(1.7, g.speed*0.82);  // ufak nefes payı
+    g.countdown = 3; g.hitstop = 0;
+    state = STATE.PLAY;
+    el.top.style.opacity='1';
+    updateCashUI();
+    // yeşil kutlama
+    g.flash = 0.5; g.pulse = 1;
+    ring(CX,CY,[124,240,168]); burst(CX,CY,24,{color:[124,240,168],smax:420,grav:900});
+    floatText('DEVAM!', CX, CY - R - 42, '#7cf0a8', 36);
+    beep(523,0.12,'triangle',0.2); setTimeout(()=>beep(784,0.14,'triangle',0.2),110); setTimeout(()=>beep(1046,0.18,'sine',0.2),230);
+    vibe([0,20,30,20]);
+  }
+  document.getElementById('reviveBtn').addEventListener('pointerdown',(e)=>{e.preventDefault();e.stopPropagation();watchAd();});
+  document.getElementById('reviveSkip').addEventListener('pointerdown',(e)=>{e.preventDefault();e.stopPropagation();declineRevive();});
 
   function burstScreen(){
     for(let i=0;i<60;i++){
@@ -815,6 +947,17 @@
     ctx.fillStyle=sparkGrad; ctx.beginPath(); ctx.arc(sx,sy,17,0,TAU); ctx.fill();
     ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(sx,sy,5,0,TAU); ctx.fill();
     ctx.restore();
+
+    // revive geri sayımı
+    if(g.countdown>0){
+      const n=Math.ceil(g.countdown);
+      ctx.save(); ctx.textAlign='center'; ctx.textBaseline='middle';
+      const frac = g.countdown-(n-1);           // 1->0 her sayıda
+      ctx.globalAlpha = clamp(0.25+frac*0.75,0,1);
+      ctx.font=`900 ${R*0.95*(1.2-frac*0.2)}px ${FONT}`; ctx.lineJoin='round';
+      ctx.lineWidth=Math.max(6,R*0.05); ctx.strokeStyle='rgba(10,4,20,0.5)'; ctx.strokeText(n,CX,CY);
+      ctx.fillStyle='#fff'; ctx.fillText(n,CX,CY); ctx.restore();
+    }
   }
 
   // ---- Ana döngü ----
@@ -835,7 +978,8 @@
     }
 
     if(state===STATE.PLAY && g && !g.over){
-      if(g.hitstop>0){ g.hitstop -= dt; }
+      if(g.countdown>0){ g.countdown -= dt; if(g.countdown<0) g.countdown=0; }
+      else if(g.hitstop>0){ g.hitstop -= dt; }
       else{ g.angle += g.dir * g.speed * dt; g.angle = (g.angle%TAU+TAU)%TAU; }
     }
 

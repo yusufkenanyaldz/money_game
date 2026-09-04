@@ -103,6 +103,26 @@ Oyunun greed döngüsü **Kasa** sistemiyle çalışır:
 - Temiz kaçış: pot'u kasaya alıp sonra ışkalarsan kayıp **0** olur ("TEMİZ
   KAÇTIN") — akıllıca oynamayı ödüllendirir.
 
+## Revive (İkinci Şans) — reklam izleyerek
+
+Işkalayıp öldüğünde, oyun-sonu ekranından **önce** bir teklif çıkar:
+
+- 💛 **DEVAM ET?** — süreli teklif (süre çubuğu dolunca kaçar; baskı yaratır).
+- **▶ Reklam İzle & Devam** → ödüllü reklam (rewarded video) oynar; bitince
+  **riskteki altın korunur** ve aynı hız/seviyeden **3-2-1** geri sayımla
+  devam edersin (taze kapı + ufak nefes payı).
+- **Tur başına 1 kez.** İkinci ölümde teklif çıkmaz, doğrudan oyun-sonu.
+- "Hayır, bitir" ya da süre dolması → normal oyun-sonu.
+
+**Neden:** Rage-quit'i azaltır, oturumu uzatır ve **loss aversion**'ı kullanır
+("650 altını kaybetme!"). Hyper-casual'ın en güçlü retention + gelir kancası.
+
+> **Gerçek reklam entegrasyonu:** Şu an yerine geçici bir **sahte ödüllü
+> reklam** ekranı oynuyor (5 sn geri sayım). Koda `watchAd()` içine
+> `// GERÇEK ENTEGRASYON` yorumu bırakıldı: oraya AdMob/Unity Ads rewarded
+> video `show()` çağrısı gelir, `onUserEarnedReward → grantRevive()`,
+> reklam kapatılırsa `declineRevive()`.
+
 ## Dükkan (temalar / skin'ler) — servete anlam
 
 Biriken **Kasa**'yı harcayacağın yer. Menü ya da oyun-sonu ekranından
