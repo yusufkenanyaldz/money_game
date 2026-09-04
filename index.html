@@ -11,6 +11,7 @@
   :root{
     --gold:#ffd24a;
     --gold-deep:#f5a623;
+    --coin:#ffd24a;      /* aktif tema para rengi */
     --bg0:#06040d;
     --bg1:#140a24;
     --danger:#ff3b6b;
@@ -32,15 +33,16 @@
   /* ---- HUD ---- */
   #hud{position:fixed;inset:0;pointer-events:none;z-index:5;}
   .top{position:absolute;top:calc(env(safe-area-inset-top) + 16px);left:0;right:0;
-    display:flex;justify-content:space-between;align-items:flex-start;padding:0 20px;}
+    display:flex;justify-content:space-between;align-items:flex-start;padding:0 20px;
+    opacity:0;transition:opacity .3s;}
   .stat{display:flex;flex-direction:column;gap:3px;}
   .stat .label{font-size:10px;letter-spacing:2.5px;color:#7d72a8;text-transform:uppercase;font-weight:800;}
   .stat.right{align-items:flex-end;}
-  #money{font-size:36px;font-weight:900;color:var(--gold);
-    text-shadow:0 0 24px rgba(255,210,74,.6);font-variant-numeric:tabular-nums;line-height:1;
+  #money{font-size:36px;font-weight:900;color:var(--coin);
+    text-shadow:0 0 24px rgba(255,255,255,.35);font-variant-numeric:tabular-nums;line-height:1;
     display:flex;align-items:baseline;gap:6px;}
   #money::before{content:"";width:20px;height:20px;border-radius:50%;align-self:center;
-    background:radial-gradient(circle at 35% 30%,#fff6cf,#f5a623 70%);box-shadow:0 0 14px rgba(255,190,60,.8);}
+    background:radial-gradient(circle at 35% 30%,#fff,var(--coin) 72%);box-shadow:0 0 14px var(--coin);}
   #best{font-size:20px;font-weight:800;color:#cbb9ff;font-variant-numeric:tabular-nums;line-height:1;}
 
   /* tier chip in the middle top */
@@ -107,6 +109,43 @@
   .hint{position:absolute;bottom:calc(env(safe-area-inset-bottom) + 22px);left:0;right:0;text-align:center;
     font-size:12px;letter-spacing:2px;color:#5f5680;font-weight:700;}
 
+  /* secondary / ghost buttons */
+  .ghost-btn{margin-top:16px;pointer-events:auto;padding:13px 34px;border-radius:100px;cursor:pointer;
+    font-size:15px;font-weight:900;letter-spacing:2px;color:#cbb9ff;text-transform:uppercase;
+    background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.16);backdrop-filter:blur(6px);
+    transition:transform .08s, background .2s;display:inline-flex;align-items:center;gap:8px;}
+  .ghost-btn:active{transform:scale(.95);}
+  .equipped-tag{margin-top:14px;font-size:12px;letter-spacing:2px;color:#8a7fb0;font-weight:800;text-transform:uppercase;}
+  .equipped-tag b{color:var(--coin);}
+
+  /* ---- Shop ---- */
+  #shopScreen{justify-content:flex-start;padding:0;}
+  .shop-head{width:100%;padding:calc(env(safe-area-inset-top) + 20px) 22px 14px;
+    display:flex;align-items:center;justify-content:space-between;flex:0 0 auto;}
+  .shop-title{font-size:28px;font-weight:900;letter-spacing:1px;
+    background:linear-gradient(180deg,#fff,var(--coin));-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .shop-bank{font-size:20px;font-weight:900;color:var(--coin);display:flex;align-items:center;gap:7px;
+    font-variant-numeric:tabular-nums;}
+  .shop-grid{flex:1 1 auto;width:100%;max-width:520px;overflow-y:auto;-webkit-overflow-scrolling:touch;
+    padding:8px 18px 8px;display:grid;grid-template-columns:1fr 1fr;gap:12px;align-content:start;}
+  .skin{border-radius:20px;padding:14px;background:rgba(255,255,255,.045);
+    border:1px solid rgba(255,255,255,.10);display:flex;flex-direction:column;gap:10px;position:relative;overflow:hidden;
+    transition:transform .12s, border-color .2s;}
+  .skin.sel{border-color:var(--coin);box-shadow:0 0 0 1px var(--coin), 0 0 26px rgba(255,255,255,.12) inset;}
+  .skin.buypop{animation:buypop .5s ease;}
+  @keyframes buypop{0%{transform:scale(1)}30%{transform:scale(1.06)}100%{transform:scale(1)}}
+  .skin .swatch{height:56px;border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,.35) inset;}
+  .skin .sname{font-size:16px;font-weight:900;letter-spacing:.5px;color:#fff;}
+  .skin .sbtn{margin-top:2px;border:none;border-radius:100px;padding:10px;cursor:pointer;pointer-events:auto;
+    font-size:13px;font-weight:900;letter-spacing:1px;text-transform:uppercase;transition:transform .08s;}
+  .skin .sbtn:active{transform:scale(.95);}
+  .sbtn.buy{background:linear-gradient(180deg,#ffe888,var(--gold-deep));color:#3a2600;
+    display:flex;align-items:center;justify-content:center;gap:6px;}
+  .sbtn.buy.locked{background:rgba(255,255,255,.07);color:#7d72a8;box-shadow:none;cursor:not-allowed;}
+  .sbtn.equip{background:rgba(255,255,255,.10);color:#e8dcff;border:1px solid rgba(255,255,255,.18);}
+  .sbtn.selected{background:var(--coin);color:#1a1024;}
+  #shopBack{flex:0 0 auto;margin:6px auto calc(env(safe-area-inset-bottom) + 18px);}
+
   /* cash-out button */
   #cashout{position:absolute;left:50%;bottom:calc(env(safe-area-inset-bottom) + 78px);transform:translateX(-50%);
     pointer-events:auto;cursor:pointer;border:none;border-radius:100px;padding:14px 28px;z-index:7;
@@ -165,7 +204,19 @@
     </div>
     <div class="cta">Kapıda dokun, altın topla. <b>Kasaya Al</b> ile garantiye al<br>ya da riske atıp büyüt. <span class="p">Işkalarsan riskteki gider.</span></div>
     <button class="pulse-btn" id="startBtn">BAŞLA</button>
+    <button class="ghost-btn" id="shopBtn">🛒 Dükkan</button>
+    <div class="equipped-tag">Tema: <b id="equipped-name">Altın</b></div>
     <div class="hint">Dokun · Tıkla · Boşluk tuşu</div>
+  </div>
+
+  <!-- Shop -->
+  <div class="overlay hidden" id="shopScreen">
+    <div class="shop-head">
+      <div class="shop-title">DÜKKAN</div>
+      <div class="shop-bank">🏦 <span id="shop-bank">0</span></div>
+    </div>
+    <div class="shop-grid" id="shop-grid"></div>
+    <button class="ghost-btn" id="shopBack">← Geri</button>
   </div>
 
   <!-- Game Over -->
@@ -183,6 +234,7 @@
     </div>
     <div id="newbest" style="display:none">YENİ REKOR!</div>
     <button class="pulse-btn" id="retryBtn">TEKRAR</button>
+    <button class="ghost-btn" id="shopBtn2">🛒 Dükkan</button>
     <div class="hint">Dokun · Tıkla · Boşluk tuşu</div>
   </div>
 
@@ -223,18 +275,47 @@
   function lerpCol(a,b,t){ return [Math.round(lerp(a[0],b[0],t)),Math.round(lerp(a[1],b[1],t)),Math.round(lerp(a[2],b[2],t))]; }
   const rgb=(c,a)=> a==null?`rgb(${c[0]},${c[1]},${c[2]})`:`rgba(${c[0]},${c[1]},${c[2]},${a})`;
 
-  // ---- Neon ısı rampası (tier renkleri) ----
-  const TIERS = [
-    {name:'ALTIN',   col:[255,210,74]},
-    {name:'AMBER',   col:[255,150,50]},
-    {name:'MERCAN',  col:[255,95,120]},
-    {name:'MAGENTA', col:[224,80,215]},
-    {name:'VİYOLE',  col:[150,110,255]},
-    {name:'CAMGÖBEĞİ',col:[56,230,215]},
-    {name:'ZÜMRÜT',  col:[70,230,140]},
+  // ---- Rütbeler (temadan bağımsız seviye adları) ----
+  const RANKS = ['KIVILCIM','ATEŞ','KOR','ALEV','İNFERNO','NOVA','SÜPERNOVA','TANRISAL'];
+
+  // ---- Temalar / skin'ler — Kasa ile açılır ----
+  // ramp: kapının hız arttıkça geçtiği renk dizisi. coin: para/HUD rengi.
+  const SKINS = [
+    { id:'altin', name:'Altın', price:0, coin:[255,210,74],
+      ramp:[[255,210,74],[255,150,50],[255,95,120],[224,80,215],[150,110,255],[56,230,215],[70,230,140]] },
+    { id:'buz', name:'Buz', price:400, coin:[150,220,255],
+      ramp:[[150,225,255],[90,185,255],[130,150,255],[190,225,255],[80,240,230],[210,240,255],[120,255,235]] },
+    { id:'lav', name:'Lav', price:1200, coin:[255,130,50],
+      ramp:[[255,185,45],[255,120,25],[255,70,35],[235,35,45],[255,95,30],[255,205,70],[200,30,25]] },
+    { id:'neon', name:'Neon', price:3500, coin:[255,90,205],
+      ramp:[[255,70,205],[185,65,255],[85,160,255],[56,240,220],[255,85,150],[145,85,255],[65,220,255]] },
+    { id:'zumrut', name:'Zümrüt', price:9000, coin:[95,230,155],
+      ramp:[[80,235,150],[45,215,125],[185,245,95],[240,235,85],[65,225,185],[125,245,125],[35,205,165]] },
+    { id:'galaksi', name:'Galaksi', price:22000, coin:[205,155,255],
+      ramp:[[185,135,255],[125,95,255],[255,125,225],[95,165,255],[225,155,255],[255,205,245],[135,115,255]] },
+    { id:'prizma', name:'Prizma', price:55000, coin:[255,255,255],
+      ramp:[[255,85,85],[255,185,45],[255,240,65],[85,235,125],[65,185,255],[155,95,255],[255,95,205]] },
   ];
+  function skinById(id){ return SKINS.find(s=>s.id===id) || SKINS[0]; }
+
+  let activeSkin = SKINS[0];
+  let owned = new Set(['altin']);
+  try{ (localStorage.getItem('midas_skins')||'altin').split(',').forEach(x=>x&&owned.add(x)); }catch(e){}
+  let menuAccent = activeSkin.ramp[0];
+
+  function applySkin(skin){
+    activeSkin = skin;
+    menuAccent = skin.ramp[0];
+    try{ localStorage.setItem('midas_skin', skin.id); }catch(e){}
+    document.documentElement.style.setProperty('--coin', rgb(skin.coin));
+    if(g){ g.colTarget = skin.ramp[tierIndex(g.hits) % skin.ramp.length].slice(); }
+  }
+
   function tierIndex(hits){ return Math.floor(hits/5); }
-  function tierData(hits){ const t=tierIndex(hits); return TIERS[t % TIERS.length]; }
+  function tierData(hits){
+    const t=tierIndex(hits);
+    return { name: RANKS[Math.min(t, RANKS.length-1)], col: activeSkin.ramp[t % activeSkin.ramp.length] };
+  }
 
   // ---- WebAudio ----
   let AC=null;
@@ -282,8 +363,8 @@
       gateCenter: -Math.PI/2, gateHalf: 0.62,
       pot: 0, maxPot: 0, hits: 0, streak: 0, mult: 1, tier: 0,
       shake: 0, flash: 0, hitstop: 0, pulse: 0, gatePop: 0,
-      col: [255,210,74],        // anlık kapı rengi (yumuşak geçiş için)
-      colTarget: [255,210,74],  // hedef tier rengi
+      col: activeSkin.ramp[0].slice(),        // anlık kapı rengi (yumuşak geçiş için)
+      colTarget: activeSkin.ramp[0].slice(),  // hedef tier rengi
       over: false
     };
   }
@@ -383,6 +464,7 @@
     combo:document.getElementById('combo'), streak:document.getElementById('streak'),
     tier:document.getElementById('tier'), sound:document.getElementById('sound'),
     cashout:document.getElementById('cashout'), pot:document.getElementById('pot'),
+    top:document.querySelector('.top'),
     start:document.getElementById('startScreen'), over:document.getElementById('overScreen'),
     goMoney:document.getElementById('go-money'), goHits:document.getElementById('go-hits'),
     goBest:document.getElementById('go-best'), goTier:document.getElementById('go-tier'),
@@ -395,7 +477,14 @@
   try{ best = parseInt(localStorage.getItem('midas_best')||'0',10)||0; }catch(e){}
   try{ bank = parseInt(localStorage.getItem('midas_bank')||'0',10)||0; }catch(e){}
   el.bank.textContent = bank;
-  function refreshMenu(){ el.menuBank.textContent = bank; el.menuBest.textContent = best; }
+  // kayıtlı temayı yükle
+  let savedSkin='altin'; try{ savedSkin = localStorage.getItem('midas_skin')||'altin'; }catch(e){}
+  if(!owned.has(savedSkin)) savedSkin='altin';
+  applySkin(skinById(savedSkin));
+  function refreshMenu(){
+    el.menuBank.textContent = bank; el.menuBest.textContent = best;
+    document.getElementById('equipped-name').textContent = activeSkin.name;
+  }
   refreshMenu();
   el.sound.textContent = soundOn ? '🔊' : '🔇';
   el.sound.addEventListener('pointerdown',(e)=>{ e.preventDefault(); e.stopPropagation();
@@ -444,20 +533,95 @@
     // JUICE — tatmin edici kasa girişi
     g.flash = 0.5; g.pulse = 1;
     const by = H - 120;
-    burst(CX, by, 30, {color:[255,225,120], smax:520, grav:1200, up:260});
-    ring(CX, CY, [255,225,120]);
-    floatText('+'+amount+' KASA', CX, CY - R - 42, '#ffe27a', 34);
+    const cc = activeSkin.coin, cl = lerpCol(cc,[255,255,255],0.4);
+    burst(CX, by, 30, {color:cl, smax:520, grav:1200, up:260});
+    ring(CX, CY, cl);
+    floatText('+'+amount+' KASA', CX, CY - R - 42, rgb(cl), 34);
     floatText('GÜVENDE!', CX, CY, '#ffffff', 30);
     for(let i=0;i<26;i++){
       parts.push({x:rand(CX-90,CX+90),y:by,vx:rand(-120,120),vy:rand(-560,-260),life:1,decay:rand(0.5,0.9),
-        size:rand(3,7),color:[255,210,74],grav:1100,shape:'coin',spin:rand(0,TAU),vspin:rand(-12,12)});
+        size:rand(3,7),color:cc.slice(),grav:1100,shape:'coin',spin:rand(0,TAU),vspin:rand(-12,12)});
     }
     cashSound(); setTimeout(()=>beep(1046,0.18,'triangle',0.2),210);
     vibe([0,15,25,15,25,40]);
   }
 
+  // ---- Dükkan ----
+  const shopScreen = document.getElementById('shopScreen');
+  const shopGrid = document.getElementById('shop-grid');
+  const shopBankEl = document.getElementById('shop-bank');
+  let shopOpen = false, shopReturn = 'start';
+
+  function fmt(n){ return n>=1000 ? (n/1000).toFixed(n%1000===0?0:1)+'K' : ''+n; }
+
+  function renderShop(){
+    shopBankEl.textContent = bank;
+    shopGrid.innerHTML = '';
+    SKINS.forEach(skin=>{
+      const card = document.createElement('div');
+      card.className = 'skin' + (activeSkin.id===skin.id ? ' sel':'');
+      card.dataset.id = skin.id;
+      const grad = 'linear-gradient(100deg,'+skin.ramp.map((c,i)=>rgb(c)+' '+Math.round(i/(skin.ramp.length-1)*100)+'%').join(',')+')';
+      const isOwned = owned.has(skin.id);
+      const isSel = activeSkin.id===skin.id;
+      let btn;
+      if(isOwned){
+        btn = isSel ? '<button class="sbtn selected" disabled>SEÇİLİ</button>'
+                    : '<button class="sbtn equip">SEÇ</button>';
+      }else{
+        const afford = bank>=skin.price;
+        btn = '<button class="sbtn buy'+(afford?'':' locked')+'">🏦 '+fmt(skin.price)+'</button>';
+      }
+      card.innerHTML = '<div class="swatch" style="background:'+grad+'"></div>'
+        + '<div class="sname">'+skin.name+'</div>' + btn;
+      shopGrid.appendChild(card);
+      const b = card.querySelector('.sbtn');
+      if(isOwned && !isSel) b.addEventListener('pointerdown',(e)=>{e.preventDefault();e.stopPropagation();equipSkin(skin);});
+      else if(!isOwned) b.addEventListener('pointerdown',(e)=>{e.preventDefault();e.stopPropagation();buySkin(skin,card);});
+    });
+  }
+
+  function buySkin(skin, card){
+    if(owned.has(skin.id)) return;
+    if(bank < skin.price){
+      card.style.animation='none'; void card.offsetWidth; card.style.animation='';
+      card.classList.add('buypop'); setTimeout(()=>card.classList.remove('buypop'),500);
+      beep(160,0.18,'sawtooth',0.2,110); vibe(30); return;
+    }
+    bank -= skin.price; owned.add(skin.id);
+    try{ localStorage.setItem('midas_bank',String(bank)); localStorage.setItem('midas_skins',[...owned].join(',')); }catch(e){}
+    el.bank.textContent = bank;
+    applySkin(skin); refreshMenu();
+    cashSound(); setTimeout(()=>beep(1318,0.22,'triangle',0.24),200); vibe([0,20,30,20,40]);
+    burstScreen();
+    renderShop();
+    const nc = shopGrid.querySelector('[data-id="'+skin.id+'"]');
+    if(nc){ nc.classList.add('buypop'); setTimeout(()=>nc.classList.remove('buypop'),500); }
+  }
+  function equipSkin(skin){
+    applySkin(skin); refreshMenu();
+    beep(660,0.1,'triangle',0.2); setTimeout(()=>beep(990,0.14,'sine',0.18),80); vibe(15);
+    renderShop();
+  }
+
+  function openShop(from){
+    shopReturn = from; shopOpen = true;
+    el.start.classList.add('hidden'); el.over.classList.add('hidden');
+    renderShop(); shopScreen.classList.remove('hidden');
+  }
+  function closeShop(){
+    shopOpen = false; shopScreen.classList.add('hidden');
+    if(shopReturn==='over') el.over.classList.remove('hidden');
+    else el.start.classList.remove('hidden');
+  }
+
+  document.getElementById('shopBtn').addEventListener('pointerdown',(e)=>{e.preventDefault();e.stopPropagation();openShop('start');});
+  document.getElementById('shopBtn2').addEventListener('pointerdown',(e)=>{e.preventDefault();e.stopPropagation();openShop('over');});
+  document.getElementById('shopBack').addEventListener('pointerdown',(e)=>{e.preventDefault();e.stopPropagation();closeShop();});
+
   // ---- Giriş ----
   function press(){
+    if(shopOpen) return;
     const ac=audio(); if(ac && ac.state==='suspended') ac.resume();
     if(state===STATE.MENU){ start(); return; }
     if(state===STATE.OVER){ if(overCooldown<=0) start(); return; }
@@ -478,6 +642,7 @@
     newGame(); state = STATE.PLAY;
     el.start.classList.add('hidden'); el.over.classList.add('hidden');
     el.money.textContent='0'; el.bank.textContent=bank;
+    el.top.style.opacity='1';
     updateCashUI();
     cashSound(); vibe(20);
   }
@@ -566,6 +731,7 @@
       el.goBest.textContent = best;
       el.newbest.style.display = isBest ? 'inline-block' : 'none';
       el.goTitle.textContent = isBest ? 'EFSANE!' : 'SONA GELDİN';
+      el.top.style.opacity='0';
       el.over.classList.remove('hidden');
       if(isBest){ cashSound(); setTimeout(()=>burstScreen(),120); }
     }, 480);
@@ -574,7 +740,7 @@
   function burstScreen(){
     for(let i=0;i<60;i++){
       parts.push({x:rand(0,W),y:-20,vx:rand(-40,40),vy:rand(80,260),life:1,decay:rand(0.35,0.7),
-        size:rand(3,7),color:[255,210,74],grav:400,shape:'coin',spin:rand(0,TAU),vspin:rand(-10,10)});
+        size:rand(3,7),color:activeSkin.coin.slice(),grav:400,shape:'coin',spin:rand(0,TAU),vspin:rand(-10,10)});
     }
   }
 
@@ -593,7 +759,7 @@
   }
 
   function drawScene(){
-    const accent = g ? g.col : [150,110,255];
+    const accent = g ? g.col : menuAccent;
     drawBg(accent);
     drawMotes(accent);
     if(!g) return;

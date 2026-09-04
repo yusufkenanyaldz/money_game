@@ -81,10 +81,27 @@ Oyunun greed döngüsü **Kasa** sistemiyle çalışır:
 - Temiz kaçış: pot'u kasaya alıp sonra ışkalarsan kayıp **0** olur ("TEMİZ
   KAÇTIN") — akıllıca oynamayı ödüllendirir.
 
+## Dükkan (temalar / skin'ler) — servete anlam
+
+Biriken **Kasa**'yı harcayacağın yer. Menü ya da oyun-sonu ekranından
+**🛒 Dükkan** ile açılır.
+
+- Her tema oyunun **renk dünyasını** baştan boyar: kapının ısı rampası,
+  kıvılcım, para/HUD rengi, arka plan tonu ve parçacıklar.
+- **7 tema** artan fiyat merdiveniyle (grind hedefi):
+  Altın (bedava) · Buz (400) · Lav (1.2K) · Neon (3.5K) · Zümrüt (9K) ·
+  Galaksi (22K) · Prizma (55K).
+- Açtığın tema **seçilebilir**; seçim ve sahiplik kalıcı (`localStorage`).
+- Satın alım tatmin edici kutlamayla gelir (altın yağmuru + ses + titreşim).
+- **Rütbe sistemi:** seviye adları temadan bağımsızdır —
+  KIVILCIM → ATEŞ → KOR → ALEV → İNFERNO → NOVA → SÜPERNOVA → TANRISAL.
+
+Serveti harcamak (spending) tıpkı kazanmak kadar tatmin edicidir; bu da
+oyuncuyu daha çok oynayıp Kasa büyütmeye iter — kalıcı bir grind döngüsü.
+
 ## Geliştirme fikirleri (sonraki adımlar)
 
 - Günlük görev / seri (streak) takvimi — geri dönüş kancası.
-- Kasa ile açılan temalar/skin dükkânı (biriken serveti harca).
 - Arka plan müziği.
 - Skor tablosu (yerel çoklu oyuncu / cihaz).
 
