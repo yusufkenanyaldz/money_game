@@ -71,7 +71,8 @@
   .buff{width:42px;padding:6px 0 5px;border-radius:14px;display:flex;flex-direction:column;align-items:center;gap:4px;
     background:var(--surface-2);border:1px solid var(--brd);backdrop-filter:blur(8px);
     box-shadow:0 4px 14px rgba(0,0,0,.3);}
-  .buff span{font-size:19px;line-height:1;}
+  .buff span{font-size:19px;line-height:1;display:flex;align-items:center;justify-content:center;}
+  .buff span svg{display:block;}
   .buff i{display:block;width:26px;height:4px;border-radius:100px;background:rgba(255,255,255,.18);overflow:hidden;position:relative;}
   .buff i::after{content:"";position:absolute;inset:0;transform-origin:left;
     background:linear-gradient(90deg,var(--coin),#fff);border-radius:100px;transform:scaleX(var(--t,1));}
@@ -170,12 +171,50 @@
     background:linear-gradient(180deg,#ffe08a,var(--gold-deep));
     box-shadow:0 10px 28px rgba(245,166,35,.5), inset 0 1px 0 rgba(255,255,255,.45);
     display:flex;align-items:center;gap:8px;transition:transform .08s, background .2s, box-shadow .2s;}
-  #cashout .ico{font-size:17px;}
+  #cashout .ico{display:flex;align-items:center;}
   #cashout:active{transform:translateX(-50%) scale(.96);}
   #cashout.big{animation:cashPulse .85s ease-in-out infinite;}
   #cashout.hot{color:#fff;background:linear-gradient(180deg,#ff7aa0,var(--danger));
     box-shadow:0 10px 30px rgba(255,71,111,.6), inset 0 1px 0 rgba(255,255,255,.35);}
   @keyframes cashPulse{0%,100%{transform:translateX(-50%) scale(1)}50%{transform:translateX(-50%) scale(1.055)}}
+
+  /* menu button row */
+  .menu-row{display:flex;gap:10px;margin-top:16px;}
+  .menu-row .ghost-btn{margin-top:0;}
+
+  /* custom coin icon (no emoji) */
+  .coin-ic{display:inline-block;width:16px;height:16px;border-radius:50%;vertical-align:-2px;
+    background:radial-gradient(circle at 35% 30%,#fff,var(--coin) 72%);box-shadow:0 0 10px var(--coin);}
+
+  /* ---- Missions ---- */
+  #missionScreen{justify-content:flex-start;padding:0;}
+  #mission-list{flex:1 1 auto;width:100%;max-width:520px;overflow-y:auto;-webkit-overflow-scrolling:touch;
+    padding:8px 20px 4px;display:flex;flex-direction:column;gap:12px;}
+  .mcard{background:var(--surface);border:1px solid var(--brd);border-radius:20px;padding:16px 18px;
+    display:flex;flex-direction:column;gap:11px;backdrop-filter:blur(6px);}
+  .mcard.done{border-color:var(--coin);box-shadow:0 0 0 1px var(--coin);}
+  .mcard .mtext{font-size:15px;font-weight:700;color:#efe8ff;line-height:1.3;}
+  .mcard .mrow{display:flex;align-items:center;justify-content:space-between;gap:12px;}
+  .mbar{flex:1 1 auto;height:9px;border-radius:100px;background:rgba(255,255,255,.1);overflow:hidden;}
+  .mbar i{display:block;height:100%;border-radius:100px;transform-origin:left;transform:scaleX(var(--t,0));
+    background:linear-gradient(90deg,var(--coin),#fff);transition:transform .4s;}
+  .mrew{font-size:15px;font-weight:900;color:var(--coin);white-space:nowrap;display:flex;align-items:center;gap:5px;}
+  .mprog{font-size:12px;font-weight:800;color:var(--ink2);white-space:nowrap;min-width:52px;text-align:right;}
+  .mhint{font-size:12px;color:var(--ink2);font-weight:600;margin:2px 24px 8px;text-align:center;}
+  #missionBack{flex:0 0 auto;margin:4px auto calc(env(safe-area-inset-bottom) + 18px);}
+
+  /* mission-complete toast */
+  #mtoast{position:absolute;top:calc(env(safe-area-inset-top) + 70px);left:50%;transform:translateX(-50%) translateY(-24px);
+    display:flex;align-items:center;gap:12px;padding:12px 18px;border-radius:18px;z-index:9;opacity:0;
+    background:linear-gradient(180deg,rgba(40,26,66,.96),rgba(24,14,44,.96));border:1px solid var(--coin);
+    box-shadow:0 10px 34px rgba(0,0,0,.5), 0 0 30px color-mix(in srgb,var(--coin) 35%, transparent);
+    transition:opacity .35s, transform .35s;max-width:90vw;}
+  #mtoast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  .mt-badge{width:34px;height:34px;border-radius:50%;flex:0 0 auto;display:flex;align-items:center;justify-content:center;
+    font-weight:900;font-size:18px;color:#2a1a00;background:linear-gradient(180deg,#ffe08a,var(--coin));}
+  .mt-title{font-size:11px;letter-spacing:2px;font-weight:800;color:var(--coin);text-transform:uppercase;}
+  .mt-desc{font-size:13px;font-weight:700;color:#efe8ff;line-height:1.25;}
+  .mt-rew{font-size:18px;font-weight:900;color:var(--coin);white-space:nowrap;}
 
   /* menu vault stats */
   .mstats{display:flex;gap:13px;margin:4px 0 30px;}
@@ -237,14 +276,19 @@
     </div>
     <div id="tier">SEVİYE 1</div>
     <div id="buffs">
-      <div class="buff hidden" id="buff-shield"><span>🛡️</span><i></i></div>
-      <div class="buff hidden" id="buff-x2"><span>✨</span><i></i></div>
-      <div class="buff hidden" id="buff-slow"><span>🐌</span><i></i></div>
-      <div class="buff hidden" id="buff-wide"><span>🎯</span><i></i></div>
+      <div class="buff hidden" id="buff-shield"><span><svg viewBox="0 0 24 24" width="20" height="20"><path d="M12 2.4 19 6 V12 C19 16.6 12 21 12 21 C12 21 5 16.6 5 12 V6 Z" fill="#5ac8ff"/><path d="M8.4 12 l2.7 2.7 4.6-5.3" fill="none" stroke="#0c0616" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><i></i></div>
+      <div class="buff hidden" id="buff-x2"><span><svg viewBox="0 0 24 24" width="20" height="20"><text x="12" y="17" text-anchor="middle" font-family="Poppins,sans-serif" font-weight="800" font-size="15" fill="#ff8a1e">2×</text></svg></span><i></i></div>
+      <div class="buff hidden" id="buff-slow"><span><svg viewBox="0 0 24 24" width="20" height="20"><g stroke="#82e696" stroke-width="2" stroke-linecap="round"><path d="M6 4 H18M6 20 H18" fill="none"/><path d="M7 4 L17 4 L7 20 L17 20 Z" fill="#82e696" stroke="none"/></g></svg></span><i></i></div>
+      <div class="buff hidden" id="buff-wide"><span><svg viewBox="0 0 24 24" width="20" height="20"><g stroke="#ff78c8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none"><path d="M4 12 H20"/><path d="M8 8 L4 12 L8 16"/><path d="M16 8 L20 12 L16 16"/></g></svg></span><i></i></div>
     </div>
     <div id="combo">x2</div>
     <div id="streak">SERİ</div>
-    <button id="cashout" class="hidden"><span class="ico">🏦</span>KASAYA AL <span id="pot">0</span></button>
+    <div id="mtoast" class="hidden">
+      <div class="mt-badge">✓</div>
+      <div class="mt-body"><div class="mt-title">GÖREV TAMAM</div><div class="mt-desc" id="mt-desc"></div></div>
+      <div class="mt-rew" id="mt-rew">+0</div>
+    </div>
+    <button id="cashout" class="hidden"><span class="ico"><svg viewBox="0 0 24 24" width="19" height="19"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="7" rx="7" ry="3"/><path d="M5 7 v5 c0 1.7 3.1 3 7 3 s7-1.3 7-3 V7"/><path d="M5 12 v5 c0 1.7 3.1 3 7 3 s7-1.3 7-3 v-5"/></g></svg></span>KASAYA AL <span id="pot">0</span></button>
     <div id="sound">🔊</div>
   </div>
 
@@ -258,7 +302,10 @@
     </div>
     <div class="cta">Kapıda dokun, altın topla. <b>Kasaya Al</b> ile garantiye al<br>ya da riske atıp büyüt. <span class="p">Işkalarsan riskteki gider.</span></div>
     <button class="pulse-btn" id="startBtn">BAŞLA</button>
-    <button class="ghost-btn" id="shopBtn">🛒 Dükkan</button>
+    <div class="menu-row">
+      <button class="ghost-btn" id="shopBtn">Dükkan</button>
+      <button class="ghost-btn" id="missionBtn">Görevler</button>
+    </div>
     <div class="equipped-tag">Tema: <b id="equipped-name">Altın</b></div>
     <div class="hint">Dokun · Tıkla · Boşluk tuşu</div>
   </div>
@@ -271,6 +318,17 @@
     </div>
     <div class="shop-grid" id="shop-grid"></div>
     <button class="ghost-btn" id="shopBack">← Geri</button>
+  </div>
+
+  <!-- Missions -->
+  <div class="overlay hidden" id="missionScreen">
+    <div class="shop-head">
+      <div class="shop-title">GÖREVLER</div>
+      <div class="shop-bank"><span class="coin-ic"></span> <span id="mission-bank">0</span></div>
+    </div>
+    <div id="mission-list"></div>
+    <div class="mhint">Görevi tamamla, Kasa kazan. Biri bitince yenisi gelir.</div>
+    <button class="ghost-btn" id="missionBack">← Geri</button>
   </div>
 
   <!-- Game Over -->
@@ -288,7 +346,10 @@
     </div>
     <div id="newbest" style="display:none">YENİ REKOR!</div>
     <button class="pulse-btn" id="retryBtn">TEKRAR</button>
-    <button class="ghost-btn" id="shopBtn2">🛒 Dükkan</button>
+    <div class="menu-row">
+      <button class="ghost-btn" id="shopBtn2">Dükkan</button>
+      <button class="ghost-btn" id="missionBtn2">Görevler</button>
+    </div>
     <div class="hint">Dokun · Tıkla · Boşluk tuşu</div>
   </div>
 
@@ -484,6 +545,7 @@
   function collectOrb(o){
     const P = POWERUPS[o.type];
     applyPU(o.type);
+    missionEvent('orb',1);
     const [ox,oy]=pos(o.center);
     burst(ox,oy, 22, {color:P.col, smax:420, grav:900});
     ring(ox,oy, P.col); ring(CX,CY, P.col);
@@ -506,6 +568,36 @@
       }
     }
   }
+  // oyuna özel power-up ikonları (canvas'ta çizilir, emoji yok)
+  function drawPuIcon(type, cx, cy, s){
+    ctx.save(); ctx.translate(cx,cy);
+    ctx.lineJoin='round'; ctx.lineCap='round'; ctx.fillStyle='#fff'; ctx.strokeStyle='#fff';
+    if(type==='shield'){
+      ctx.beginPath();
+      ctx.moveTo(0,-s);
+      ctx.lineTo(s*0.82,-s*0.52); ctx.lineTo(s*0.82,s*0.16);
+      ctx.quadraticCurveTo(s*0.82,s*0.78, 0,s);
+      ctx.quadraticCurveTo(-s*0.82,s*0.78, -s*0.82,s*0.16);
+      ctx.lineTo(-s*0.82,-s*0.52); ctx.closePath(); ctx.fill();
+      ctx.strokeStyle='rgba(10,6,20,0.92)'; ctx.lineWidth=s*0.22;
+      ctx.beginPath(); ctx.moveTo(-s*0.34,s*0.02); ctx.lineTo(-s*0.04,s*0.34); ctx.lineTo(s*0.44,-s*0.32); ctx.stroke();
+    } else if(type==='x2'){
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.font=`800 ${s*1.55}px ${FONT}`; ctx.fillText('2×', 0, s*0.08);
+    } else if(type==='slow'){        // kum saati
+      ctx.lineWidth=s*0.18;
+      ctx.beginPath(); ctx.moveTo(-s*0.62,-s*0.82); ctx.lineTo(s*0.62,-s*0.82);
+      ctx.moveTo(-s*0.62,s*0.82); ctx.lineTo(s*0.62,s*0.82); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(-s*0.5,-s*0.82); ctx.lineTo(s*0.5,-s*0.82);
+      ctx.lineTo(-s*0.5,s*0.82); ctx.lineTo(s*0.5,s*0.82); ctx.closePath(); ctx.fill();
+    } else if(type==='wide'){        // çift yönlü ok
+      ctx.lineWidth=s*0.17;
+      ctx.beginPath(); ctx.moveTo(-s*0.72,0); ctx.lineTo(s*0.72,0); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(-s*0.34,-s*0.34); ctx.lineTo(-s*0.74,0); ctx.lineTo(-s*0.34,s*0.34); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(s*0.34,-s*0.34); ctx.lineTo(s*0.74,0); ctx.lineTo(s*0.34,s*0.34); ctx.stroke();
+    }
+    ctx.restore();
+  }
   function drawOrbs(){
     for(const o of orbs){
       const P=POWERUPS[o.type];
@@ -524,8 +616,7 @@
       ctx.fillStyle='#fff'; ctx.shadowColor=rgb(P.col,1); ctx.shadowBlur=20;
       ctx.beginPath(); ctx.arc(ex,ey,18*o.pop,0,TAU); ctx.fill();
       ctx.shadowBlur=0; ctx.fillStyle='rgba(10,6,20,0.9)'; ctx.beginPath(); ctx.arc(ex,ey,15.5*o.pop,0,TAU); ctx.fill();
-      ctx.textAlign='center'; ctx.textBaseline='middle';
-      ctx.font=`${18*o.pop}px -apple-system,Segoe UI,Roboto,sans-serif`; ctx.fillText(P.emoji, ex, ey+1);
+      drawPuIcon(o.type, ex, ey, 8.5*o.pop);
       ctx.restore();
     }
     ctx.globalAlpha=1;
@@ -708,6 +799,7 @@
     bank += amount;
     try{ localStorage.setItem('midas_bank', String(bank)); }catch(e){}
     el.bank.textContent = bank;
+    missionEvent('bank', amount);
     g.pot = 0; g.streak = 0; g.mult = 1;
     el.money.textContent = '0';
     updateCashUI();
@@ -799,9 +891,106 @@
   document.getElementById('shopBtn2').addEventListener('pointerdown',(e)=>{e.preventDefault();e.stopPropagation();openShop('over');});
   document.getElementById('shopBack').addEventListener('pointerdown',(e)=>{e.preventDefault();e.stopPropagation();closeShop();});
 
+  // ---- Görevler ----
+  const MISSION_POOL = [
+    {key:'perfect', mode:'sum', type:'perfect',    target:30,   reward:400, text:t=>t+' MÜKEMMEL vuruş yap'},
+    {key:'orb',     mode:'sum', type:'orb',        target:12,   reward:500, text:t=>t+' power-up topla'},
+    {key:'bank',    mode:'sum', type:'bank',       target:1500, reward:300, text:t=>t+' altını Kasa\'ya al'},
+    {key:'hit',     mode:'sum', type:'hit',        target:150,  reward:250, text:t=>t+' kez kapıya vur'},
+    {key:'tier',    mode:'max', type:'tierReach',  target:7,    reward:600, text:t=>'Bir turda Seviye '+t+'\'e ulaş'},
+    {key:'mult',    mode:'max', type:'multReach',  target:6,    reward:500, text:t=>'Bir turda x'+t+' çarpana ulaş'},
+    {key:'shield',  mode:'sum', type:'shieldSave', target:3,    reward:450, text:t=>'Kalkanla '+t+' kez ölümden dön'},
+    {key:'games',   mode:'sum', type:'games',      target:8,    reward:200, text:t=>t+' el oyna'},
+  ];
+  function mtpl(key){ return MISSION_POOL.find(m=>m.key===key); }
+  let missions = [];
+  function initMissions(){
+    const keys = MISSION_POOL.map(m=>m.key);
+    for(let i=keys.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [keys[i],keys[j]]=[keys[j],keys[i]]; }
+    missions = keys.slice(0,3).map(k=>({key:k,prog:0}));
+  }
+  function loadMissions(){
+    try{
+      const raw = JSON.parse(localStorage.getItem('midas_missions')||'null');
+      if(Array.isArray(raw) && raw.length===3 && raw.every(m=>mtpl(m.k))){
+        missions = raw.map(m=>({key:m.k, prog:m.p||0})); return;
+      }
+    }catch(e){}
+    initMissions();
+  }
+  function saveMissions(){ try{ localStorage.setItem('midas_missions', JSON.stringify(missions.map(m=>({k:m.key,p:m.prog})))); }catch(e){} }
+  function replaceMission(idx){
+    const act = missions.map(m=>m.key);
+    const avail = MISSION_POOL.map(m=>m.key).filter(k=>!act.includes(k));
+    const pick = avail.length ? avail[Math.floor(Math.random()*avail.length)]
+                              : MISSION_POOL[Math.floor(Math.random()*MISSION_POOL.length)].key;
+    missions[idx] = {key:pick, prog:0};
+  }
+  function completeMission(idx){
+    const t = mtpl(missions[idx].key);
+    bank += t.reward;
+    try{ localStorage.setItem('midas_bank', String(bank)); }catch(e){}
+    el.bank.textContent = bank;
+    showMissionToast(t);
+    replaceMission(idx); saveMissions(); refreshMenu();
+    if(missionOpen) renderMissions();
+    cashSound(); setTimeout(()=>beep(1318,0.2,'triangle',0.2),200); vibe([0,25,30,25]);
+  }
+  function missionEvent(type, value){
+    if(value==null) value=1;
+    let changed=false;
+    for(let i=0;i<missions.length;i++){
+      const t=mtpl(missions[i].key); if(!t || t.type!==type) continue;
+      if(t.mode==='sum') missions[i].prog += value;
+      else missions[i].prog = Math.max(missions[i].prog, value);
+      changed=true;
+      if(missions[i].prog >= t.target) completeMission(i);
+    }
+    if(changed) saveMissions();
+  }
+  const mtoast = document.getElementById('mtoast');
+  let mtoastTimer=null;
+  function showMissionToast(t){
+    document.getElementById('mt-desc').textContent = t.text(t.target);
+    document.getElementById('mt-rew').textContent = '+'+t.reward;
+    mtoast.classList.remove('hidden'); void mtoast.offsetWidth; mtoast.classList.add('show');
+    clearTimeout(mtoastTimer);
+    mtoastTimer=setTimeout(()=>{ mtoast.classList.remove('show'); setTimeout(()=>mtoast.classList.add('hidden'),400); }, 2800);
+  }
+  const missionScreen = document.getElementById('missionScreen');
+  const missionList = document.getElementById('mission-list');
+  let missionOpen=false, missionReturn='start';
+  function renderMissions(){
+    document.getElementById('mission-bank').textContent = bank;
+    missionList.innerHTML='';
+    missions.forEach(m=>{
+      const t=mtpl(m.key);
+      const prog=Math.min(m.prog,t.target), frac=prog/t.target;
+      const card=document.createElement('div'); card.className='mcard'+(frac>=1?' done':'');
+      card.innerHTML = '<div class="mtext">'+t.text(t.target)+'</div>'
+        + '<div class="mrow"><div class="mbar"><i style="--t:'+frac.toFixed(3)+'"></i></div>'
+        + '<span class="mprog">'+prog+'/'+t.target+'</span>'
+        + '<span class="mrew"><span class="coin-ic"></span>+'+t.reward+'</span></div>';
+      missionList.appendChild(card);
+    });
+  }
+  function openMissions(from){
+    missionReturn=from; missionOpen=true;
+    el.start.classList.add('hidden'); el.over.classList.add('hidden');
+    renderMissions(); missionScreen.classList.remove('hidden');
+  }
+  function closeMissions(){
+    missionOpen=false; missionScreen.classList.add('hidden');
+    if(missionReturn==='over') el.over.classList.remove('hidden'); else el.start.classList.remove('hidden');
+  }
+  document.getElementById('missionBtn').addEventListener('pointerdown',(e)=>{e.preventDefault();e.stopPropagation();openMissions('start');});
+  document.getElementById('missionBtn2').addEventListener('pointerdown',(e)=>{e.preventDefault();e.stopPropagation();openMissions('over');});
+  document.getElementById('missionBack').addEventListener('pointerdown',(e)=>{e.preventDefault();e.stopPropagation();closeMissions();});
+  loadMissions();
+
   // ---- Giriş ----
   function press(){
-    if(shopOpen) return;
+    if(shopOpen || missionOpen) return;
     const ac=audio(); if(ac && ac.state==='suspended') ac.resume();
     if(state===STATE.MENU){ start(); return; }
     if(state===STATE.OVER){ if(overCooldown<=0) start(); return; }
@@ -825,6 +1014,7 @@
     el.top.style.opacity='1';
     updateCashUI();
     cashSound(); vibe(20);
+    missionEvent('games',1);
   }
 
   function tap(){
@@ -862,6 +1052,8 @@
     g.pulse = 1;
     g.colTarget = curTier.col.slice();
 
+    missionEvent('hit',1); if(perfect) missionEvent('perfect',1); missionEvent('multReach', g.mult);
+
     const col = perfect ? lerpCol(curTier.col,[255,255,255],0.35) : curTier.col;
     burst(px,py, perfect?34:18, {color:col, smax:perfect?560:380, grav:1100, up:120});
     ring(px,py, col);
@@ -877,6 +1069,7 @@
       showTier(g.hits); tierSound();
       g.flash = Math.max(g.flash, 0.6); g.shake = Math.max(g.shake, 14);
       ring(CX,CY, curTier.col);
+      missionEvent('tierReach', tierIndex(g.hits)+1);
     }
 
     g.speed = Math.min(g.speed + 0.14, 8.5);
@@ -895,6 +1088,7 @@
       burst(CX,CY, 26, {color:sc, smax:480, grav:900});
       ring(CX,CY,sc); ring(CX,CY,[255,255,255]);
       floatText('KALKAN KIRILDI!', CX, CY - R - 42, '#7cd4ff', 30);
+      missionEvent('shieldSave',1);
       newGateAway();
       beep(300,0.18,'square',0.2,180); setTimeout(()=>beep(180,0.24,'sine',0.16,90),80);
       vibe([0,25,20,25]);

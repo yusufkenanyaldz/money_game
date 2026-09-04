@@ -143,6 +143,31 @@ Işkalayıp öldüğünde, oyun-sonu ekranından **önce** bir teklif çıkar:
 > video `show()` çağrısı gelir, `onUserEarnedReward → grantRevive()`,
 > reklam kapatılırsa `declineRevive()`.
 
+## Görev Sistemi
+
+Menüden ve oyun-sonundan **Görevler** ekranı açılır: aynı anda **3 aktif görev**
+gösterilir (açıklama + ilerleme çubuğu + Kasa ödülü). Görevler oynadıkça
+otomatik ilerler; biri tamamlanınca **ödül Kasa'ya eklenir**, ekranda bir
+"GÖREV TAMAM +X" bildirimi (toast) belirir ve yerine **yeni bir görev** gelir.
+
+Görev havuzu (rastgele 3'ü aktif olur):
+
+- 30 MÜKEMMEL vuruş yap · 12 power-up topla · 1500 altını Kasa'ya al
+- 150 kez kapıya vur · Bir turda Seviye 7'e ulaş · Bir turda x6 çarpana ulaş
+- Kalkanla 3 kez ölümden dön · 8 el oyna
+
+İlerleme ve aktif görevler `localStorage`'da saklanır (oturumlar arası kalıcı).
+**Neden:** kısa vadeli hedefler → oturum uzunluğu ve Kasa harcama döngüsü;
+"bir görev daha bitireyim" kancası.
+
+## Oyuna özel ikonlar
+
+Oyun-içi öğelerde emoji yerine **canvas'ta ve SVG ile çizilmiş özel ikonlar**
+kullanılır: power-up kapılarının ortasındaki ikonlar (kalkan, 2×, kum saati,
+çift-yönlü ok), üstteki aktif-etki çipleri, "Kasaya Al" butonundaki kumbara ve
+Kasa/coin göstergeleri. Böylece cihazdan bağımsız, tutarlı ve oyuna has bir
+görsel dil sağlanır.
+
 ## Dükkan (temalar / skin'ler) — servete anlam
 
 Biriken **Kasa**'yı harcayacağın yer. Menü ya da oyun-sonu ekranından
@@ -163,9 +188,9 @@ oyuncuyu daha çok oynayıp Kasa büyütmeye iter — kalıcı bir grind döngü
 
 ## Geliştirme fikirleri (sonraki adımlar)
 
-- Günlük görev / seri (streak) takvimi — geri dönüş kancası.
+- Günlük ödül / seri (streak) takvimi — geri dönüş kancası.
+- Skor paylaş + lider tablosu (yerel çoklu oyuncu / cihaz).
 - Arka plan müziği.
-- Skor tablosu (yerel çoklu oyuncu / cihaz).
 
 ---
 _MİDAS — dokun, altına çevir._
