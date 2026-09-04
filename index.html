@@ -106,6 +106,31 @@
   @keyframes flash{50%{opacity:.4}}
   .hint{position:absolute;bottom:calc(env(safe-area-inset-bottom) + 22px);left:0;right:0;text-align:center;
     font-size:12px;letter-spacing:2px;color:#5f5680;font-weight:700;}
+
+  /* cash-out button */
+  #cashout{position:absolute;left:50%;bottom:calc(env(safe-area-inset-bottom) + 78px);transform:translateX(-50%);
+    pointer-events:auto;cursor:pointer;border:none;border-radius:100px;padding:14px 28px;z-index:7;
+    font-size:15px;font-weight:900;letter-spacing:.5px;color:#3a2600;white-space:nowrap;
+    background:linear-gradient(180deg,#ffe888,var(--gold-deep));
+    box-shadow:0 6px 0 #a9660d, 0 12px 30px rgba(245,166,35,.5);
+    display:flex;align-items:center;gap:8px;transition:transform .08s, background .2s, box-shadow .2s;}
+  #cashout .ico{font-size:17px;}
+  #cashout:active{transform:translateX(-50%) translateY(4px);box-shadow:0 2px 0 #a9660d,0 6px 16px rgba(245,166,35,.4);}
+  #cashout.big{animation:cashPulse .8s ease-in-out infinite;}
+  #cashout.hot{color:#fff;background:linear-gradient(180deg,#ff9a76,var(--danger));
+    box-shadow:0 6px 0 #a01037, 0 0 36px rgba(255,59,107,.65);}
+  @keyframes cashPulse{0%,100%{transform:translateX(-50%) scale(1)}50%{transform:translateX(-50%) scale(1.055)}}
+
+  /* menu / game-over vault stats */
+  .mstats{display:flex;gap:12px;margin:-18px 0 34px;}
+  .mstat{display:flex;flex-direction:column;gap:3px;align-items:center;padding:10px 20px;border-radius:16px;
+    background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);}
+  .mstat .v{font-size:24px;font-weight:900;font-variant-numeric:tabular-nums;line-height:1;}
+  .mstat .l{font-size:10px;letter-spacing:2px;color:#8a7fb0;text-transform:uppercase;font-weight:800;}
+  #go-bank{margin:16px 0 2px;font-size:16px;font-weight:900;letter-spacing:1px;color:#3a2600;
+    background:linear-gradient(180deg,#ffe888,var(--gold));padding:10px 22px;border-radius:100px;
+    display:inline-flex;align-items:center;gap:8px;box-shadow:0 0 26px rgba(255,210,74,.45);}
+  #go-money{transition:none;}
 </style>
 </head>
 <body>
@@ -115,17 +140,18 @@
   <div id="hud">
     <div class="top">
       <div class="stat">
-        <span class="label">Altın</span>
+        <span class="label">Riskteki</span>
         <span id="money">0</span>
       </div>
       <div class="stat right">
-        <span class="label">Rekor</span>
-        <span id="best">0</span>
+        <span class="label">Kasa</span>
+        <span id="bank">0</span>
       </div>
     </div>
     <div id="tier">SEVİYE 1</div>
     <div id="combo">x2</div>
     <div id="streak">SERİ</div>
+    <button id="cashout" class="hidden"><span class="ico">🏦</span>KASAYA AL <span id="pot">0</span></button>
     <div id="sound">🔊</div>
   </div>
 
@@ -133,7 +159,11 @@
   <div class="overlay" id="startScreen">
     <div class="logo">MİDAS</div>
     <div class="tag">Dokun · Altına Çevir</div>
-    <div class="cta">Kıvılcım <b>altın kapıdan</b> geçerken dokun.<br>Tam ortası <span class="p">PERFECT</span>. Işkalarsan biter.</div>
+    <div class="mstats">
+      <div class="mstat"><span class="v" id="menu-bank" style="color:var(--gold)">0</span><span class="l">Kasa</span></div>
+      <div class="mstat"><span class="v" id="menu-best" style="color:#cbb9ff">0</span><span class="l">Rekor</span></div>
+    </div>
+    <div class="cta">Kapıda dokun, altın topla. <b>Kasaya Al</b> ile garantiye al<br>ya da riske atıp büyüt. <span class="p">Işkalarsan riskteki gider.</span></div>
     <button class="pulse-btn" id="startBtn">BAŞLA</button>
     <div class="hint">Dokun · Tıkla · Boşluk tuşu</div>
   </div>
@@ -141,10 +171,11 @@
   <!-- Game Over -->
   <div class="overlay hidden" id="overScreen">
     <div id="go-title">SONA GELDİN</div>
-    <div id="go-sub">Işkaladın</div>
+    <div id="go-sub">Riskteki altın yandı</div>
     <div class="score-box">
       <div id="go-money">0</div>
     </div>
+    <div id="go-bank"><span>🏦</span> KASA <span id="go-bankval">0</span></div>
     <div class="go-labels">
       <div class="gl"><span class="glv" id="go-hits" style="color:var(--cyan)">0</span><span class="gll">Vuruş</span></div>
       <div class="gl"><span class="glv" id="go-tier" style="color:var(--violet)">1</span><span class="gll">Seviye</span></div>
@@ -249,7 +280,7 @@
     g = {
       angle: 0, dir: 1, speed: 1.7,
       gateCenter: -Math.PI/2, gateHalf: 0.62,
-      money: 0, hits: 0, streak: 0, mult: 1, tier: 0,
+      pot: 0, maxPot: 0, hits: 0, streak: 0, mult: 1, tier: 0,
       shake: 0, flash: 0, hitstop: 0, pulse: 0, gatePop: 0,
       col: [255,210,74],        // anlık kapı rengi (yumuşak geçiş için)
       colTarget: [255,210,74],  // hedef tier rengi
@@ -348,18 +379,24 @@
 
   // ---- HUD ----
   const el = {
-    money:document.getElementById('money'), best:document.getElementById('best'),
+    money:document.getElementById('money'), bank:document.getElementById('bank'),
     combo:document.getElementById('combo'), streak:document.getElementById('streak'),
     tier:document.getElementById('tier'), sound:document.getElementById('sound'),
+    cashout:document.getElementById('cashout'), pot:document.getElementById('pot'),
     start:document.getElementById('startScreen'), over:document.getElementById('overScreen'),
     goMoney:document.getElementById('go-money'), goHits:document.getElementById('go-hits'),
     goBest:document.getElementById('go-best'), goTier:document.getElementById('go-tier'),
+    goBankVal:document.getElementById('go-bankval'), goSub:document.getElementById('go-sub'),
     newbest:document.getElementById('newbest'), goTitle:document.getElementById('go-title'),
+    menuBank:document.getElementById('menu-bank'), menuBest:document.getElementById('menu-best'),
   };
 
-  let best = 0;
+  let best = 0, bank = 0;
   try{ best = parseInt(localStorage.getItem('midas_best')||'0',10)||0; }catch(e){}
-  el.best.textContent = best;
+  try{ bank = parseInt(localStorage.getItem('midas_bank')||'0',10)||0; }catch(e){}
+  el.bank.textContent = bank;
+  function refreshMenu(){ el.menuBank.textContent = bank; el.menuBest.textContent = best; }
+  refreshMenu();
   el.sound.textContent = soundOn ? '🔊' : '🔇';
   el.sound.addEventListener('pointerdown',(e)=>{ e.preventDefault(); e.stopPropagation();
     soundOn=!soundOn; el.sound.textContent = soundOn?'🔊':'🔇';
@@ -386,6 +423,39 @@
     clearTimeout(el.tier._t); el.tier._t=setTimeout(()=>{ el.tier.style.opacity='0'; }, 1400);
   }
 
+  // ---- Kasa (cash-out) ----
+  function updateCashUI(){
+    if(state!==STATE.PLAY || !g || g.over || g.pot<=0){ el.cashout.classList.add('hidden'); return; }
+    el.cashout.classList.remove('hidden');
+    el.pot.textContent = g.pot;
+    el.cashout.classList.toggle('big', g.pot>=30);
+    el.cashout.classList.toggle('hot', g.pot>=100);
+  }
+  function cashOut(){
+    if(state!==STATE.PLAY || !g || g.over || g.pot<=0) return;
+    const amount = g.pot;
+    bank += amount;
+    try{ localStorage.setItem('midas_bank', String(bank)); }catch(e){}
+    el.bank.textContent = bank;
+    // momentum bedeli: seri sıfırlanır
+    g.pot = 0; g.streak = 0; g.mult = 1;
+    el.money.textContent = '0';
+    updateCashUI();
+    // JUICE — tatmin edici kasa girişi
+    g.flash = 0.5; g.pulse = 1;
+    const by = H - 120;
+    burst(CX, by, 30, {color:[255,225,120], smax:520, grav:1200, up:260});
+    ring(CX, CY, [255,225,120]);
+    floatText('+'+amount+' KASA', CX, CY - R - 42, '#ffe27a', 34);
+    floatText('GÜVENDE!', CX, CY, '#ffffff', 30);
+    for(let i=0;i<26;i++){
+      parts.push({x:rand(CX-90,CX+90),y:by,vx:rand(-120,120),vy:rand(-560,-260),life:1,decay:rand(0.5,0.9),
+        size:rand(3,7),color:[255,210,74],grav:1100,shape:'coin',spin:rand(0,TAU),vspin:rand(-12,12)});
+    }
+    cashSound(); setTimeout(()=>beep(1046,0.18,'triangle',0.2),210);
+    vibe([0,15,25,15,25,40]);
+  }
+
   // ---- Giriş ----
   function press(){
     const ac=audio(); if(ac && ac.state==='suspended') ac.resume();
@@ -396,14 +466,19 @@
   canvas.addEventListener('pointerdown', (e)=>{ e.preventDefault(); press(); }, {passive:false});
   document.getElementById('startBtn').addEventListener('pointerdown',(e)=>{e.preventDefault();e.stopPropagation();press();});
   document.getElementById('retryBtn').addEventListener('pointerdown',(e)=>{e.preventDefault();e.stopPropagation();press();});
-  window.addEventListener('keydown',(e)=>{ if(e.code==='Space'||e.code==='Enter'){ e.preventDefault(); press(); }});
+  el.cashout.addEventListener('pointerdown',(e)=>{e.preventDefault();e.stopPropagation();cashOut();});
+  window.addEventListener('keydown',(e)=>{
+    if(e.code==='Space'||e.code==='Enter'){ e.preventDefault(); press(); }
+    else if(e.code==='KeyC'||e.code==='ArrowDown'){ e.preventDefault(); cashOut(); }
+  });
 
   let overCooldown = 0;
 
   function start(){
     newGame(); state = STATE.PLAY;
     el.start.classList.add('hidden'); el.over.classList.add('hidden');
-    el.money.textContent='0';
+    el.money.textContent='0'; el.bank.textContent=bank;
+    updateCashUI();
     cashSound(); vibe(20);
   }
 
@@ -427,8 +502,10 @@
     if(perfect){ g.streak++; g.mult = 1 + g.streak; }
     else{ g.streak = 0; g.mult = 1; }
     const gain = (perfect ? 10 : 5) * g.mult;
-    g.money += gain;
-    el.money.textContent = g.money;
+    g.pot += gain;
+    if(g.pot > g.maxPot) g.maxPot = g.pot;
+    el.money.textContent = g.pot;
+    updateCashUI();
 
     // JUICE
     g.flash = perfect ? 0.85 : 0.4;
@@ -466,19 +543,24 @@
   function onMiss(){
     g.over = true; state = STATE.OVER;
     g.shake = 26; g.flash = 0.5; g.hitstop = 0.12;
+    const lost = g.pot;
+    el.cashout.classList.add('hidden');
     const [px,py]=pos(g.angle);
     burst(px,py, 26, {color:[255,60,110], smax:520, grav:1200});
     ring(CX,CY,[255,60,110]);
     failSound(); vibe([0,40,30,80]);
 
     let isBest=false;
-    if(g.money > best){ best=g.money; isBest=true; try{localStorage.setItem('midas_best',String(best));}catch(e){} }
-    el.best.textContent = best;
+    if(g.maxPot > best){ best=g.maxPot; isBest=true; try{localStorage.setItem('midas_best',String(best));}catch(e){} }
+    refreshMenu();
 
     overCooldown = 0.75;
     const finalTier = tierIndex(g.hits)+1;
     setTimeout(()=>{
-      el.goMoney.textContent = g.money;
+      el.goMoney.textContent = lost>0 ? '−'+lost : '0';
+      el.goMoney.style.color = lost>0 ? 'var(--danger)' : '#4bd67d';
+      el.goSub.textContent = lost>0 ? 'Riskteki altın yandı' : 'Temiz kaçtın — kasan sağlam';
+      el.goBankVal.textContent = bank;
       el.goHits.textContent = g.hits;
       el.goTier.textContent = finalTier;
       el.goBest.textContent = best;

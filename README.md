@@ -63,11 +63,29 @@ Ses ve titreşim ilk dokunuşta (tarayıcı politikası gereği) etkinleşir.
 - Responsive + `safe-area-inset` ile çentikli telefon uyumu, `touch-action`
   ile mobilde kaydırma/zoom engeli.
 
+## Kasa (risk / ödül) — bağımlılık motoru
+
+Oyunun greed döngüsü **Kasa** sistemiyle çalışır:
+
+- **Riskteki Altın (pot):** run sırasında kazandığın, henüz güvende olmayan
+  altın. **Işkalarsan hepsi yanar.**
+- **Kasaya Al (🏦 / `C` tuşu):** pot'u kalıcı **Kasa**'ya aktarır. Kasa asla
+  kaybolmaz, oturumlar arası saklanır (`localStorage`). Bedeli: **seri
+  çarpanın sıfırlanır** — momentumunu feda edersin, ama garantiye alırsın.
+- Her an oyuncunun kararı: *"Şimdi kasaya alıp kilitle, yoksa bir perfect
+  daha çekip pot'u büyüt ve riske at?"* — **greed vs. kayıp korkusu.**
+- Pot büyüdükçe "Kasaya Al" butonu **ısınır** (altın → kırmızı, nabız atar):
+  kaybedecek çok şeyin olduğunu hissettirir.
+- Kalıcı Kasa = **geri dönüş kancası** (meta-progression): oyuncu servetini
+  büyütmek için tekrar tekrar döner.
+- Temiz kaçış: pot'u kasaya alıp sonra ışkalarsan kayıp **0** olur ("TEMİZ
+  KAÇTIN") — akıllıca oynamayı ödüllendirir.
+
 ## Geliştirme fikirleri (sonraki adımlar)
 
 - Günlük görev / seri (streak) takvimi — geri dönüş kancası.
-- "Cash out" riski: biriken altını bankaya al ya da riske at (greed döngüsü).
-- Temalar/skin'ler, arka plan müziği, ses aç/kapa düğmesi.
+- Kasa ile açılan temalar/skin dükkânı (biriken serveti harca).
+- Arka plan müziği.
 - Skor tablosu (yerel çoklu oyuncu / cihaz).
 
 ---
