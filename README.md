@@ -4,8 +4,23 @@ Tek dokunuşluk, refleks temelli bir "hyper-casual" oyun. Bir çember üzerinde
 dönen kıvılcım **altın kapının** içindeyken dokun; kıvılcımı altına çevir, para
 ve çarpanı büyüt, ışkalama. 7'den 70'e herkes 3 saniyede öğrenir.
 
-> **Oyna:** `index.html` dosyasını herhangi bir tarayıcıda aç. Bağımlılık yok,
-> internet gerekmez, tek dosya. Telefon, tablet ve masaüstünde çalışır.
+> **Oyna:** `index.html` dosyasını herhangi bir tarayıcıda aç. Tek dosya,
+> bağımlılıksız. Telefon, tablet ve masaüstünde çalışır. (Yuvarlak fontlar
+> için internet gerekir; yoksa sistem fontuna düşer.)
+
+---
+
+## Görsel dil: Krem & Pastel (cozy)
+
+Arayüz **sıcak, yumuşak, Pinterest tarzı** bir palete oturur: krem zemin
+(#F7F1E8), pastel tonlar, yuvarlak köşeler, yumuşak gölgeler, sticker yazılar
+ve yuvarlak font (Baloo 2 + Nunito). Efektler (sarsıntı, flaş, ses) bilerek
+yumuşatılmıştır — canlı ama yormayan bir his. Temalar da pastel: Altın,
+Şeftali, Lavanta, Nane, Gökyüzü, Gül, Gökkuşağı. Rütbeler yumuşak:
+TOMURCUK → ÇİÇEK → GÜNEŞ → BULUT → GÖKKUŞAĞI → YILDIZ → AY → RÜYA.
+
+> Not: Aşağıdaki "en çok kullanılan renkler" bölümü ilk (neon) sürüm için
+> yapılan araştırmadır; referans olarak bırakılmıştır.
 
 ---
 
