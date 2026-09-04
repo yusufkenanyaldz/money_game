@@ -160,6 +160,19 @@ Görev havuzu (rastgele 3'ü aktif olur):
 **Neden:** kısa vadeli hedefler → oturum uzunluğu ve Kasa harcama döngüsü;
 "bir görev daha bitireyim" kancası.
 
+## Top kıyafetleri (mağaza: "Toplar" sekmesi)
+
+Dükkanda **Temalar / Toplar** sekmeleri var. "Toplar", dönen topun (kıvılcımın)
+**kostümünü** değiştirir — her biri **canvas'ta elle çizilir** (emoji/resim yok),
+kartlarda canlı önizlemesiyle görünür. Kasa ile alınır, seçilir, kalıcı saklanır
+(`localStorage`).
+
+**13 top:** Kıvılcım (bedava) · Ateş · Buz · Yıldız · Gezegen (halkalı) · Futbol ·
+Kalp · Elmas · Göz (hareket yönüne bakar) · 8 Top · Şimşek (çakan) · Ay · Gökkuşağı
+(gökkuşağı kuyruk). Kimi tema rengiyle boyanır (kıvılcım, yıldız, elmas, gezegen),
+kimi sabit renklidir (ateş, buz, futbol…). Seçilen top kuyruğuyla birlikte oyuna
+yansır.
+
 ## Oyuna özel ikonlar
 
 Oyun-içi öğelerde emoji yerine **canvas'ta ve SVG ile çizilmiş özel ikonlar**
