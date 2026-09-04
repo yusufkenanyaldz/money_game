@@ -465,11 +465,15 @@
     g.gateCenter = ng; g.gatePop = 1;
   }
 
+  const ORB_LIFE = 6;         // saniye — kıvılcım içindeyken dokunmazsan kaybolur
+  const ORB_HALF = 0.40;      // power-up kapısının başlangıç yarı genişliği (rad)
+  function orbHalf(o){ return o.half * (0.35 + 0.65*(o.t/ORB_LIFE)); } // süre doldukça daralır
   function spawnOrb(){
-    // kıvılcımdan ve kapıdan uzağa yerleştir
+    // ana kapıdan ve kıvılcımdan uzağa, çember üzerinde ikinci bir kapı aç
     let a;
-    do{ a = rand(0,TAU); }while(Math.abs(angDiff(a,g.angle))<1.0 || Math.abs(angDiff(a,g.gateCenter))<0.6);
-    orbs.push({ type:pickPowerup(), angle:a, t:8, pop:1 });
+    do{ a = rand(0,TAU); }
+    while(Math.abs(angDiff(a,g.gateCenter))<(effGate()+ORB_HALF+0.35) || Math.abs(angDiff(a,g.angle))<0.9);
+    orbs.push({ type:pickPowerup(), center:a, half:ORB_HALF, t:ORB_LIFE, pop:1 });
   }
   function applyPU(type){
     if(type==='shield') g.shield = true;
@@ -480,7 +484,7 @@
   function collectOrb(o){
     const P = POWERUPS[o.type];
     applyPU(o.type);
-    const [ox,oy]=pos(o.angle);
+    const [ox,oy]=pos(o.center);
     burst(ox,oy, 22, {color:P.col, smax:420, grav:900});
     ring(ox,oy, P.col); ring(CX,CY, P.col);
     floatText(P.label, CX, CY - R - 42, rgb(P.col), 32);
@@ -490,27 +494,38 @@
   }
   function updateOrbs(dt){
     if(!g || state!==STATE.PLAY || g.over || g.countdown>0) return;
-    // doğuş zamanlayıcısı
+    // aynı anda tek power-up kapısı; belli aralıkla doğar
     g.spawnTimer -= dt;
-    if(g.spawnTimer<=0){ if(orbs.length<2) spawnOrb(); g.spawnTimer = rand(4,7); }
+    if(g.spawnTimer<=0){ if(orbs.length<1) spawnOrb(); g.spawnTimer = rand(5,8); }
     for(let i=orbs.length-1;i>=0;i--){
-      const o=orbs[i]; o.t-=dt; o.pop=1+0.12*Math.sin(performance.now()/180+i);
-      if(o.t<=0){ orbs.splice(i,1); continue; }
-      // kıvılcım üstünden geçince topla
-      if(Math.abs(angDiff(g.angle,o.angle)) < 0.20){ collectOrb(o); orbs.splice(i,1); }
+      const o=orbs[i]; o.t-=dt; o.pop=1+0.10*Math.sin(performance.now()/180);
+      if(o.t<=0){ // kaçırıldı — sönerek kaybolur (özelliği kaybettin)
+        const P=POWERUPS[o.type]; const [ox,oy]=pos(o.center);
+        burst(ox,oy, 8, {color:lerpCol(P.col,[120,120,140],0.6), smax:130, grav:280, smin2:2, smax2:4});
+        orbs.splice(i,1); continue;
+      }
     }
   }
   function drawOrbs(){
     for(const o of orbs){
-      const P=POWERUPS[o.type]; const [ox,oy]=pos(o.angle);
-      const fade = o.t<1.5 ? o.t/1.5 : 1;
-      ctx.save(); ctx.globalAlpha=fade;
-      ctx.shadowColor=rgb(P.col,0.9); ctx.shadowBlur=18;
-      ctx.fillStyle=rgb(P.col); ctx.beginPath(); ctx.arc(ox,oy,15*o.pop,0,TAU); ctx.fill();
-      ctx.shadowBlur=0; ctx.fillStyle='rgba(10,6,20,0.85)'; ctx.beginPath(); ctx.arc(ox,oy,12*o.pop,0,TAU); ctx.fill();
-      ctx.globalAlpha=fade; ctx.textAlign='center'; ctx.textBaseline='middle';
-      ctx.font=`${16*o.pop}px -apple-system,Segoe UI,Roboto,sans-serif`;
-      ctx.fillText(P.emoji, ox, oy+1);
+      const P=POWERUPS[o.type];
+      const fade = o.t<1 ? o.t/1 : 1;
+      const th = orbHalf(o);   // kapı süre doldukça daralır
+      ctx.save(); ctx.globalAlpha=fade; ctx.lineCap='round';
+      // ikinci kapı (arc) — power-up rengi
+      ctx.shadowColor=rgb(P.col,0.9); ctx.shadowBlur=22;
+      ctx.lineWidth=22; ctx.strokeStyle=rgb(P.col,0.30);
+      ctx.beginPath(); ctx.arc(CX,CY,R, o.center-th, o.center+th); ctx.stroke();
+      ctx.shadowBlur=12; ctx.lineWidth=13; ctx.strokeStyle=rgb(lerpCol(P.col,[255,255,255],0.45));
+      ctx.beginPath(); ctx.arc(CX,CY,R, o.center-th, o.center+th); ctx.stroke();
+      ctx.shadowBlur=0;
+      // ikon — kapının tam ortasında, çemberin üzerinde
+      const [ex,ey]=pos(o.center);
+      ctx.fillStyle='#fff'; ctx.shadowColor=rgb(P.col,1); ctx.shadowBlur=20;
+      ctx.beginPath(); ctx.arc(ex,ey,18*o.pop,0,TAU); ctx.fill();
+      ctx.shadowBlur=0; ctx.fillStyle='rgba(10,6,20,0.9)'; ctx.beginPath(); ctx.arc(ex,ey,15.5*o.pop,0,TAU); ctx.fill();
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.font=`${18*o.pop}px -apple-system,Segoe UI,Roboto,sans-serif`; ctx.fillText(P.emoji, ex, ey+1);
       ctx.restore();
     }
     ctx.globalAlpha=1;
@@ -816,8 +831,13 @@
     if(g.over || g.countdown>0) return;   // geri sayım sırasında dokunma yok
     const gh = effGate();
     const d = Math.abs(angDiff(g.angle, g.gateCenter));
-    if(d <= gh){ onHit(d <= gh*0.34, d); }
-    else{ onMiss(); }
+    if(d <= gh){ onHit(d <= gh*0.34, d); return; }
+    // power-up kapısı içindeysek topla (ıska sayılmaz)
+    for(let i=0;i<orbs.length;i++){
+      const o=orbs[i];
+      if(Math.abs(angDiff(g.angle, o.center)) <= orbHalf(o)){ collectOrb(o); orbs.splice(i,1); return; }
+    }
+    onMiss();
   }
   function pos(angle){ return [CX + Math.cos(angle)*R, CY + Math.sin(angle)*R]; }
 

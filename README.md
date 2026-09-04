@@ -105,9 +105,11 @@ Oyunun greed döngüsü **Kasa** sistemiyle çalışır:
 
 ## Power-up'lar (toplanabilir)
 
-Oyun sırasında **çemberin üstünde** parlayan power-up küreleri belirir; dönen
-kıvılcım üzerinden **geçince otomatik toplanır** (ekstra dokunuş yok). Aktif
-etkiler üstte küçük sayaçlı çiplerle görünür.
+Oyun sırasında çemberin üzerinde **ikinci bir kapı** açılır — tıpkı ana altın
+kapı gibi bir arc, ama kendi renginde ve **tam ortasında power-up ikonu** durur.
+Toplamak için kıvılcım o kapıdan geçerken **dokunursun** (kapı vuruşu sayılmaz,
+ıska riski yok). Kapı süreli daralır; **zamanında dokunamazsan solup kaybolur**
+— yani power-up'ı kaçırırsın. Aktif etkiler üstte küçük sayaçlı çiplerle görünür.
 
 | Power-up | Etki | Süre |
 |---|---|---|
@@ -116,10 +118,10 @@ etkiler üstte küçük sayaçlı çiplerle görünür.
 | 🐌 **Yavaşlat** | Kıvılcım yavaşlar (kolay nişan) | 6 sn |
 | 🎯 **Geniş Kapı** | Kapı genişler (hem çizim hem isabet) | 8 sn |
 
-Küreler ~4-7 sn'de bir doğar (aynı anda en çok 2), toplanmazsa ~8 sn sonra
-solar. Kalkan aktifken çemberin dışında mavi bir koruma halkası parlar.
-**Neden:** "her el aynı" hissini kırar, sürpriz/ödül (dopamin) ve risk-yönetimi
-kararları ekler — oturumu çeşitlendirir.
+Power-up kapısı ~5-8 sn'de bir doğar (aynı anda tek), ana kapıdan uzağa
+yerleşir, ~6 sn içinde toplanmazsa kaybolur. Kalkan aktifken çemberin dışında
+mavi bir koruma halkası parlar. **Neden:** ikinci bir zamanlama hedefi ekler —
+"her el aynı" hissini kırar, hem ödül hem beceri/risk kararı getirir.
 
 ## Revive (İkinci Şans) — reklam izleyerek
 
