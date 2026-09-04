@@ -207,3 +207,9 @@ oyuncuyu daha çok oynayıp Kasa büyütmeye iter — kalıcı bir grind döngü
 
 ---
 _MİDAS — dokun, altına çevir._
+
+## 🔒 Sahibe özel: geçici altın hilesi
+
+Menüde **MİDAS logosuna ~1.2 sn basılı tut** → **+100.000 Kasa** ("PATRON MODU").
+Tek kişilik, sunucusuz oyun olduğu için zararsızdır. Kodda `GEÇİCİ ALTIN HİLESİ`
+bloğu tek parça; yayına almadan önce silmek istersen o bloğu kaldırman yeter.
