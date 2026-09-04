@@ -10,17 +10,24 @@ ve çarpanı büyüt, ışkalama. 7'den 70'e herkes 3 saniyede öğrenir.
 
 ---
 
-## Görsel dil: Krem & Pastel (cozy)
+## Görsel dil: Premium koyu-canlı
 
-Arayüz **sıcak, yumuşak, Pinterest tarzı** bir palete oturur: krem zemin
-(#F7F1E8), pastel tonlar, yuvarlak köşeler, yumuşak gölgeler, sticker yazılar
-ve yuvarlak font (Baloo 2 + Nunito). Efektler (sarsıntı, flaş, ses) bilerek
-yumuşatılmıştır — canlı ama yormayan bir his. Temalar da pastel: Altın,
-Şeftali, Lavanta, Nane, Gökyüzü, Gül, Gökkuşağı. Rütbeler yumuşak:
-TOMURCUK → ÇİÇEK → GÜNEŞ → BULUT → GÖKKUŞAĞI → YILDIZ → AY → RÜYA.
+Arayüz **derin mor zemin + canlı doygun neon aksanlar + güçlü juice**
+üzerine kuruludur (Subway Surfers mantığı). Cam (glass) kartlar, katmanlı
+neon-bloom parıltı, derinlik vinyeti ve temiz **Poppins** fontu ile
+"ucuz neon" değil premium bir his hedeflenir. Temalar canlı: Altın, Buz,
+Lav, Neon, Zümrüt, Galaksi, Prizma. Rütbeler: KIVILCIM → ATEŞ → KOR →
+ALEV → İNFERNO → NOVA → SÜPERNOVA → TANRISAL.
 
-> Not: Aşağıdaki "en çok kullanılan renkler" bölümü ilk (neon) sürüm için
-> yapılan araştırmadır; referans olarak bırakılmıştır.
+**Bu yön neden seçildi (araştırma):** Bağımlılık odaklı hyper-casual
+oyunlarda **yüksek doygunluk + yüksek kontrast** kazandırır; koyu/donuk
+tonlar "az davetkâr" okunur ve retention'ı düşürür. "Juice" (sarsıntı,
+flaş, parçacık) dopamin salgılatır ve en iyi yüksek kontrastlı zeminde
+parlar. Candy Crush (parlak doygun) ve Subway Surfers (derin zemin + canlı
+öğe) bunun kanıtı. Bir ara denenen pastel/cozy yön sakin oyunlara uygun
+ama bu oyunun adrenalin hedefiyle çeliştiği için terk edildi.
+
+> Aşağıdaki "en çok kullanılan renkler" bölümü bu araştırmanın özetidir.
 
 ---
 
