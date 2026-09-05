@@ -706,7 +706,8 @@
     dailyHint:'Her gün gel, seri büyüsün — ödül katlanır.',
     continueQ:'DEVAM ET?', reviveSave:'<b>{0}</b> altını kurtar',
     reviveStreak:'Serine kaldığın yerden devam et',
-    watchAd:'REKLAM İZLE & DEVAM', noEnd:'Hayır, bitir', oncePerRun:'Tur başına 1 kez',
+    watchAd:'REKLAM İZLE & DEVAM', reviveFree:'İKİNCİ ŞANSI KULLAN',
+    noEnd:'Hayır, bitir', oncePerRun:'Tur başına 1 kez',
     adLbl:'REKLAM', adSub:'Reklam bitince kaldığın yerden devam edeceksin',
     adPrep:'Ödülün hazırlanıyor…',
     coach1:'Kıvılcım <b>kapıdan</b> geçerken <b>dokun</b>',
@@ -758,7 +759,8 @@
     dailyHint:'Come back every day — your streak grows, rewards multiply.',
     continueQ:'CONTINUE?', reviveSave:'Save your <b>{0}</b> gold',
     reviveStreak:'Pick your streak up where you left off',
-    watchAd:'WATCH AD & CONTINUE', noEnd:'No, end it', oncePerRun:'Once per run',
+    watchAd:'WATCH AD & CONTINUE', reviveFree:'USE SECOND CHANCE',
+    noEnd:'No, end it', oncePerRun:'Once per run',
     adLbl:'AD', adSub:"When the ad ends you'll continue right where you left off",
     adPrep:'Preparing your reward…',
     coach1:'Tap when the spark crosses the <b>gate</b>',
@@ -2164,6 +2166,14 @@
 
   function showReviveOffer(){
     if(state!==STATE.REVIVE) return;
+    // Gercek odullu reklam YALNIZCA portal SDK'si varsa oynatilir (Poki/CrazyGames).
+    // Portal yoksa (itch.io / kendi sitesi) reklam vaadi etmeyiz: ikinci sans bedava.
+    const btnLbl = document.querySelector('#reviveBtn [data-i18n]');
+    if(btnLbl){
+      const k = Portal.present() ? 'watchAd' : 'reviveFree';
+      btnLbl.setAttribute('data-i18n', k); btnLbl.textContent = t(k);
+    }
+    document.querySelector('#reviveBtn span').style.display = Portal.present() ? '' : 'none';
     const amt = g.pot;
     document.getElementById('rev-sub').innerHTML = amt>0
       ? t('reviveSave', amt)
@@ -2194,16 +2204,9 @@
                        ()=>{ adScreen.classList.add('hidden'); declineRevive(); })){
       return;
     }
-    // ---- YEDEK: portal yokken (itch.io / kendi sitesi) sahte reklam ----
-    adScreen.classList.remove('hidden');
-    let n = 5;
-    const cd = document.getElementById('ad-count');
-    cd.textContent = n;
-    const iv = setInterval(()=>{
-      n--;
-      if(n<=0){ clearInterval(iv); grantRevive(); return; }
-      cd.textContent = n; beep(520,0.06,'sine',0.12);
-    }, 1000);
+    // ---- YEDEK: portal yok -> sahte reklam gostermeyiz, ikinci sansi direkt ver.
+    // (grantRevive zaten 3-2-1 geri sayimiyla nefes payi veriyor.)
+    grantRevive();
   }
   function grantRevive(){
     adScreen.classList.add('hidden');

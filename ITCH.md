@@ -93,6 +93,19 @@ Tap · Click · Spacebar
       (Korunmuyorsa: fullscreen'den oyna, yukarıdaki nota bak.)
 - [ ] TR/EN düğmesi dili değiştiriyor mu?
 
+## Reklamlar
+
+**itch.io'da reklam YOKTUR.** Oyun, sayfada bir portal reklam SDK'si
+(`PokiSDK` / `CrazyGames.SDK`) olup olmadığını çalışma anında kontrol eder:
+
+- **SDK varsa** (Poki/CrazyGames): ölünce *"REKLAM İZLE & DEVAM"* çıkar ve
+  **gerçek ödüllü reklam** onların sistemiyle oynatılır — gelir buradan gelir.
+- **SDK yoksa** (itch.io, kendi siten): reklam vaadi edilmez. Buton
+  *"İKİNCİ ŞANSI KULLAN"* olur ve hak **ücretsiz** verilir (tur başına 1 kez).
+
+Yani aynı dosya her iki ortamda da dürüst davranır; itch'te oyuncuya
+gösterilmeyen bir reklam için bekletme yapılmaz.
+
 ## Not: sahibe özel altın hilesi
 
 Portal/temiz derleme kuralları gereği **kapalı** (`const OWNER_CHEAT = false`,
