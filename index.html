@@ -66,7 +66,7 @@
     background:var(--surface-2);border:1px solid var(--brd);backdrop-filter:blur(8px);}
 
   #combo{position:absolute;top:15%;left:0;right:0;text-align:center;
-    font-size:17vw;font-weight:900;color:#fff;opacity:0;line-height:1;
+    font-size:clamp(52px,17vw,120px);font-weight:900;color:#fff;opacity:0;line-height:1;
     text-shadow:0 0 50px var(--coin);font-variant-numeric:tabular-nums;letter-spacing:-2px;}
   #streak{position:absolute;top:calc(15% + 17vw);left:0;right:0;text-align:center;
     font-size:13px;font-weight:800;letter-spacing:5px;color:var(--coin);opacity:0;text-transform:uppercase;}
@@ -100,7 +100,7 @@
     text-align:center;padding:24px;pointer-events:auto;z-index:10;
     background:radial-gradient(120% 90% at 50% 38%, rgba(30,18,54,.42), rgba(8,4,16,.93));}
   .hidden{display:none !important;}
-  .logo{font-size:21vw;font-weight:900;letter-spacing:-4px;line-height:.85;
+  .logo{font-size:clamp(58px,21vw,132px);font-weight:900;letter-spacing:-4px;line-height:.85;
     background:linear-gradient(180deg,#fff 0%,#ffe08a 45%,var(--gold-deep) 100%);
     -webkit-background-clip:text;background-clip:text;color:transparent;
     filter:drop-shadow(0 4px 40px rgba(255,180,60,.55));margin-bottom:6px;
@@ -120,10 +120,10 @@
   @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
 
   /* game over */
-  #go-title{font-size:13vw;font-weight:900;letter-spacing:-1px;color:#fff;line-height:.9;}
+  #go-title{font-size:clamp(38px,13vw,84px);font-weight:900;letter-spacing:-1px;color:#fff;line-height:.9;}
   #go-sub{font-size:14px;letter-spacing:4px;color:var(--danger);text-transform:uppercase;font-weight:800;margin-top:8px;}
   .score-box{margin:30px 0 4px;position:relative;}
-  #go-money{font-size:24vw;font-weight:900;color:var(--danger);line-height:.9;
+  #go-money{font-size:clamp(64px,24vw,152px);font-weight:900;color:var(--danger);line-height:.9;
     text-shadow:0 0 54px rgba(255,71,111,.5);font-variant-numeric:tabular-nums;}
   .go-labels{display:flex;gap:12px;justify-content:center;margin-top:18px;}
   .go-labels .gl{display:flex;flex-direction:column;gap:4px;min-width:82px;padding:14px 8px;border-radius:18px;
@@ -179,7 +179,7 @@
   #daily-title{font-size:34px;font-weight:900;letter-spacing:1px;
     background:linear-gradient(180deg,#fff,var(--gold));-webkit-background-clip:text;background-clip:text;color:transparent;}
   #daily-streak{font-size:14px;letter-spacing:3px;color:var(--coin);font-weight:800;text-transform:uppercase;margin-top:6px;}
-  #daily-amt{font-size:16vw;font-weight:900;color:var(--gold);text-shadow:0 0 44px rgba(255,204,77,.5);line-height:.9;}
+  #daily-amt{font-size:clamp(50px,16vw,112px);font-weight:900;color:var(--gold);text-shadow:0 0 44px rgba(255,204,77,.5);line-height:.9;}
   .daily-dots{display:flex;gap:9px;margin:18px 0 4px;justify-content:center;flex-wrap:wrap;}
   .daily-dots i{width:12px;height:12px;border-radius:50%;background:var(--brd);transition:.3s;}
   .daily-dots i.on{background:var(--coin);box-shadow:0 0 12px var(--coin);}
@@ -328,7 +328,7 @@
   /* ---- Revive ---- */
   #reviveScreen{background:radial-gradient(120% 90% at 50% 40%, rgba(30,18,54,.55), rgba(8,4,16,.96));}
   .rev-heart{font-size:64px;animation:softpulse 1s ease-in-out infinite;filter:drop-shadow(0 0 24px rgba(255,204,77,.5));}
-  .rev-title{font-size:12vw;font-weight:900;letter-spacing:-1px;color:#fff;line-height:1;margin-top:6px;}
+  .rev-title{font-size:clamp(36px,12vw,78px);font-weight:900;letter-spacing:-1px;color:#fff;line-height:1;margin-top:6px;}
   .rev-sub{font-size:16px;color:#e6ddf7;font-weight:600;margin-top:10px;}
   .rev-sub b{color:var(--gold);font-weight:900;font-size:20px;}
   .ad-btn{background:linear-gradient(180deg,#7CF0A8,#22b866)!important;color:#053a1c!important;
@@ -2176,7 +2176,7 @@
   }
   requestAnimationFrame(frame);
 
-  newGame(); g=null;
+  newGame(); g=null; coachOff();   // açılıştaki hazırlık turu koç balonunu göstermesin
 })();
 </script>
 </body>
