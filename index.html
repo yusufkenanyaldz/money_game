@@ -105,6 +105,11 @@
   #sound{right:20px;} #music{right:76px;} #langBtn{right:132px;font-size:14px;font-weight:900;letter-spacing:.5px;}
   #sound:active,#music:active,#langBtn:active{transform:scale(.9);}
   #music.off{opacity:.5;}
+  /* Alt ekranlarda (dükkan/görevler/yükselt/sıralama) yüzen düğmeler gizlenir:
+     ekranın altındaki "Geri" butonuyla çakışıyorlardı. */
+  body.subscreen #sound, body.subscreen #music, body.subscreen #langBtn{
+    opacity:0;pointer-events:none;transform:scale(.85);}
+  #sound,#music,#langBtn{transition:transform .1s, opacity .2s;}
   #sound svg,#music svg{width:21px;height:21px;display:block;pointer-events:none;}
   .rev-heart svg{width:64px;height:64px;}
   .mt-badge svg{width:20px;height:20px;}
@@ -1529,6 +1534,21 @@
     refreshAllText(); beep(720,0.08,'triangle',0.18);
   });
 
+  // Overlay durum bayrakları TEK YERDE ve updateChrome'dan ÖNCE tanımlanır.
+  // (Daha aşağıda `let` ile tanımlanırlarsa, açılışta çalışan checkDaily()
+  //  bunları okuduğunda Temporal Dead Zone hatası verir ve oyun hiç açılmaz.)
+  let shopOpen=false,    shopReturn='start';
+  let missionOpen=false, missionReturn='start';
+  let upgradeOpen=false, upgradeReturn='start';
+  let lbOpen=false,      lbReturn='start';
+  let dailyOpen=false;
+
+  // Alt ekran açık mı? Yüzen düğmeleri ona göre gizle/göster.
+  function updateChrome(){
+    const sub = shopOpen || missionOpen || upgradeOpen || lbOpen || dailyOpen;
+    document.body.classList.toggle('subscreen', !!sub);
+  }
+
   // ================= Kademeli açılım (onboarding reveal) =================
   let gamesPlayed=0; try{ gamesPlayed=Math.max(0,parseInt(localStorage.getItem('midas_games')||'0',10)||0); }catch(e){}
   // Menü butonları oyuncu ilerledikçe açılır — başta kalabalık gelmesin
@@ -1551,7 +1571,6 @@
     saveLB();
     return leaderboard.indexOf(run); // 0-index sıralamadaki yeri (yoksa -1)
   }
-  let lbOpen=false, lbReturn='start';
   const lbScreen=document.getElementById('lbScreen'), lbList=document.getElementById('lb-list');
   function renderLB(){
     document.getElementById('lb-best').textContent=best;
@@ -1568,8 +1587,8 @@
       lbList.appendChild(row);
     });
   }
-  function openLB(from){ lbReturn=from; lbOpen=true; el.start.classList.add('hidden'); el.over.classList.add('hidden'); renderLB(); lbScreen.classList.remove('hidden'); }
-  function closeLB(){ lbOpen=false; lbScreen.classList.add('hidden'); if(lbReturn==='over') el.over.classList.remove('hidden'); else el.start.classList.remove('hidden'); }
+  function openLB(from){ lbReturn=from; lbOpen=true; updateChrome(); el.start.classList.add('hidden'); el.over.classList.add('hidden'); renderLB(); lbScreen.classList.remove('hidden'); }
+  function closeLB(){ lbOpen=false; updateChrome(); lbScreen.classList.add('hidden'); if(lbReturn==='over') el.over.classList.remove('hidden'); else el.start.classList.remove('hidden'); }
   document.getElementById('lbBtn').addEventListener('pointerdown',(e)=>{e.preventDefault();e.stopPropagation();openLB('start');});
   document.getElementById('lbBtn2').addEventListener('pointerdown',(e)=>{e.preventDefault();e.stopPropagation();openLB('over');});
   document.getElementById('lbBack').addEventListener('pointerdown',(e)=>{e.preventDefault();e.stopPropagation();closeLB();});
@@ -1595,7 +1614,6 @@
   document.getElementById('lbShareBtn').addEventListener('pointerdown',(e)=>{e.preventDefault();e.stopPropagation();shareScore();});
 
   // ================= Günlük ödül / seri =================
-  let dailyOpen=false;
   function todayStr(){ const d=new Date(); return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate(); }
   function dayIndex(){ return Math.floor(Date.now()/86400000); }
   function checkDaily(){
@@ -1608,7 +1626,7 @@
     const day=((streak-1)%7)+1;         // 7 günlük döngü
     const reward=100*day + (day===7?400:0);   // 7. gün büyük ödül
     // popup
-    dailyOpen=true;
+    dailyOpen=true; updateChrome();
     document.getElementById('daily-streak').textContent=t('dailyStreak',streak);
     document.getElementById('daily-amt').textContent='+'+reward;
     const dots=document.getElementById('daily-dots'); dots.innerHTML='';
@@ -1619,7 +1637,7 @@
       bank+=reward; try{ localStorage.setItem('midas_bank',String(bank)); }catch(e){}
       try{ localStorage.setItem('midas_daily_day',String(today)); localStorage.setItem('midas_daily_streak',String(streak)); }catch(e){}
       el.bank.textContent=bank; refreshMenu();
-      dailyOpen=false; document.getElementById('dailyScreen').classList.add('hidden'); el.start.classList.remove('hidden');
+      dailyOpen=false; updateChrome(); document.getElementById('dailyScreen').classList.add('hidden'); el.start.classList.remove('hidden');
       burstScreen(); cashSound(); vibe([0,25,20,40]);
     };
   }
@@ -1720,7 +1738,6 @@
   const shopScreen = document.getElementById('shopScreen');
   const shopGrid = document.getElementById('shop-grid');
   const shopBankEl = document.getElementById('shop-bank');
-  let shopOpen = false, shopReturn = 'start';
 
   function fmt(n){ return n>=1000 ? (n/1000).toFixed(n%1000===0?0:1)+'K' : ''+n; }
   const priceBtn = (afford,price)=> '<button class="sbtn buy'+(afford?'':' locked')+'"><span class="coin-ic"></span> '+fmt(price)+'</button>';
@@ -1813,7 +1830,7 @@
   }
 
   function openShop(from){
-    shopReturn = from; shopOpen = true;
+    shopReturn = from; shopOpen = true; updateChrome();
     shopTab='theme';
     document.getElementById('tab-theme').classList.add('active');
     document.getElementById('tab-ball').classList.remove('active');
@@ -1821,7 +1838,7 @@
     shopScreen.classList.remove('hidden'); renderShop();
   }
   function closeShop(){
-    shopOpen = false; shopScreen.classList.add('hidden');
+    shopOpen = false; updateChrome(); shopScreen.classList.add('hidden');
     if(shopReturn==='over') el.over.classList.remove('hidden');
     else el.start.classList.remove('hidden');
   }
@@ -1918,7 +1935,6 @@
   function showMissionToast(tp){ showToast(t('missionDone'), tp.text(tp.target), '+'+tp.reward); }
   const missionScreen = document.getElementById('missionScreen');
   const missionList = document.getElementById('mission-list');
-  let missionOpen=false, missionReturn='start';
   function renderMissions(){
     document.getElementById('mission-bank').textContent = bank;
     missionList.innerHTML='';
@@ -1934,12 +1950,12 @@
     });
   }
   function openMissions(from){
-    missionReturn=from; missionOpen=true;
+    missionReturn=from; missionOpen=true; updateChrome();
     el.start.classList.add('hidden'); el.over.classList.add('hidden');
     renderMissions(); missionScreen.classList.remove('hidden');
   }
   function closeMissions(){
-    missionOpen=false; missionScreen.classList.add('hidden');
+    missionOpen=false; updateChrome(); missionScreen.classList.add('hidden');
     if(missionReturn==='over') el.over.classList.remove('hidden'); else el.start.classList.remove('hidden');
   }
   document.getElementById('missionBtn').addEventListener('pointerdown',(e)=>{e.preventDefault();e.stopPropagation();openMissions('start');});
@@ -1950,7 +1966,6 @@
   // ---- Yükselt (kalıcı upgrade'ler) ----
   const upgScreen = document.getElementById('upgradeScreen');
   const upgList = document.getElementById('upg-list');
-  let upgradeOpen=false, upgradeReturn='start';
   function renderUpgrades(){
     // Reklam yoksa diriliş de yok; parayı boşa harcatmayalım.
     document.getElementById('upg-bank').textContent = bank;
@@ -1985,12 +2000,12 @@
     if(nc){ nc.classList.add('buypop'); setTimeout(()=>nc.classList.remove('buypop'),500); }
   }
   function openUpgrades(from){
-    upgradeReturn=from; upgradeOpen=true;
+    upgradeReturn=from; upgradeOpen=true; updateChrome();
     el.start.classList.add('hidden'); el.over.classList.add('hidden');
     upgScreen.classList.remove('hidden'); renderUpgrades();
   }
   function closeUpgrades(){
-    upgradeOpen=false; upgScreen.classList.add('hidden');
+    upgradeOpen=false; updateChrome(); upgScreen.classList.add('hidden');
     if(upgradeReturn==='over') el.over.classList.remove('hidden'); else el.start.classList.remove('hidden');
   }
   document.getElementById('upgradeBtn').addEventListener('pointerdown',(e)=>{e.preventDefault();e.stopPropagation();openUpgrades('start');});
