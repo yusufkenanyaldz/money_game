@@ -218,6 +218,38 @@ taraf" sayabilir ve ilerleme oturumlar arası silinebilir. Oyun bu durumda
 **çökmez** (test edildi), yalnızca kayıt tutmaz. itch sayfasında
 *"Click to launch in fullscreen"* seçeneğini açmak sorunu giderir.
 
+## Ekonomi dengesi (ölçülmüş)
+
+**Sorun:** Kazanç, combo çarpanı sınırsız büyüdüğü için tur uzunluğuyla
+**karesel** artıyordu. Simülasyon: 40 vuruşluk bir turda usta oyuncu **9.824**,
+acemi **1.305** altın kazanıyordu — **7,5 kat** uçurum. Dükkânın tamamı
+(144.200 altın) sadece **~69 turda** bitiyordu; yani oyuncunun hedefi
+bir saatte tükeniyordu.
+
+**Çözüm 1 — yumuşak tavan.** Çarpan artık `x8`e kadar her seride +1, sonra
+her 4 seride +1 artar:
+
+| seri | 1 | 3 | 5 | 7 | 11 | 15 | 23 | 30 |
+|---|---|---|---|---|---|---|---|---|
+| çarpan | x2 | x4 | x6 | x8 | x9 | x10 | x12 | x13 |
+
+Tırmanma hissi korunur (asla tıkanmaz) ama karesel patlama biter:
+usta/acemi uçurumu **7,5x → 4,2x**.
+
+**Çözüm 2 — dik fiyat eğrisi.** Erken ucuz, geç çok pahalı:
+
+| | eski | yeni |
+|---|---|---|
+| Temalar | 91.100 | 222.800 |
+| Toplar | 30.300 | 237.400 |
+| Upgrade'ler | 22.800 | 49.500 *(kademeler uzatıldı)* |
+| **Toplam** | **144.200** | **509.700** |
+
+- **İlk kozmetik: 200 altın** → ilk turda alınır. Erken ödül tutundurmanın
+  belkemiğidir, orayı ucuz tuttum.
+- **En üst öğe: 150.000 altın** → haftalarca sürecek gerçek bir hedef.
+- Dükkânın tamamı: **~69 tur → ~259 tur.**
+
 ## Ödül mimarisi (bağımlılık motoru)
 
 "Juice" görselliktir; asıl bağlayıcı olan **ödülün ne zaman ve nasıl

@@ -852,17 +852,17 @@
   const SKINS = [
     { id:'altin', name:'Altın', price:0, coin:[255,204,77],
       ramp:[[255,204,77],[255,150,50],[255,95,120],[224,80,215],[150,110,255],[53,231,208],[70,230,140]] },
-    { id:'buz', name:'Buz', price:400, coin:[130,215,255],
+    { id:'buz', name:'Buz', price:300, coin:[130,215,255],
       ramp:[[130,215,255],[80,180,255],[120,140,255],[170,215,255],[70,235,225],[190,235,255],[110,250,235]] },
-    { id:'lav', name:'Lav', price:1200, coin:[255,120,45],
+    { id:'lav', name:'Lav', price:1500, coin:[255,120,45],
       ramp:[[255,180,45],[255,115,25],[255,65,35],[235,30,45],[255,90,30],[255,200,65],[205,25,25]] },
-    { id:'neon', name:'Neon', price:3500, coin:[255,92,200],
+    { id:'neon', name:'Neon', price:5000, coin:[255,92,200],
       ramp:[[255,72,200],[185,65,255],[85,160,255],[53,235,215],[255,85,150],[145,85,255],[65,220,255]] },
-    { id:'zumrut', name:'Zümrüt', price:9000, coin:[80,230,150],
+    { id:'zumrut', name:'Zümrüt', price:16000, coin:[80,230,150],
       ramp:[[80,235,150],[45,215,125],[185,245,95],[240,235,85],[65,225,185],[125,245,125],[35,205,165]] },
-    { id:'galaksi', name:'Galaksi', price:22000, coin:[200,150,255],
+    { id:'galaksi', name:'Galaksi', price:50000, coin:[200,150,255],
       ramp:[[185,135,255],[125,95,255],[255,125,225],[95,165,255],[225,155,255],[255,205,245],[135,115,255]] },
-    { id:'prizma', name:'Prizma', price:55000, coin:[255,255,255],
+    { id:'prizma', name:'Prizma', price:150000, coin:[255,255,255],
       ramp:[[255,80,80],[255,180,45],[255,235,65],[80,235,125],[65,185,255],[155,95,255],[255,90,205]] },
   ];
   function skinById(id){ return SKINS.find(s=>s.id===id) || SKINS[0]; }
@@ -889,18 +889,18 @@
   // ---- Toplar (top kıyafetleri) — Kasa ile açılır ----
   const BALLS = [
     {id:'spark',    name:'Kıvılcım',  price:0},
-    {id:'fire',     name:'Ateş',      price:300,  base:[255,120,30]},
-    {id:'ice',      name:'Buz',       price:300,  base:[140,220,255]},
-    {id:'star',     name:'Yıldız',    price:600},
-    {id:'planet',   name:'Gezegen',   price:900},
-    {id:'soccer',   name:'Futbol',    price:1200, base:[240,240,248]},
-    {id:'heart',    name:'Kalp',      price:1500, base:[255,95,150]},
-    {id:'gem',      name:'Elmas',     price:2000},
-    {id:'eye',      name:'Göz',       price:2600, base:[255,255,255]},
-    {id:'eight',    name:'8 Top',     price:3200, base:[46,46,56]},
-    {id:'lightning',name:'Şimşek',    price:4200, base:[255,240,120]},
-    {id:'moon',     name:'Ay',        price:5500, base:[214,214,224]},
-    {id:'rainbow',  name:'Gökkuşağı', price:8000},
+    {id:'fire',     name:'Ateş',      price:200,  base:[255,120,30]},
+    {id:'ice',      name:'Buz',       price:200,  base:[140,220,255]},
+    {id:'star',     name:'Yıldız',    price:700},
+    {id:'planet',   name:'Gezegen',   price:1500},
+    {id:'soccer',   name:'Futbol',    price:2800, base:[240,240,248]},
+    {id:'heart',    name:'Kalp',      price:4500, base:[255,95,150]},
+    {id:'gem',      name:'Elmas',     price:7500},
+    {id:'eye',      name:'Göz',       price:12000, base:[255,255,255]},
+    {id:'eight',    name:'8 Top',     price:20000, base:[46,46,56]},
+    {id:'lightning',name:'Şimşek',    price:33000, base:[255,240,120]},
+    {id:'moon',     name:'Ay',        price:55000, base:[214,214,224]},
+    {id:'rainbow',  name:'Gökkuşağı', price:100000},
   ];
   function ballById(id){ return BALLS.find(b=>b.id===id)||BALLS[0]; }
   let ballOwned = new Set(['spark']);
@@ -1209,6 +1209,7 @@
   function effGate(){ return g.gateHalf * (g.wideTime>0 ? 1.7 : 1) * (SHAPE_GATE[currentShape]||1) * (g.stageGrace>0 ? 1.35 : 1); }
   function perfectFactor(){ return 0.34 * (1 + UP.perfect*0.12); }   // Geniş Perfect upgrade'i
   const GOLDEN_MULT = 5;
+  const comboMult = (streak)=> streak<=7 ? 1+streak : 8 + Math.floor((streak-7)/4);
   function newGateAway(){
     let ng; do{ ng = rand(0,TAU); }while(Math.abs(angDiff(ng, g.angle)) < 1.1);
     g.gateCenter = ng; g.gatePop = 1;
@@ -1446,10 +1447,10 @@
 
   // ---- Kalıcı upgrade'ler (Kasa ile güçlen) ----
   const UPGRADES = [
-    {key:'gold',    max:5, cost:l=>400*(l+1), eff:l=>t('eff_gold',l*8)},
-    {key:'perfect', max:4, cost:l=>600*(l+1), eff:l=>t('eff_perfect',Math.round(l*12))},
-    {key:'shield',  max:3, cost:l=>800*(l+1), eff:l=>t('eff_shield',l)},
-    {key:'slow',    max:3, cost:l=>500*(l+1), eff:l=>t('eff_slow',l)},
+    {key:'gold',    max:8, cost:l=>400*(l+1), eff:l=>t('eff_gold',l*8)},
+    {key:'perfect', max:6, cost:l=>600*(l+1), eff:l=>t('eff_perfect',Math.round(l*12))},
+    {key:'shield',  max:5, cost:l=>800*(l+1), eff:l=>t('eff_shield',l)},
+    {key:'slow',    max:5, cost:l=>500*(l+1), eff:l=>t('eff_slow',l)},
     {key:'revive',  max:1, cost:l=>3000,      eff:l=>t('eff_revive',1+l), needsAd:true},
   ];
   const UP = {gold:0,perfect:0,shield:0,slow:0,revive:0};
@@ -2083,7 +2084,10 @@
     const [px,py] = tiltPoint(...pos(g.angle));   // yalpalayan pistle hizali
     const curTier = tierData(g.hits);
 
-    if(perfect){ g.streak++; g.mult = 1 + g.streak; }
+    // Çarpan yumuşak tavanla büyür: x8'e kadar her seride +1, sonra her 4
+    // seride +1. Böylece combo tırmanma hissi korunur ama uzun serilerde
+    // kazanç KARESEL patlamaz (usta/acemi uçurumu 7.5x -> 4.2x).
+    if(perfect){ g.streak++; g.mult = comboMult(g.streak); }
     else{ g.streak = 0; g.mult = 1; }
     const wasGolden = !!g.golden;
     const gain = Math.round((perfect ? 10 : 5) * g.mult * (g.x2Time>0 ? 2 : 1) * (1 + UP.gold*0.08)
