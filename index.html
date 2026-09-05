@@ -116,6 +116,8 @@
     text-align:center;padding:24px;pointer-events:auto;z-index:10;
     background:radial-gradient(120% 90% at 50% 38%, rgba(30,18,54,.42), rgba(8,4,16,.93));}
   /* Menü: arkadaki nebula görünsün diye çok daha hafif bir örtü */
+  /* İçerik taşarsa kesilmesin: kaydırılabilir olsun (küçük ekran güvencesi) */
+  #startScreen,#overScreen{overflow-y:auto;justify-content:flex-start;padding-top:max(28px,6vh);padding-bottom:96px;}
   #startScreen{background:radial-gradient(125% 100% at 50% 45%, rgba(12,10,34,.10), rgba(6,5,18,.46));}
   .hidden{display:none !important;}
   .logo{display:flex;flex-direction:column;align-items:center;line-height:.94;
@@ -131,7 +133,7 @@
   .cta{font-size:16px;color:#e6ddf7;font-weight:600;line-height:1.7;max-width:335px;}
   .cta b{color:var(--gold);font-weight:800;}
   .cta .p{color:var(--cyan);font-weight:800;}
-  .pulse-btn{margin-top:34px;pointer-events:auto;position:relative;
+  .pulse-btn{margin-top:20px;pointer-events:auto;position:relative;
     padding:19px 62px;border:1px solid rgba(255,255,255,.42);border-radius:100px;cursor:pointer;
     font-size:21px;font-weight:800;letter-spacing:1px;color:#3d2600;
     background:linear-gradient(165deg, rgba(255,246,214,.94), rgba(255,206,110,.86));
@@ -143,16 +145,21 @@
   @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
 
   /* game over */
-  #go-title{font-size:clamp(38px,13vw,84px);font-weight:900;letter-spacing:-1px;color:#fff;line-height:.9;}
+  #go-title{font-size:clamp(32px,10.5vw,68px);font-weight:900;letter-spacing:-1px;color:#fff;line-height:.9;}
   #go-sub{font-size:14px;letter-spacing:4px;color:var(--danger);text-transform:uppercase;font-weight:800;margin-top:8px;}
-  .score-box{margin:30px 0 4px;position:relative;}
-  #go-money{font-size:clamp(64px,24vw,152px);font-weight:900;color:var(--danger);line-height:.9;
+  .score-box{margin:16px 0 2px;position:relative;}
+  #go-money{font-size:clamp(46px,15vw,100px);font-weight:900;color:var(--danger);line-height:.9;
     text-shadow:0 0 54px rgba(255,71,111,.5);font-variant-numeric:tabular-nums;}
-  .go-labels{display:flex;gap:12px;justify-content:center;margin-top:18px;}
+  .go-labels{display:flex;gap:10px;justify-content:center;margin-top:12px;}
   .go-labels .gl{display:flex;flex-direction:column;gap:4px;min-width:82px;padding:14px 8px;border-radius:18px;
     background:var(--surface);border:1px solid var(--brd);backdrop-filter:blur(6px);}
   .go-labels .glv{font-size:24px;font-weight:900;font-variant-numeric:tabular-nums;}
   .go-labels .gll{font-size:10px;letter-spacing:1.5px;color:var(--ink2);text-transform:uppercase;font-weight:700;}
+  #go-hook{margin-top:12px;font-size:15px;font-weight:800;letter-spacing:.4px;color:#ffd97a;
+    background:linear-gradient(160deg, rgba(255,214,110,.15), rgba(255,214,110,.05));
+    border:1px solid rgba(255,214,110,.32);border-radius:100px;padding:11px 22px;
+    display:inline-block;backdrop-filter:blur(10px);animation:softpulse 1.4s ease-in-out infinite;}
+  #go-hook b{color:#fff;}
   #newbest{margin-top:18px;font-size:15px;font-weight:900;letter-spacing:2px;color:#4a2e00;
     background:linear-gradient(180deg,#ffe08a,var(--gold));padding:10px 24px;border-radius:100px;text-transform:uppercase;
     display:inline-block;box-shadow:0 0 34px rgba(255,204,77,.65);animation:softpulse 1s ease-in-out infinite;}
@@ -173,7 +180,7 @@
 
   /* share + game-over cta row */
   .go-cta{display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap;}
-  .share-btn{margin-top:34px;pointer-events:auto;padding:19px 34px;border:none;border-radius:100px;cursor:pointer;
+  .share-btn{margin-top:20px;pointer-events:auto;padding:19px 34px;border:none;border-radius:100px;cursor:pointer;
     font-size:18px;font-weight:800;letter-spacing:1px;color:#fff;text-transform:uppercase;
     background:linear-gradient(180deg,#5ce1c4,#2ca6d8);
     box-shadow:0 12px 30px rgba(44,166,216,.42), inset 0 1px 0 rgba(255,255,255,.4);
@@ -287,8 +294,8 @@
     box-shadow:0 0 14px rgba(255,204,77,.6);}
 
   /* menu button row */
-  .menu-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;
-    margin-top:16px;width:100%;max-width:332px;}
+  .menu-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;
+    margin-top:14px;width:100%;max-width:332px;}
   .menu-row .ghost-btn{margin-top:0;padding:13px 8px;letter-spacing:1px;justify-content:center;width:100%;}
 
   /* ---- Upgrades ---- */
@@ -330,7 +337,7 @@
   #missionBack{flex:0 0 auto;margin:4px auto calc(env(safe-area-inset-bottom) + 18px);}
 
   /* mission-complete toast */
-  #mtoast{position:absolute;top:calc(env(safe-area-inset-top) + 70px);left:50%;transform:translateX(-50%) translateY(-24px);
+  #mtoast{position:fixed;top:calc(env(safe-area-inset-top) + 22vh);left:50%;transform:translateX(-50%) translateY(-24px);
     display:flex;align-items:center;gap:12px;padding:12px 18px;border-radius:18px;z-index:12;opacity:0;pointer-events:none;
     background:linear-gradient(180deg,rgba(40,26,66,.96),rgba(24,14,44,.96));border:1px solid var(--coin);
     box-shadow:0 10px 34px rgba(0,0,0,.5), 0 0 30px color-mix(in srgb,var(--coin) 35%, transparent);
@@ -350,7 +357,7 @@
     box-shadow:0 8px 28px rgba(0,0,0,.30), inset 0 1px 0 rgba(255,255,255,.28);}
   .mstat .v{font-size:26px;font-weight:900;font-variant-numeric:tabular-nums;line-height:1;}
   .mstat .l{font-size:10px;letter-spacing:2px;color:var(--ink2);text-transform:uppercase;font-weight:700;}
-  #go-bank{margin:18px 0 2px;font-size:16px;font-weight:900;letter-spacing:.5px;color:#4a2e00;
+  #go-bank{margin:12px 0 2px;font-size:16px;font-weight:900;letter-spacing:.5px;color:#4a2e00;
     background:linear-gradient(180deg,#ffe08a,var(--gold));padding:11px 24px;border-radius:100px;
     display:inline-flex;align-items:center;gap:8px;box-shadow:0 0 30px rgba(255,204,77,.5);}
 
@@ -499,6 +506,7 @@
       <div class="gl"><span class="glv" id="go-tier" style="color:var(--violet)">1</span><span class="gll" data-i18n="levelLbl">Seviye</span></div>
       <div class="gl"><span class="glv" id="go-best" style="color:#cbb9ff">0</span><span class="gll" data-i18n="best">Rekor</span></div>
     </div>
+    <div id="go-hook" style="display:none"></div>
     <div id="newbest" style="display:none" data-i18n="newBest">YENİ REKOR!</div>
     <div class="go-cta">
       <button class="pulse-btn" id="retryBtn" data-i18n="retry">TEKRAR</button>
@@ -510,7 +518,6 @@
       <button class="ghost-btn" id="upgradeBtn2" data-i18n="upgrades">Yükselt</button>
       <button class="ghost-btn" id="lbBtn2" data-i18n="ranking">Sıralama</button>
     </div>
-    <div class="hint">Dokun · Tıkla · Boşluk tuşu</div>
   </div>
 
   <!-- Revive offer -->
@@ -731,6 +738,10 @@
     coach3:'Altının <b>riskte</b> — <b>KASAYA AL</b> ile garantiye al',
     coachDone:'Hazırsın. Şimdi gerçek oyun!',
     coachMiss:'Erken/geç kaldın — kapı <b>tam üstündeyken</b> dokun',
+    hookRecord:'Rekora sadece <b>{0}</b> altın kaldı!',
+    hookRank:'<b>{0}</b> vuruş daha = <b>{1}</b> rütbesi',
+    hookNear:'Kapıya <b>kıl payı</b> — bir daha dene!',
+    goldenGate:'ALTIN KAPI! x5', comboMilestone:'SERİ x{0}!', soClose:'KIL PAYI!',
     pu_shield:'KALKAN!', pu_x2:'x2 ALTIN!', pu_slow:'YAVAŞ!', pu_wide:'GENİŞ KAPI!',
     perfect:'PERFECT!', flawless:'MÜKEMMEL!', flip:'YÖN!', shieldBreak:'KALKAN KIRILDI!',
     shieldGot:'KALKAN!', safe:'GÜVENDE!', go:'DEVAM!', stage:'AŞAMA {0}',
@@ -784,6 +795,10 @@
     coach3:'Your gold is <b>at risk</b> — hit <b>BANK IT</b> to lock it in',
     coachDone:"You're ready. Now the real game!",
     coachMiss:'Too early/late — tap when the gate is <b>right on you</b>',
+    hookRecord:'Only <b>{0}</b> gold from your record!',
+    hookRank:'<b>{0}</b> more hits = <b>{1}</b> rank',
+    hookNear:'You were <b>a hair</b> from the gate — go again!',
+    goldenGate:'GOLDEN GATE! x5', comboMilestone:'STREAK x{0}!', soClose:'SO CLOSE!',
     pu_shield:'SHIELD!', pu_x2:'x2 GOLD!', pu_slow:'SLOW!', pu_wide:'WIDE GATE!',
     perfect:'PERFECT!', flawless:'FLAWLESS!', flip:'FLIP!', shieldBreak:'SHIELD BROKEN!',
     shieldGot:'SHIELD!', safe:'SAFE!', go:'GO!', stage:'STAGE {0}',
@@ -1076,6 +1091,17 @@
   }
   function failSound(){ beep(180, 0.5, 'sawtooth', 0.28, 40); beep(90, 0.6, 'triangle', 0.2, 30); }
   function cashSound(){ beep(523,0.1,'triangle',0.2); setTimeout(()=>beep(659,0.1,'triangle',0.2),70); setTimeout(()=>beep(880,0.16,'triangle',0.24),140); }
+  // ALTIN KAPI: parlak, yukarı tırmanan bir fanfar — beynin "büyük ödül" etiketi
+  function goldenSound(){
+    const f=[523,659,784,1047,1319];
+    f.forEach((n,i)=>setTimeout(()=>{ beep(n,0.20,'triangle',0.26); beep(n*2,0.16,'sine',0.12); }, i*70));
+  }
+  // Kilometre taşı: her eşikte bir perde yukarıdan çalar (5,10,15... hep daha tiz)
+  function milestoneSound(step){
+    const base = 392 * Math.pow(2, Math.min(step,6)/12*2);
+    beep(base,0.16,'square',0.14); beep(base*1.5,0.22,'triangle',0.22);
+    setTimeout(()=>beep(base*2,0.26,'sine',0.20),90);
+  }
   function tierSound(){ beep(660,0.12,'triangle',0.18); setTimeout(()=>beep(990,0.18,'sine',0.2),90); }
   function vibe(ms){ if(navigator.vibrate){ try{navigator.vibrate(ms);}catch(e){} } }
 
@@ -1153,7 +1179,7 @@
       col: activeSkin.ramp[0].slice(), colTarget: activeSkin.ramp[0].slice(),
       over: false, revivesUsed: 0, countdown: 0,
       shieldCount: UP.shield, x2Time:0, slowTime:0, wideTime:0, spawnTimer:rand(3,5),  // Başlangıç Kalkanı
-      stage:0, stageGrace:0, tut:0
+      stage:0, stageGrace:0, tut:0, golden:false, nearMiss:false
     };
     orbs = [];
     setShape('circle', false);          // her tur çemberle başlar
@@ -1182,9 +1208,13 @@
   }
   function effGate(){ return g.gateHalf * (g.wideTime>0 ? 1.7 : 1) * (SHAPE_GATE[currentShape]||1) * (g.stageGrace>0 ? 1.35 : 1); }
   function perfectFactor(){ return 0.34 * (1 + UP.perfect*0.12); }   // Geniş Perfect upgrade'i
+  const GOLDEN_MULT = 5;
   function newGateAway(){
     let ng; do{ ng = rand(0,TAU); }while(Math.abs(angDiff(ng, g.angle)) < 1.1);
     g.gateCenter = ng; g.gatePop = 1;
+    // Değişken oranlı ödül: ne zaman geleceği bilinmeyen ALTIN KAPI (x5).
+    // Sabit ödülden çok daha güçlü bir pekiştirmedir — "bir sonraki olabilir".
+    g.golden = (g.hits >= 3) && !g.tut && Math.random() < 0.12;
   }
 
   const ORB_LIFE = 6;         // saniye — kıvılcım içindeyken dokunmazsan kaybolur
@@ -1814,6 +1844,7 @@
     {key:'mult',    mode:'max', type:'multReach',  target:6,    reward:500, text:n=>t('m_mult',n)},
     {key:'shield',  mode:'sum', type:'shieldSave', target:3,    reward:450, text:n=>t('m_shield',n)},
     {key:'games',   mode:'sum', type:'games',      target:8,    reward:200, text:n=>t('m_games',n)},
+    {key:'golden',  mode:'sum', type:'golden',     target:5,    reward:700, text:n=>t('m_golden',n)},
   ];
   function mtpl(key){ return MISSION_POOL.find(m=>m.key===key); }
   let missions = [];
@@ -2040,6 +2071,9 @@
       const o=orbs[i];
       if(Math.abs(angDiff(g.angle, o.center)) <= orbHalf(o)){ collectOrb(o); orbs.splice(i,1); return; }
     }
+    // "Kıl payı" kaçırma: kapının hemen dışı. Temiz bir yenilgiden çok daha
+    // güçlü bir tekrar-oynama dürtüsü yaratır ("az kalmıştı, bir daha").
+    g.nearMiss = (d <= gh*1.85);
     onMiss();
   }
 
@@ -2051,32 +2085,59 @@
 
     if(perfect){ g.streak++; g.mult = 1 + g.streak; }
     else{ g.streak = 0; g.mult = 1; }
-    const gain = Math.round((perfect ? 10 : 5) * g.mult * (g.x2Time>0 ? 2 : 1) * (1 + UP.gold*0.08));  // Altın Dokunuş
+    const wasGolden = !!g.golden;
+    const gain = Math.round((perfect ? 10 : 5) * g.mult * (g.x2Time>0 ? 2 : 1) * (1 + UP.gold*0.08)
+                            * (wasGolden ? GOLDEN_MULT : 1));  // Altın Dokunuş + ALTIN KAPI
     g.pot += gain;
     if(g.pot > g.maxPot) g.maxPot = g.pot;
     el.money.textContent = g.pot;
     updateCashUI();
 
-    // JUICE
-    g.flash = perfect ? 0.85 : 0.4;
-    g.shake = perfect ? 16 : 8;
-    g.hitstop = perfect ? 0.09 : 0.05;
+    // JUICE — yoğunluk combo ile büyür: aynı hareket, giderek artan ödül hissi
+    const heat = Math.min(1, g.streak/14);            // 0..1 "sıcaklık"
+    g.flash = (perfect ? 0.85 : 0.4) * (1 + heat*0.5);
+    g.shake = (perfect ? 16 : 8) * (1 + heat*0.9);
+    g.hitstop = (perfect ? 0.09 : 0.05) + heat*0.035; // darbe ağırlaşır
     g.pulse = 1;
     g.colTarget = curTier.col.slice();
 
     missionEvent('hit',1); if(perfect) missionEvent('perfect',1); missionEvent('multReach', g.mult);
     gainXP(perfect?3:2);
 
-    const col = perfect ? lerpCol(curTier.col,[255,255,255],0.35) : curTier.col;
-    burst(px,py, perfect?34:18, {color:col, smax:perfect?560:380, grav:1100, up:120});
+    const col = wasGolden ? [255,215,90]
+              : perfect ? lerpCol(curTier.col,[255,255,255],0.35) : curTier.col;
+    const nParts = Math.round((perfect?34:18) * (1 + heat*1.1)) + (wasGolden?40:0);
+    burst(px,py, nParts, {color:col, smax:(perfect?560:380)*(1+heat*0.4), grav:1100, up:120});
     ring(px,py, col);
     if(perfect) ring(CX,CY, lerpCol(curTier.col,[255,255,255],0.3));
 
-    floatText('+'+gain, px, py-24, rgb(col), perfect?40:30);
+    // ALTIN KAPI: beklenmedik büyük ödül — en yüksek yoğunluklu an
+    if(wasGolden){
+      g.flash = Math.max(g.flash, 1.0); g.shake = Math.max(g.shake, 30); g.hitstop = 0.14;
+      ring(CX,CY,[255,225,120]); ring(CX,CY,[255,255,255]);
+      burstScreen();
+      floatText(t('goldenGate'), CX, CY - R - 108, '#ffd85a', 40);
+      goldenSound(); vibe([0,40,25,40,25,70]);
+      missionEvent('golden',1);
+    }
+
+    floatText('+'+gain, px, py-24, rgb(col), wasGolden?52:(perfect?40:30));
     if(perfect){
       floatText(g.streak>=3? t('flawless') : t('perfect'), CX, CY - R - 62, rgb(col), 34);
       showCombo(g.mult, rgb(col)); perfectSound(g.streak); vibe([0,18,25,18]);
     }else{ hitSound(g.hits); vibe(14); }
+
+    // Combo kilometre taşları: 5/10/15/20... — her biri bir öncekinden büyük.
+    // "Bir sonraki eşiğe ulaşma" isteği, seriyi bırakmayı zorlaştırır.
+    if(perfect && g.streak>0 && g.streak%5===0){
+      const step = g.streak/5;                       // 1,2,3...
+      g.flash = Math.max(g.flash, 0.75+step*0.06);
+      g.shake = Math.max(g.shake, 22+step*5);
+      ring(CX,CY,[255,255,255]); ring(CX,CY, curTier.col);
+      burst(CX,CY, 30+step*10, {color:curTier.col, smax:700, grav:800, up:200});
+      floatText(t('comboMilestone', g.mult), CX, CY - R - 108, rgb(lerpCol(curTier.col,[255,255,255],0.4)), 42);
+      milestoneSound(step); vibe([0,30,20,30,20,60]);
+    }
 
     if(tierIndex(g.hits) !== prevTier){
       showTier(g.hits); tierSound();
@@ -2166,7 +2227,7 @@
     refreshMenu();
     // paylaş butonu sadece paylaşılacak skor varsa görünsün
     document.getElementById('shareBtn').style.display = (best>0 || runScore>0) ? '' : 'none';
-    overCooldown = 0.75;
+    overCooldown = 0.45;   // sürtünmeyi azalt: 'bir daha' anında olsun
     const finalTier = tierIndex(g.hits)+1;
     el.goMoney.textContent = lost>0 ? '−'+lost : '0';
     el.goMoney.style.color = lost>0 ? 'var(--danger)' : '#4bd67d';
@@ -2176,7 +2237,22 @@
     el.goTier.textContent = finalTier;
     el.goBest.textContent = best;
     el.newbest.style.display = isBest ? 'inline-block' : 'none';
-    el.goTitle.textContent = isBest ? t('legend') : t('gameOver');
+    el.goTitle.textContent = isBest ? t('legend') : (g.nearMiss ? t('soClose') : t('gameOver'));
+
+    // "Az kalmıştı" kancası: hedefe olan mesafeyi somut bir sayıya çevirir.
+    // Tamamlanmamış hedef, tamamlanmış olandan daha çok akılda kalır.
+    const hook = document.getElementById('go-hook');
+    let msg = '';
+    if(!isBest && best>0){
+      const diff = best - runScore;
+      if(diff>0 && diff <= Math.max(120, best*0.25)) msg = t('hookRecord', diff);
+    }
+    if(!msg){
+      const nextTier = (tierIndex(g.hits)+1)*5 - g.hits;   // sonraki rütbeye kaç vuruş
+      if(nextTier>0 && nextTier<=3) msg = t('hookRank', nextTier, rankName(tierIndex(g.hits)+1));
+    }
+    if(!msg && g.nearMiss) msg = t('hookNear');
+    hook.innerHTML = msg; hook.style.display = msg ? 'block' : 'none';
     el.top.style.opacity='0';
     el.over.classList.remove('hidden');
     if(isBest){ cashSound(); setTimeout(()=>burstScreen(),120); }
@@ -2370,11 +2446,17 @@
     ctx.restore();
     strokeFullTrack(12, rgb(lerpCol([120,95,190], accent, 0.35), 0.20));
 
-    // kapı — katmanlı neon-bloom
-    const c=g.col;
+    // kapı — katmanlı neon-bloom (ALTIN KAPI ise bambaşka görünür: göz onu arar)
+    const gold = !!g.golden;
+    const c = gold ? [255,208,70] : g.col;
     const gh = effGate() * (1 + g.gatePop*0.4);
-    strokeArc(g.gateCenter, gh, 26, rgb(c,0.28), rgb(c,0.95), 34 + g.pulse*34);      // dış parıltı
-    strokeArc(g.gateCenter, gh, 16, rgb(lerpCol(c,[255,255,255],0.42)), rgb(c,0.95), 18 + g.pulse*20); // gövde
+    const gp = gold ? (1 + 0.16*Math.sin(performance.now()/90)) : 1;   // altın kapı nabzı
+    // Yaklaşma gerilimi: kıvılcım kapıya yaklaştıkça kapı belirginleşir.
+    // Beklenti, ödülün kendisi kadar güçlü bir uyarandır.
+    const near = 1 - Math.min(1, Math.abs(angDiff(g.angle, g.gateCenter)) / (gh*3.2));
+    const antic = 1 + near*near*0.55;
+    strokeArc(g.gateCenter, gh, 26*gp, rgb(c,(gold?0.42:0.28)*antic), rgb(c,0.95), (34 + g.pulse*34)*(gold?1.5:1)*antic);
+    strokeArc(g.gateCenter, gh, 16*gp, rgb(lerpCol(c,[255,255,255],gold?0.60:0.42)), rgb(c,0.95), (18 + g.pulse*20)*(gold?1.5:1)*antic);
     strokeArc(g.gateCenter, effGate()*perfectFactor(), 5, 'rgba(255,255,255,0.92)', rgb(c,0.9), 10);  // perfect çekirdek
 
     drawOrbs();

@@ -218,6 +218,25 @@ taraf" sayabilir ve ilerleme oturumlar arası silinebilir. Oyun bu durumda
 **çökmez** (test edildi), yalnızca kayıt tutmaz. itch sayfasında
 *"Click to launch in fullscreen"* seçeneğini açmak sorunu giderir.
 
+## Ödül mimarisi (bağımlılık motoru)
+
+"Juice" görselliktir; asıl bağlayıcı olan **ödülün ne zaman ve nasıl
+verildiğidir.** Uygulananlar:
+
+| Mekanizma | Ne yapar |
+|---|---|
+| **ALTIN KAPI (x5)** | %12 ihtimalle kapı altına döner, 5 kat öder. *Değişken oranlı* ödül — ne zaman geleceği bilinmediği için sabit ödülden çok daha güçlü bağlar. Ayrı renk, nabız, fanfar ve tam ekran patlama ile işaretlenir. |
+| **Yaklaşma gerilimi** | Kıvılcım kapıya yaklaştıkça kapı belirginleşir. Beklenti, ödülün kendisi kadar güçlü bir uyarandır. |
+| **Combo kilometre taşları** | Her 5 seride bir, bir öncekinden büyük kutlama ve bir perde tiz çalan akor. "Bir sonraki eşik" serinin bırakılmasını zorlaştırır. |
+| **Yükselen yoğunluk** | Sarsıntı, flaş, parçacık sayısı ve hit-stop combo ile birlikte büyür (`heat`). Aynı hareket, giderek artan ödül hissi verir. |
+| **Kıl payı ıska** | Kapının hemen dışında ölmek "KIL PAYI!" olarak işaretlenir. Temiz bir yenilgiden çok daha güçlü bir tekrar-oynama dürtüsü yaratır. |
+| **Oyun-sonu kancası** | "Rekora sadece 80 altın kaldı!" / "2 vuruş daha = NOVA rütbesi". Tamamlanmamış hedef, tamamlanmıştan daha çok akılda kalır. |
+| **Anında tekrar** | Oyun-sonu bekleme süresi 0.75sn → 0.45sn. Sürtünme = kaybedilen tur. |
+
+**Sınır:** Bunların hepsi *oyun hissi* düzeyindedir. Gerçek parayla kumar,
+sahte aciliyet veya ödeme baskısı yok — oyun tamamen ücretsiz ve
+uygulama-içi satın alma içermiyor.
+
 ## Zorluk eğrisi: ölçülmüş adalet
 
 Oyunun adaleti tek bir sayıyla ölçülebilir: **pencere** — kıvılcımın kapının
