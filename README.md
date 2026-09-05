@@ -5,8 +5,8 @@ dönen kıvılcım **altın kapının** içindeyken dokun; kıvılcımı altına
 ve çarpanı büyüt, ıskalama. 7'den 70'e herkes 3 saniyede öğrenir.
 
 > **Oyna:** `index.html` dosyasını herhangi bir tarayıcıda aç. Tek dosya,
-> bağımlılıksız. Telefon, tablet ve masaüstünde çalışır. (Yuvarlak fontlar
-> için internet gerekir; yoksa sistem fontuna düşer.)
+> bağımlılıksız, **sıfır dış istek** — font dâhil her şey gömülü, çevrimdışı
+> çalışır. Telefon, tablet ve masaüstünde çalışır. Arayüz **Türkçe/İngilizce**.
 
 ---
 
@@ -86,6 +86,9 @@ Ses ve titreşim ilk dokunuşta (tarayıcı politikası gereği) etkinleşir.
   ile mobilde kaydırma/zoom engeli.
 - **PWA:** gömülü manifest + ikon ile telefona kurulabilir; ana ekrandan
   tam ekran (`standalone`) açılır. Ek dosya yok — ikon da gömülü.
+- **Sıfır dış istek:** Poppins fontu woff2/base64 olarak gömülüdür (latin +
+  latin-ext, ~52 KB). Poki gibi portallar tüm dış istekleri engeller; ayrıca
+  çevrimdışı ve gizlilik açısından da doğrusu budur.
 
 ### Render motoru: `shadowBlur` yerine katmanlı bloom
 
@@ -174,6 +177,46 @@ böylece kıvılcım tüm şekillerde **sabit hızda** akar; oyun mantığı hâ
 açı-uzayında (kapı/perfect/power-up hepsi şekilden bağımsız çalışır), sadece
 render bir polyline'a döner. Bu, planlanan **ilerleme sistemi**nin ilk adımıdır
 (sonraki adımlar: kalıcı Seviye+XP ve kalıcı upgrade'ler).
+
+## Diller (TR / EN)
+
+Arayüzün tamamı sözlük tabanlıdır (`LANG` + `t()`); tarayıcı dili Türkçe ise
+**TR**, değilse **EN** açılır ve oyuncu sağ alttaki **TR/EN** düğmesiyle anında
+değiştirebilir (tercih kalıcı). Çeviri yalnızca menüleri değil rütbeleri
+(KIVILCIM↔SPARK … AŞKIN↔TRANSCENDENT), pist adlarını (SONSUZLUK↔INFINITY),
+tema/top adlarını, görevleri, upgrade'leri, eğitim koçunu ve oyun-içi kayan
+yazıları da kapsar. Portallar küresel yayın yaptığı için çok dillilik
+onların açık gereksinimidir.
+
+## Oyun portallarına yayın (itch.io / Poki / CrazyGames)
+
+Portalların ortak şartlarına göre hazırlandı:
+
+| Şart | Durum |
+|---|---|
+| Kökte tek `index.html`, zip'lenebilir | ✅ 244 KB |
+| **Sıfır dış istek** (font/asset pakete gömülü) | ✅ ölçüldü: 0 istek |
+| Çok dilli arayüz | ✅ TR + EN |
+| **Temiz derleme** — hata ayıklama/test kodu yok | ✅ `OWNER_CHEAT = false` |
+| Reklam portalın kendi SDK'siyle | ✅ `Portal` köprüsü |
+| Anında oyna, giriş/oturum yok, kişisel veri toplamaz | ✅ |
+| Mobil + masaüstü, dikey/yatay uyum | ✅ |
+| İlk indirme boyutu (Poki ≤ 8 MB) | ✅ 0.24 MB |
+
+**`Portal` köprüsü:** oyun, `PokiSDK` veya `CrazyGames.SDK` sayfada varsa
+otomatik algılar; `gameplayStart()` / `gameplayStop()` olaylarını (Poki bunları
+zorunlu tutar ve üst üste atmamalarını ister) ve **ödüllü reklamı** onların
+sistemine devreder. SDK yoksa her şey sessizce devre dışı kalır ve oyun
+kendi yedek akışıyla tek başına çalışır — yani aynı dosya hem itch.io'da hem
+portallarda çalışır.
+
+**Sahibe özel altın hilesi** portal şartı gereği varsayılan **kapalıdır**
+(`const OWNER_CHEAT = false`). Kendi kişisel sürümünde `true` yapman yeterli.
+
+**itch.io notu:** oyun iframe'de çalıştığı için tarayıcı depolamayı "üçüncü
+taraf" sayabilir ve ilerleme oturumlar arası silinebilir. Oyun bu durumda
+**çökmez** (test edildi), yalnızca kayıt tutmaz. itch sayfasında
+*"Click to launch in fullscreen"* seçeneğini açmak sorunu giderir.
 
 ## Zorluk eğrisi: ölçülmüş adalet
 
