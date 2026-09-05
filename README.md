@@ -2,7 +2,7 @@
 
 Tek dokunuşluk, refleks temelli bir "hyper-casual" oyun. Bir çember üzerinde
 dönen kıvılcım **altın kapının** içindeyken dokun; kıvılcımı altına çevir, para
-ve çarpanı büyüt, ışkalama. 7'den 70'e herkes 3 saniyede öğrenir.
+ve çarpanı büyüt, ıskalama. 7'den 70'e herkes 3 saniyede öğrenir.
 
 > **Oyna:** `index.html` dosyasını herhangi bir tarayıcıda aç. Tek dosya,
 > bağımlılıksız. Telefon, tablet ve masaüstünde çalışır. (Yuvarlak fontlar
@@ -84,6 +84,43 @@ Ses ve titreşim ilk dokunuşta (tarayıcı politikası gereği) etkinleşir.
 - `localStorage` ile rekor kalıcı.
 - Responsive + `safe-area-inset` ile çentikli telefon uyumu, `touch-action`
   ile mobilde kaydırma/zoom engeli.
+- **PWA:** gömülü manifest + ikon ile telefona kurulabilir; ana ekrandan
+  tam ekran (`standalone`) açılır. Ek dosya yok — ikon da gömülü.
+
+### Render motoru: `shadowBlur` yerine katmanlı bloom
+
+Neon parıltı ilk sürümde canvas `shadowBlur` ile çiziliyordu. `shadowBlur`
+canvas'ın **en pahalı** işlemidir ve burada her karede 200 noktalı pist +
+3 kapı yayı için (68px yarıçapa kadar) çalışıyordu — orta seviye telefonda
+takılmanın ana sebebi buydu. Yerine:
+
+- Yol bir kez **`Path2D`** olarak kurulur, pist için **önbelleklenir**
+  (şekil değişince/morph sırasında tazelenir).
+- Parıltı, `globalCompositeOperation='lighter'` ile **giderek genişleyen ve
+  saydamlaşan katmanlı çizgilerden** üretilir (yumuşak alfa düşüşü → bantlaşma yok).
+- **Adaptif kalite:** ortalama kare süresi izlenir; yavaşlarsa bloom katmanı
+  otomatik azalır (FX 2→1→0), hızlanınca geri yükselir.
+
+**Ölçüm** (aynı sahne: derin aşama + kalkan parıltısı, başsız Chromium):
+
+| | eski (`shadowBlur`) | yeni (katmanlı bloom) |
+|---|---|---|
+| `drawScene()` CPU maliyeti | 0.208 ms/kare | **0.101 ms/kare** |
+| en kötü kare (takılma) | 76.5 ms | **21.4 ms** |
+| 6× CPU kısıtlı (orta telefon taklidi) | 12.0 fps | **15.4 fps** |
+
+Ayrıca: `devicePixelRatio` 2 ile sınırlandı (3× ekranlarda %36 daha az piksel,
+gözle fark yok), arka plan gradyanları önbelleklendi, fon müziği
+`setInterval` yerine **ses kartı saatine kilitli ileri-bakışlı zamanlayıcıya**
+taşındı (kayma yok) ve sekme gizlenince durur.
+
+### Erişilebilirlik
+
+- Sistemde **"hareketi azalt"** (`prefers-reduced-motion`) açıksa ekran
+  sarsıntısı ~%12'ye, beyaz flaş ~%28'e kısılır. Yoğun flaş vestibüler
+  rahatsızlık ve fotosensitif nöbet riski taşıdığı için bu bir tercih değil,
+  gerekliliktir.
+- Ses ve müzik **ayrı ayrı** kapatılabilir; tercih kalıcıdır.
 
 ## Kalıcı Upgrade'ler (Kasa ile güçlen)
 
@@ -129,21 +166,55 @@ vuruşta bir yeni şekle **morph animasyonuyla** dönüşür ve büyük bir
 
 Her şekil farklı bir refleks meydan okuması sunar (∞'in kesişme noktası, dalga
 ve yıldızın keskin dönüşleri, zikzağın testere kenarları). **Adalet:** zor
-pistlerde kapı biraz genişler ve hız biraz düşer (`SHAPE_GATE`/`SHAPE_SPEED` —
-en çok yardım SONSUZLUK'ta), ayrıca her aşama geçişinde ~2.6sn "**alışma payı**"
-ile kapı geçici genişler; böylece şekil değişimi ani bir zorluk zıplaması olmaz.
-Teknik: yol **yay-uzunluğuna göre** örneklenir,
+pistlerde kapı genişler ve hız düşer (`SHAPE_GATE`/`SHAPE_SPEED` — en çok
+yardım SONSUZLUK'ta), ayrıca her aşama geçişinde ~2.6sn "**alışma payı**" ile
+kapı geçici genişler. Katsayılar birbirine yakın tutulur ki aşama değişimi
+zorluk uçurumuna dönüşmesin. Teknik: yol **yay-uzunluğuna göre** örneklenir,
 böylece kıvılcım tüm şekillerde **sabit hızda** akar; oyun mantığı hâlâ
 açı-uzayında (kapı/perfect/power-up hepsi şekilden bağımsız çalışır), sadece
 render bir polyline'a döner. Bu, planlanan **ilerleme sistemi**nin ilk adımıdır
 (sonraki adımlar: kalıcı Seviye+XP ve kalıcı upgrade'ler).
+
+## Zorluk eğrisi: ölçülmüş adalet
+
+Oyunun adaleti tek bir sayıyla ölçülebilir: **pencere** — kıvılcımın kapının
+içinde geçirdiği süre. Oyuncunun dokunmak için sahip olduğu gerçek zaman budur.
+
+```
+pencere(ms) = 2 × (kapı_yarı_genişliği × ŞEKİL_KAPI) / (hız × ŞEKİL_HIZ) × 1000
+```
+
+Eski lineer rampa (`hız += 0.115` tavan 7.6, `kapı ×= 0.972` taban 0.235) bu
+ölçüde **çöküyordu**:
+
+| vuruş | 0 | 12 | 24 | 36 | 48 | 72 |
+|---|---|---|---|---|---|---|
+| **eski** | 729ms | 307ms | 232ms | **98ms** | 88ms | **62ms** |
+| **yeni** | 729ms | 322ms | 270ms | **186ms** | 188ms | **137ms** |
+
+36. vuruşta tek aşamada %42'lik bir uçurum vardı: kapı tabanına çarpıyor, hız
+ise lineer artmaya devam ediyordu. 62–98ms'lik pencereler **dokunmatik giriş
+gecikmesinin (50–100ms) altında** kalır — orada oyun beceri olmaktan çıkıp
+şansa döner. Oyuncunun "sabahtan beri geçemiyorum" dediği duvar buydu.
+
+**Yeni model:**
+- Hız **asimptotik** yaklaşır: `hız += (5.4 − hız) × 0.045` — ani sıçrama yok,
+  tavan adil.
+- Kapı tabanı `0.36`'ya yükseltildi (`×= 0.980`).
+- Şekil katsayıları birbirine yaklaştırıldı (uçurumu düzleştirmek için).
+
+Sonuç: pencere **hiçbir zaman ~135ms altına inmez**; zorluk artık imkânsız
+zamanlamadan değil, **hızdan ve istikrar gerektiren uzunluktan** gelir.
+SONSUZLUK'taki yükselme (270ms) bilinçlidir — gerilim/rahatlama ritmi yaratan
+bir "nefes alma" aşamasıdır. Ölçümler oyunun içinden, gerçek turlarda da
+doğrulanmıştır (en dar gözlenen pencere: 176ms).
 
 ## Kasa (risk / ödül) — bağımlılık motoru
 
 Oyunun greed döngüsü **Kasa** sistemiyle çalışır:
 
 - **Riskteki Altın (pot):** run sırasında kazandığın, henüz güvende olmayan
-  altın. **Işkalarsan hepsi yanar.**
+  altın. **Iskalarsan hepsi yanar.**
 - **Kasaya Al (🏦 / `C` tuşu):** pot'u kalıcı **Kasa**'ya aktarır. Kasa asla
   kaybolmaz, oturumlar arası saklanır (`localStorage`). Bedeli: **seri
   çarpanın sıfırlanır** — momentumunu feda edersin, ama garantiye alırsın.
@@ -153,7 +224,7 @@ Oyunun greed döngüsü **Kasa** sistemiyle çalışır:
   kaybedecek çok şeyin olduğunu hissettirir.
 - Kalıcı Kasa = **geri dönüş kancası** (meta-progression): oyuncu servetini
   büyütmek için tekrar tekrar döner.
-- Temiz kaçış: pot'u kasaya alıp sonra ışkalarsan kayıp **0** olur ("TEMİZ
+- Temiz kaçış: pot'u kasaya alıp sonra ıskalarsan kayıp **0** olur ("TEMİZ
   KAÇTIN") — akıllıca oynamayı ödüllendirir.
 
 ## Power-up'lar (toplanabilir)
@@ -178,7 +249,7 @@ mavi bir koruma halkası parlar. **Neden:** ikinci bir zamanlama hedefi ekler �
 
 ## Revive (İkinci Şans) — reklam izleyerek
 
-Işkalayıp öldüğünde, oyun-sonu ekranından **önce** bir teklif çıkar:
+Iskalayıp öldüğünde, oyun-sonu ekranından **önce** bir teklif çıkar:
 
 - 💛 **DEVAM ET?** — süreli teklif (süre çubuğu dolunca kaçar; baskı yaratır).
 - **▶ Reklam İzle & Devam** → ödüllü reklam (rewarded video) oynar; bitince
@@ -270,13 +341,26 @@ Her gün ilk açılışta **GÜNLÜK ÖDÜL** açılır. 7 günlük döngü; öd
 büyüdükçe artar (100·gün), **7. günde büyük bonus** (+400). Ardışık günler
 **seriyi** büyütür; bir gün kaçarsan seri sıfırlanır. Klasik geri dönüş kancası.
 
-## Onboarding (kademeli açılım)
+## Onboarding: oynayarak öğreten interaktif eğitim
 
-Oyun ~10 sistemi ilk anda yüzüne çarpmaz:
-- **İlk açılışta 3 adımlık rehber** (tek kural → Kasaya Al → büyü/ilerle).
-- **Menü butonları kademeli açılır:** başta yalnız **BAŞLA + Dükkan**; 1 tur
-  sonra **Görevler + Sıralama**, 2 tur sonra **Yükselt** görünür. Yeni oyuncu
-  boğulmaz, kıdemli oyuncu her şeye erişir.
+Metin duvarı **yok**. Araştırma nettir: hyper/hybrid-casual'da *"yaparak
+öğreten"* interaktif eğitim, statik anlatıma göre tutundurmayı belirgin
+biçimde artırır; "tutorial duvarı" ise ilk oturumda oyuncu kaybettirir.
+Bu yüzden **ilk tur, oyunun kendisidir** — sadece güvenli hâli:
+
+| Eğitim adımı | Ne olur |
+|---|---|
+| **1. Dokun** | Yavaş dönüş + çok geniş kapı. Koç balonu: *"Kıvılcım kapıdan geçerken dokun"* |
+| **Iska** | **Ölüm yok.** Nazik düzeltme: *"Kapı tam üstündeyken dokun"* |
+| **2. Isınma** | Birkaç vuruş daha; zorluk **artmaz** |
+| **3. Kasaya Al** | *"Altının riskte"* + **KASAYA AL** butonu nabız atarak işaret edilir |
+| **Bitiş** | *"Hazırsın!"* → hız/kapı normale döner, gerçek oyun sorunsuz devralır |
+
+Eğitim bir kez çalışır (`localStorage`), sonra bir daha görünmez.
+
+**Kademeli açılım:** menü butonları oyuncu ilerledikçe açılır — başta yalnız
+**BAŞLA + Dükkan**; 1 tur sonra **Görevler + Sıralama**, 2 tur sonra
+**Yükselt**. Yeni oyuncu 10 sistemle boğulmaz, kıdemli oyuncu her şeye erişir.
 
 ## Arka plan müziği
 
