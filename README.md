@@ -85,6 +85,24 @@ Ses ve titreşim ilk dokunuşta (tarayıcı politikası gereği) etkinleşir.
 - Responsive + `safe-area-inset` ile çentikli telefon uyumu, `touch-action`
   ile mobilde kaydırma/zoom engeli.
 
+## Kalıcı Upgrade'ler (Kasa ile güçlen)
+
+Menü/oyun-sonundan **Yükselt** ekranı açılır. Kasa harcayarak seviyelenen,
+**her turda etkili** kalıcı güçler — Kasa'ya kozmetik ötesi anlam katar ve
+"harca-güçlen" döngüsü kurar:
+
+| Upgrade | Etki | Kademe |
+|---|---|---|
+| **Altın Dokunuş** | Kazanılan altın +%8/kademe | 5 |
+| **Geniş Perfect** | Perfect bölgesi +%12/kademe (kolay combo) | 4 |
+| **Başlangıç Kalkanı** | Her tura N kalkanla başla | 3 |
+| **Sakin Başlangıç** | Başlangıç hızı düşer (kolay giriş) | 3 |
+| **İkinci Şans+** | +1 revive hakkı (tur başına) | 1 |
+
+Fiyatlar kademeyle artar; seviyeler `localStorage`'da kalıcıdır. Bu, planlanan
+**3-katmanlı ilerleme sisteminin son adımıdır** (pist aşamaları + Seviye/XP +
+kalıcı upgrade'ler).
+
 ## Kalıcı Seviye + XP (ilerlemenin belkemiği)
 
 Oyuncunun **asla sıfırlanmayan** bir hesap seviyesi vardır. Her vuruş (+2, perfect

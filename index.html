@@ -199,8 +199,25 @@
     box-shadow:0 0 14px rgba(255,204,77,.6);}
 
   /* menu button row */
-  .menu-row{display:flex;gap:10px;margin-top:16px;}
-  .menu-row .ghost-btn{margin-top:0;}
+  .menu-row{display:flex;gap:9px;margin-top:16px;flex-wrap:wrap;justify-content:center;}
+  .menu-row .ghost-btn{margin-top:0;padding:12px 20px;letter-spacing:1px;}
+
+  /* ---- Upgrades ---- */
+  #upgradeScreen{justify-content:flex-start;padding:0;}
+  #upg-list{flex:1 1 auto;width:100%;max-width:520px;overflow-y:auto;-webkit-overflow-scrolling:touch;
+    padding:8px 20px 4px;display:flex;flex-direction:column;gap:11px;}
+  .ucard{background:var(--surface);border:1px solid var(--brd);border-radius:20px;padding:14px 16px;
+    display:flex;flex-direction:column;gap:9px;backdrop-filter:blur(6px);}
+  .ucard.maxed{border-color:var(--coin);box-shadow:0 0 0 1px var(--coin);}
+  .ucard .utop{display:flex;justify-content:space-between;align-items:center;gap:10px;}
+  .ucard .uname{font-size:16px;font-weight:800;color:#fff;}
+  .ucard .ueff{font-size:12.5px;font-weight:700;color:var(--coin);}
+  .ucard .urow{display:flex;align-items:center;justify-content:space-between;gap:12px;}
+  .udots{display:flex;gap:5px;}
+  .udots .d{width:13px;height:13px;border-radius:50%;background:rgba(255,255,255,.12);border:1px solid var(--brd);}
+  .udots .d.on{background:linear-gradient(180deg,#ffe08a,var(--gold-deep));border-color:transparent;box-shadow:0 0 8px rgba(255,204,77,.6);}
+  .ucard .sbtn{min-width:96px;}
+  .sbtn.maxed{background:var(--coin);color:#2a1a00;}
 
   /* custom coin icon (no emoji) */
   .coin-ic{display:inline-block;width:16px;height:16px;border-radius:50%;vertical-align:-2px;
@@ -324,6 +341,7 @@
     <div class="menu-row">
       <button class="ghost-btn" id="shopBtn">Dükkan</button>
       <button class="ghost-btn" id="missionBtn">Görevler</button>
+      <button class="ghost-btn" id="upgradeBtn">Yükselt</button>
     </div>
     <div class="equipped-tag">Tema: <b id="equipped-name">Altın</b></div>
     <div class="hint">Dokun · Tıkla · Boşluk tuşu</div>
@@ -341,6 +359,17 @@
     </div>
     <div class="shop-grid" id="shop-grid"></div>
     <button class="ghost-btn" id="shopBack">← Geri</button>
+  </div>
+
+  <!-- Upgrades -->
+  <div class="overlay hidden" id="upgradeScreen">
+    <div class="shop-head">
+      <div class="shop-title">YÜKSELT</div>
+      <div class="shop-bank"><span class="coin-ic"></span> <span id="upg-bank">0</span></div>
+    </div>
+    <div id="upg-list"></div>
+    <div class="mhint">Kalıcı güçler — her turda etkilidir.</div>
+    <button class="ghost-btn" id="upgradeBack">← Geri</button>
   </div>
 
   <!-- Missions -->
@@ -372,6 +401,7 @@
     <div class="menu-row">
       <button class="ghost-btn" id="shopBtn2">Dükkan</button>
       <button class="ghost-btn" id="missionBtn2">Görevler</button>
+      <button class="ghost-btn" id="upgradeBtn2">Yükselt</button>
     </div>
     <div class="hint">Dokun · Tıkla · Boşluk tuşu</div>
   </div>
@@ -734,13 +764,13 @@
   let g = null;
   function newGame(){
     g = {
-      angle: 0, dir: 1, speed: 1.7,
+      angle: 0, dir: 1, speed: Math.max(1.25, 1.7 - UP.slow*0.13),  // Sakin Başlangıç
       gateCenter: -Math.PI/2, gateHalf: 0.62,
       pot: 0, maxPot: 0, hits: 0, streak: 0, mult: 1, tier: 0,
       shake: 0, flash: 0, hitstop: 0, pulse: 0, gatePop: 0,
       col: activeSkin.ramp[0].slice(), colTarget: activeSkin.ramp[0].slice(),
-      over: false, revived: false, countdown: 0,
-      shield:false, x2Time:0, slowTime:0, wideTime:0, spawnTimer:rand(3,5),
+      over: false, revivesUsed: 0, countdown: 0,
+      shieldCount: UP.shield, x2Time:0, slowTime:0, wideTime:0, spawnTimer:rand(3,5),  // Başlangıç Kalkanı
       stage:0
     };
     orbs = [];
@@ -763,6 +793,7 @@
     vibe([0,30,20,40]);
   }
   function effGate(){ return g.gateHalf * (g.wideTime>0 ? 1.7 : 1); }
+  function perfectFactor(){ return 0.34 * (1 + UP.perfect*0.12); }   // Geniş Perfect upgrade'i
   function newGateAway(){
     let ng; do{ ng = rand(0,TAU); }while(Math.abs(angDiff(ng, g.angle)) < 1.1);
     g.gateCenter = ng; g.gatePop = 1;
@@ -779,7 +810,7 @@
     orbs.push({ type:pickPowerup(), center:a, half:ORB_HALF, t:ORB_LIFE, pop:1 });
   }
   function applyPU(type){
-    if(type==='shield') g.shield = true;
+    if(type==='shield') g.shieldCount = Math.min(g.shieldCount+1, 6);
     else if(type==='x2') g.x2Time = PU_DUR.x2;
     else if(type==='slow') g.slowTime = PU_DUR.slow;
     else if(type==='wide') g.wideTime = PU_DUR.wide;
@@ -874,7 +905,7 @@
     if(!g || state!==STATE.PLAY || g.over){
       setBuff('shield',false); setBuff('x2',false); setBuff('slow',false); setBuff('wide',false); return;
     }
-    setBuff('shield', g.shield);
+    setBuff('shield', g.shieldCount>0);
     setBuff('x2', g.x2Time>0, g.x2Time/PU_DUR.x2);
     setBuff('slow', g.slowTime>0, g.slowTime/PU_DUR.slow);
     setBuff('wide', g.wideTime>0, g.wideTime/PU_DUR.wide);
@@ -991,6 +1022,18 @@
   let savedSkin='altin'; try{ savedSkin = localStorage.getItem('midas_skin')||'altin'; }catch(e){}
   if(!owned.has(savedSkin)) savedSkin='altin';
   applySkin(skinById(savedSkin));
+
+  // ---- Kalıcı upgrade'ler (Kasa ile güçlen) ----
+  const UPGRADES = [
+    {key:'gold',    name:'Altın Dokunuş',    max:5, cost:l=>400*(l+1), eff:l=>'Altın +%'+(l*8)},
+    {key:'perfect', name:'Geniş Perfect',    max:4, cost:l=>600*(l+1), eff:l=>'Perfect +%'+Math.round(l*12)},
+    {key:'shield',  name:'Başlangıç Kalkanı',max:3, cost:l=>800*(l+1), eff:l=>l+' kalkanla başla'},
+    {key:'slow',    name:'Sakin Başlangıç',  max:3, cost:l=>500*(l+1), eff:l=>'Başlangıç hızı −'+l+' kademe'},
+    {key:'revive',  name:'İkinci Şans+',     max:1, cost:l=>3000,      eff:l=>(1+l)+' revive hakkı'},
+  ];
+  const UP = {gold:0,perfect:0,shield:0,slow:0,revive:0};
+  try{ const raw=JSON.parse(localStorage.getItem('midas_upg')||'{}'); for(const u of UPGRADES){ const v=parseInt(raw[u.key],10); if(v>=0&&v<=u.max) UP[u.key]=v; } }catch(e){}
+  function saveUpg(){ try{ localStorage.setItem('midas_upg', JSON.stringify(UP)); }catch(e){} }
 
   // ---- Kalıcı oyuncu seviyesi + XP ----
   let playerLevel=1, playerXP=0;
@@ -1309,6 +1352,54 @@
   document.getElementById('missionBack').addEventListener('pointerdown',(e)=>{e.preventDefault();e.stopPropagation();closeMissions();});
   loadMissions();
 
+  // ---- Yükselt (kalıcı upgrade'ler) ----
+  const upgScreen = document.getElementById('upgradeScreen');
+  const upgList = document.getElementById('upg-list');
+  let upgradeOpen=false, upgradeReturn='start';
+  function renderUpgrades(){
+    document.getElementById('upg-bank').textContent = bank;
+    upgList.innerHTML='';
+    UPGRADES.forEach(u=>{
+      const lvl=UP[u.key], maxed=lvl>=u.max;
+      const card=document.createElement('div'); card.className='ucard'+(maxed?' maxed':'');
+      card.dataset.key=u.key;
+      let dots=''; for(let i=0;i<u.max;i++) dots+='<span class="d'+(i<lvl?' on':'')+'"></span>';
+      const btn = maxed ? '<button class="sbtn maxed" disabled>TAM</button>'
+                        : (bank>=u.cost(lvl) ? '<button class="sbtn buy"><span class="coin-ic"></span> '+fmt(u.cost(lvl))+'</button>'
+                                             : '<button class="sbtn buy locked"><span class="coin-ic"></span> '+fmt(u.cost(lvl))+'</button>');
+      card.innerHTML = '<div class="utop"><span class="uname">'+u.name+'</span><span class="ueff">'+u.eff(lvl)+'</span></div>'
+        + '<div class="urow"><div class="udots">'+dots+'</div>'+btn+'</div>';
+      upgList.appendChild(card);
+      const b=card.querySelector('.sbtn');
+      if(!maxed) b.addEventListener('pointerdown',(e)=>{e.preventDefault();e.stopPropagation();buyUpgrade(u,card);});
+    });
+  }
+  function buyUpgrade(u, card){
+    const lvl=UP[u.key]; if(lvl>=u.max) return;
+    const cost=u.cost(lvl);
+    if(bank<cost){ card.classList.remove('buypop'); void card.offsetWidth; card.classList.add('buypop');
+      setTimeout(()=>card.classList.remove('buypop'),500); beep(160,0.18,'sawtooth',0.2,110); vibe(30); return; }
+    bank-=cost; UP[u.key]=lvl+1; saveUpg();
+    try{ localStorage.setItem('midas_bank',String(bank)); }catch(e){}
+    el.bank.textContent=bank; refreshMenu();
+    cashSound(); setTimeout(()=>beep(1318,0.22,'triangle',0.2),180); vibe([0,20,30,20]);
+    burstScreen(); renderUpgrades();
+    const nc=upgList.querySelector('[data-key="'+u.key+'"]');
+    if(nc){ nc.classList.add('buypop'); setTimeout(()=>nc.classList.remove('buypop'),500); }
+  }
+  function openUpgrades(from){
+    upgradeReturn=from; upgradeOpen=true;
+    el.start.classList.add('hidden'); el.over.classList.add('hidden');
+    upgScreen.classList.remove('hidden'); renderUpgrades();
+  }
+  function closeUpgrades(){
+    upgradeOpen=false; upgScreen.classList.add('hidden');
+    if(upgradeReturn==='over') el.over.classList.remove('hidden'); else el.start.classList.remove('hidden');
+  }
+  document.getElementById('upgradeBtn').addEventListener('pointerdown',(e)=>{e.preventDefault();e.stopPropagation();openUpgrades('start');});
+  document.getElementById('upgradeBtn2').addEventListener('pointerdown',(e)=>{e.preventDefault();e.stopPropagation();openUpgrades('over');});
+  document.getElementById('upgradeBack').addEventListener('pointerdown',(e)=>{e.preventDefault();e.stopPropagation();closeUpgrades();});
+
   /* =======================================================================
      GEÇİCİ ALTIN HİLESİ — sadece oyun sahibine özel 😎
      Menüde MİDAS logosuna ~1.2 sn basılı tut → +100.000 Kasa.
@@ -1340,7 +1431,7 @@
 
   // ---- Giriş ----
   function press(){
-    if(shopOpen || missionOpen) return;
+    if(shopOpen || missionOpen || upgradeOpen) return;
     const ac=audio(); if(ac && ac.state==='suspended') ac.resume();
     if(state===STATE.MENU){ start(); return; }
     if(state===STATE.OVER){ if(overCooldown<=0) start(); return; }
@@ -1371,7 +1462,7 @@
     if(g.over || g.countdown>0) return;   // geri sayım sırasında dokunma yok
     const gh = effGate();
     const d = Math.abs(angDiff(g.angle, g.gateCenter));
-    if(d <= gh){ onHit(d <= gh*0.34, d); return; }
+    if(d <= gh){ onHit(d <= gh*perfectFactor(), d); return; }
     // power-up kapısı içindeysek topla (ıska sayılmaz)
     for(let i=0;i<orbs.length;i++){
       const o=orbs[i];
@@ -1388,7 +1479,7 @@
 
     if(perfect){ g.streak++; g.mult = 1 + g.streak; }
     else{ g.streak = 0; g.mult = 1; }
-    const gain = (perfect ? 10 : 5) * g.mult * (g.x2Time>0 ? 2 : 1);
+    const gain = Math.round((perfect ? 10 : 5) * g.mult * (g.x2Time>0 ? 2 : 1) * (1 + UP.gold*0.08));  // Altın Dokunuş
     g.pot += gain;
     if(g.pot > g.maxPot) g.maxPot = g.pot;
     el.money.textContent = g.pot;
@@ -1433,8 +1524,8 @@
 
   function onMiss(){
     // Kalkan varsa ölümü emer
-    if(g.shield && !g.over){
-      g.shield = false;
+    if(g.shieldCount>0 && !g.over){
+      g.shieldCount--;
       g.shake = 14; g.flash = 0.4; g.pulse = 1;
       g.streak = 0; g.mult = 1;
       const sc=[90,200,255];
@@ -1456,7 +1547,7 @@
     ring(CX,CY,fc);
     failSound(); vibe([0,40,30,80]);
 
-    if(!g.revived){                 // tur başına 1 ikinci şans
+    if(g.revivesUsed < 1 + UP.revive){   // İkinci Şans+ (upgrade ile artar)
       state = STATE.REVIVE;
       setTimeout(showReviveOffer, 560);
     }else{
@@ -1536,7 +1627,7 @@
   }
   function grantRevive(){
     adScreen.classList.add('hidden');
-    g.over = false; g.revived = true;
+    g.over = false; g.revivesUsed++;
     g.streak = 0; g.mult = 1;               // seri sıfırlanır (pot korunur)
     newGateAway();                          // taze kapı, kıvılcımdan uzağa
     g.speed = Math.max(1.7, g.speed*0.82);  // ufak nefes payı
@@ -1583,7 +1674,7 @@
     // track — pist (şekle göre polyline)
     ctx.save();
     // kalkan halkası (aktifken tüm pist mavi parlar)
-    if(g.shield){
+    if(g.shieldCount>0){
       const sp=0.35+0.2*Math.sin(performance.now()/200);
       strokeFullTrack(20, `rgba(120,215,255,${sp*0.5})`, 'rgba(90,200,255,0.9)', 16);
     }
@@ -1594,7 +1685,7 @@
     const gh = effGate() * (1 + g.gatePop*0.4);
     strokeArc(g.gateCenter, gh, 26, rgb(c,0.28), rgb(c,0.95), 34 + g.pulse*34);      // dış parıltı
     strokeArc(g.gateCenter, gh, 16, rgb(lerpCol(c,[255,255,255],0.42)), rgb(c,0.95), 18 + g.pulse*20); // gövde
-    strokeArc(g.gateCenter, effGate()*0.34, 5, 'rgba(255,255,255,0.92)', rgb(c,0.9), 10);  // perfect çekirdek
+    strokeArc(g.gateCenter, effGate()*perfectFactor(), 5, 'rgba(255,255,255,0.92)', rgb(c,0.9), 10);  // perfect çekirdek
     ctx.restore();
 
     drawOrbs();
