@@ -642,7 +642,7 @@
     currentShape=id; targetPts=buildShape(id);
     if(morph && trackPts.length===N_TRACK){ prevPts=trackPts.map(p=>p.slice()); morphT=0; }
     else { trackPts=targetPts.map(p=>p.slice()); prevPts=null; morphT=1; }
-    trackPath=null; wallPath=null;        // önbelleği tazele
+    trackPath=null; wallPath=null; ringOuter=null; ringInner=null;   // önbelleği tazele
   }
   function updateMorph(dt){
     if(morphT>=1) return;
@@ -650,7 +650,7 @@
     const e = morphT<0.5 ? 2*morphT*morphT : 1-Math.pow(-2*morphT+2,2)/2; // easeInOut
     for(let i=0;i<N_TRACK;i++){ trackPts[i]=[ lerp(prevPts[i][0],targetPts[i][0],e), lerp(prevPts[i][1],targetPts[i][1],e) ]; }
     if(morphT>=1){ trackPts=targetPts.map(p=>p.slice()); prevPts=null; }
-    trackPath=null; wallPath=null;        // morph sürerken her kare yeniden kur
+    trackPath=null; wallPath=null; ringOuter=null; ringInner=null;   // morph sürerken yenilenir
   }
   function trackPos(u){ u=((u%1)+1)%1; const f=u*N_TRACK, i=Math.floor(f)%N_TRACK, n=(i+1)%N_TRACK, fr=f-Math.floor(f);
     const a=trackPts[i], b=trackPts[n]; return [ a[0]+(b[0]-a[0])*fr, a[1]+(b[1]-a[1])*fr ]; }
@@ -662,7 +662,7 @@
   // Aynı görünümü 'lighter' harmanlı katmanlı çizgilerle ~5-10x ucuza alıyoruz.
   // FX seviyesi düşük FPS'te otomatik düşer (adaptif kalite).
   let FX = 2;                      // 2=tam bloom, 1=hafif, 0=kapalı (glow yok)
-  let trackPath = null, wallPath = null;   // önbelleklenmiş Path2D'ler
+  let trackPath = null, wallPath = null, ringOuter = null, ringInner = null;  // önbelleklenmiş Path2D'ler
   function buildTrackPath(){
     const p2 = new Path2D();
     for(let k=0;k<N_TRACK;k++){ const p=trackPts[k]; k?p2.lineTo(p[0],p[1]):p2.moveTo(p[0],p[1]); }
@@ -673,6 +673,16 @@
     for(let k=1;k<N_TRACK;k++) w2.lineTo(trackPts[k][0], trackPts[k][1]);
     for(let k=N_TRACK-1;k>=0;k--) w2.lineTo(trackPts[k][0], trackPts[k][1]+wh);
     w2.closePath(); wallPath = w2;
+    // Eş merkezli cam halkalar: pistin ölçeklenmiş kopyaları. Kare başına 10
+    // stroke yerine şekil başına 2 yol kurup 2 stroke atıyoruz.
+    const mk = (fs)=>{ const q=new Path2D();
+      for(const f of fs){
+        const m=new DOMMatrix().translateSelf(CX,CY).scaleSelf(f,f).translateSelf(-CX,-CY);
+        q.addPath(p2, m);
+      }
+      return q; };
+    ringOuter = mk([1.13, 1.04]);
+    ringInner = mk([0.86, 0.66, 0.50]);
   }
   function arcPath(cAng, hAng){
     const uc=cAng/TAU, uh=hAng/TAU, steps=Math.max(2, Math.ceil(uh*2*N_TRACK)+2);
@@ -2494,18 +2504,15 @@
       ctx.restore();
     }
     // --- cam halka sistemi: iç içe saydam halkalar, kenarları ışıklı ---
-    ctx.save();
-    for(const [f,w,a] of [[1.13,9,0.10],[1.04,6,0.13],[0.86,5,0.11],[0.66,3,0.09],[0.50,2,0.07]]){
-      const rx=R*f, ry=R*f*TILT_Y;
-      // gövde (buzlu cam)
-      ctx.strokeStyle=`rgba(214,224,255,${a})`; ctx.lineWidth=w;
-      ctx.beginPath(); ctx.ellipse(CX,CY,rx,ry,0,0,TAU); ctx.stroke();
-      // üst kenar vurgusu — cama hacim veren şey bu
-      ctx.strokeStyle=`rgba(255,255,255,${a*1.5})`; ctx.lineWidth=1;
-      ctx.beginPath(); ctx.ellipse(CX,CY,rx+w*0.45,ry+w*0.45*TILT_Y,0,0,TAU); ctx.stroke();
-    }
+    if(!ringOuter) buildTrackPath();
+    ctx.save(); ctx.lineCap='round'; ctx.lineJoin='round';
+    ctx.strokeStyle='rgba(214,224,255,0.12)'; ctx.lineWidth=8; ctx.stroke(ringOuter);
+    ctx.strokeStyle='rgba(225,232,255,0.10)'; ctx.lineWidth=4; ctx.stroke(ringInner);
     ctx.restore();
-    strokeFullTrack(12, rgb(lerpCol([120,95,190], accent, 0.35), 0.20));
+    // Pist her zaman okunur olmalı: eskiden alfa 0.20 idi ve yalnızca kalkan
+    // parıltısı açıkken seçilebiliyordu. Artık kendi hafif parıltısı da var.
+    strokeFullTrack(13, rgb(lerpCol([170,150,235], accent, 0.40), 0.46),
+                        rgb(lerpCol([150,130,225], accent, 0.45), 0.55), 10);
 
     // kapı — katmanlı neon-bloom (ALTIN KAPI ise bambaşka görünür: göz onu arar)
     const gold = !!g.golden;

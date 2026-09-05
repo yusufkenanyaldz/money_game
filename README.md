@@ -227,13 +227,18 @@ kıvılcım net okunsun. Nebula tema rengine göre üretilir ve offscreen
 canvas'ta önbelleklenir — dış dosya yok.
 
 Sahnenin diğer parçaları:
-- **Cam halka sistemi:** iç içe 5 saydam halka, her birinin üst kenarında
-  ince ışık vurgusu — hacim hissi buradan gelir.
+- **Cam halka sistemi:** iç içe 5 saydam halka. **Halkalar pistin şeklini
+  takip eder** — pist sonsuzluğa dönüşünce halkalar da sonsuzluk olur. Bunun
+  için pist yolunun merkeze doğru ölçeklenmiş kopyaları kullanılır; kare
+  başına 10 çizim yerine şekil başına 2 önbellekli yol kurulur.
 - **Yontulmuş kristal kapı:** kapı düz bir neon çubuk değil; yay faset
   parçalarına bölünür, her faset farklı parlaklıkta çizilir ve aralarına
   koyu ayrım çizgileri konur → mücevher görünümü.
 - **Kuyruklu yıldız izi:** kıvılcımın arkasında 22 parçalı, karesel sönümlü,
   `lighter` harmanlı sıcak çekirdekli kuyruk.
+
+Pist çizgisi her zaman kendi hafif parıltısıyla çizilir; eskiden çok
+soluktu ve yalnızca kalkan parıltısı açıkken seçilebiliyordu.
 
 **Performans:** Bu sahne daha ağır değil, daha HAFİF. Zerrecik (mote) sistemi
 nebula geldiği için gereksizleşti ve %72 kısıldı; iki tam ekran gradyan
