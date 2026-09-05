@@ -1,4 +1,4 @@
-# MİDAS — Dokun, Altına Çevir
+# ONE MORE TAP — Bank It or Lose It All
 
 Tek dokunuşluk, refleks temelli bir "hyper-casual" oyun. Bir çember üzerinde
 dönen kıvılcım **altın kapının** içindeyken dokun; kıvılcımı altına çevir, para
@@ -375,7 +375,7 @@ oyuncuyu daha çok oynayıp Kasa büyütmeye iter — kalıcı bir grind döngü
   vurgulanır.
 - **Skor paylaş:** oyun-sonu ve sıralama ekranındaki **PAYLAŞ** butonu, cihazın
   yerel paylaşım sayfasını (`navigator.share`) açar; yoksa panoya kopyalar.
-  Metin bir meydan okumadır: "MİDAS'ta X Kasa topladım · rütbem … Geçebilir
+  Metin bir meydan okumadır: "ONE MORE TAP'ta X Kasa topladım · rütbem … Geçebilir
   misin?" — viral/geri dönüş kancası.
 
 ## Günlük ödül / seri (streak)
@@ -413,10 +413,10 @@ düğmesiyle açılır/kapanır (SFX'ten bağımsız); tercih `localStorage`'ta 
 olmaz).
 
 ---
-_MİDAS — dokun, altına çevir._
+_ONE MORE TAP — kasaya al ya da kaybet._
 
 ## 🔒 Sahibe özel: geçici altın hilesi
 
-Menüde **MİDAS logosuna ~1.2 sn basılı tut** → **+100.000 Kasa** ("PATRON MODU").
+Menüde **ONE MORE TAP logosuna ~1.2 sn basılı tut** → **+100.000 Kasa** ("PATRON MODU").
 Tek kişilik, sunucusuz oyun olduğu için zararsızdır. Kodda `GEÇİCİ ALTIN HİLESİ`
 bloğu tek parça; yayına almadan önce silmek istersen o bloğu kaldırman yeter.

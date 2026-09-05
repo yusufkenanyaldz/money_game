@@ -1,9 +1,9 @@
-# itch.io yayın rehberi — MİDAS
+# itch.io yayın rehberi — ONE MORE TAP
 
 ## Paketi üret
 
 ```bash
-./build-itch.sh          # -> midas-itch.zip (~104 KB)
+./build-itch.sh          # -> onemoretap-itch.zip (~104 KB)
 ```
 
 Zip'in **kökünde** `index.html` olmalı, klasör sarmalayıcı olmamalı. Betik
@@ -14,7 +14,7 @@ bunu `zip -j` ile garantiler.
 | Alan | Değer |
 |---|---|
 | **Kind of project** | HTML |
-| **Uploads** | `midas-itch.zip` → ✅ *"This file will be played in the browser"* |
+| **Uploads** | `onemoretap-itch.zip` → ✅ *"This file will be played in the browser"* |
 | **Embed options** | *Embed in page* |
 | **Viewport** | **540 × 860** (dikey) |
 | **Fullscreen button** | ✅ **açık** (aşağıdaki nota bak — önemli) |
@@ -36,7 +36,7 @@ ve sorun ortadan kalkar.
 
 ## Mağaza metni (kopyala-yapıştır)
 
-**Başlık:** `MİDAS`
+**Başlık:** `ONE MORE TAP`
 
 **Kısa açıklama (tagline):**
 `One tap. Pure greed. Tap the gate, grow your gold — or lose the lot.`
