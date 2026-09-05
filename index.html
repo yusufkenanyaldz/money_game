@@ -426,6 +426,67 @@
 
   const BG=[26,16,48], FONT='"Poppins",-apple-system,Segoe UI,Roboto,sans-serif';
 
+  // ---- Pist şekilleri (tur-içi aşamalar) ----
+  const SHAPES = ['circle','ellipse','infinity','wave','star'];
+  const SHAPE_NAME = { circle:'ÇEMBER', ellipse:'ELİPS', infinity:'SONSUZLUK', wave:'DALGA', star:'YILDIZ' };
+  const STAGE_EVERY = 12;               // her 12 vuruşta pist başkalaşır
+  function shapeForStage(n){ return SHAPES[n % SHAPES.length]; }
+  // birim şekil noktası (merkeze göre, R ölçekli, mutlak koordinat)
+  function shapePoint(id,t){
+    const th=t*TAU, c=Math.cos(th), s=Math.sin(th); let x,y;
+    if(id==='ellipse'){ x=c*1.28; y=s*0.78; }
+    else if(id==='infinity'){ const d=1+s*s; x=1.42*c/d; y=1.42*s*c/d*1.6; }
+    else if(id==='wave'){ const r=1+0.18*Math.sin(6*th); x=c*r; y=s*r; }
+    else if(id==='star'){ const r=1+0.24*Math.cos(5*th); x=c*r; y=s*r; }
+    else { x=c; y=s; }
+    return [CX + x*R, CY + y*R];
+  }
+  const N_TRACK=200;
+  let trackPts=[], prevPts=null, targetPts=[], morphT=1, currentShape='circle';
+  function buildShape(id){
+    const M=1400, raw=[], len=[0];
+    for(let i=0;i<=M;i++){ raw.push(shapePoint(id, i/M));
+      if(i>0){ len.push(len[i-1]+Math.hypot(raw[i][0]-raw[i-1][0], raw[i][1]-raw[i-1][1])); } }
+    const total=len[M]||1, pts=[]; let j=0;
+    for(let k=0;k<N_TRACK;k++){ const target=total*k/N_TRACK;
+      while(j<M && len[j+1]<target) j++;
+      const seg=len[j+1]-len[j], f=seg>0?(target-len[j])/seg:0;
+      pts.push([ lerp(raw[j][0],raw[j+1][0],f), lerp(raw[j][1],raw[j+1][1],f) ]); }
+    return pts;
+  }
+  function setShape(id, morph){
+    currentShape=id; targetPts=buildShape(id);
+    if(morph && trackPts.length===N_TRACK){ prevPts=trackPts.map(p=>p.slice()); morphT=0; }
+    else { trackPts=targetPts.map(p=>p.slice()); prevPts=null; morphT=1; }
+  }
+  function updateMorph(dt){
+    if(morphT>=1) return;
+    morphT=Math.min(1, morphT+dt/0.55);
+    const e = morphT<0.5 ? 2*morphT*morphT : 1-Math.pow(-2*morphT+2,2)/2; // easeInOut
+    for(let i=0;i<N_TRACK;i++){ trackPts[i]=[ lerp(prevPts[i][0],targetPts[i][0],e), lerp(prevPts[i][1],targetPts[i][1],e) ]; }
+    if(morphT>=1){ trackPts=targetPts.map(p=>p.slice()); prevPts=null; }
+  }
+  function trackPos(u){ u=((u%1)+1)%1; const f=u*N_TRACK, i=Math.floor(f)%N_TRACK, n=(i+1)%N_TRACK, fr=f-Math.floor(f);
+    const a=trackPts[i], b=trackPts[n]; return [ a[0]+(b[0]-a[0])*fr, a[1]+(b[1]-a[1])*fr ]; }
+  // açı parametresini (rad) pist üzerindeki noktaya çevir — oyun mantığı hâlâ açı-uzayında
+  function pos(angle){ return trackPos(angle/TAU); }
+  // pistin bir yay parçasını çiz (merkez açı ± yarım açı)
+  function strokeArc(cAng, hAng, lw, style, glowCol, blur){
+    const uc=cAng/TAU, uh=hAng/TAU, steps=Math.max(2, Math.ceil(uh*2*N_TRACK)+2);
+    ctx.lineWidth=lw; ctx.strokeStyle=style; ctx.lineCap='round'; ctx.lineJoin='round';
+    if(glowCol){ ctx.shadowColor=glowCol; ctx.shadowBlur=blur||0; }
+    ctx.beginPath();
+    for(let k=0;k<=steps;k++){ const p=trackPos(uc-uh + (2*uh)*k/steps); k?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]); }
+    ctx.stroke(); if(glowCol) ctx.shadowBlur=0;
+  }
+  function strokeFullTrack(lw, style, glowCol, blur){
+    ctx.lineWidth=lw; ctx.strokeStyle=style; ctx.lineCap='round'; ctx.lineJoin='round';
+    if(glowCol){ ctx.shadowColor=glowCol; ctx.shadowBlur=blur||0; }
+    ctx.beginPath();
+    for(let k=0;k<=N_TRACK;k++){ const p=trackPts[k%N_TRACK]; k?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]); }
+    ctx.closePath(); ctx.stroke(); if(glowCol) ctx.shadowBlur=0;
+  }
+
   // ---- Rütbeler ----
   const RANKS = ['KIVILCIM','ATEŞ','KOR','ALEV','İNFERNO','NOVA','SÜPERNOVA','TANRISAL'];
 
@@ -663,9 +724,27 @@
       shake: 0, flash: 0, hitstop: 0, pulse: 0, gatePop: 0,
       col: activeSkin.ramp[0].slice(), colTarget: activeSkin.ramp[0].slice(),
       over: false, revived: false, countdown: 0,
-      shield:false, x2Time:0, slowTime:0, wideTime:0, spawnTimer:rand(3,5)
+      shield:false, x2Time:0, slowTime:0, wideTime:0, spawnTimer:rand(3,5),
+      stage:0
     };
     orbs = [];
+    setShape('circle', false);          // her tur çemberle başlar
+  }
+  // oyun içindeyken ekran boyutu değişirse pisti yeniden kur
+  window.addEventListener('resize', ()=>{ if(trackPts.length) setShape(currentShape, false); });
+  // pist başkalaşımı (tur-içi aşama)
+  function advanceStage(n){
+    g.stage = n;
+    const id = shapeForStage(n);
+    setShape(id, true);                  // morph animasyonu
+    orbs = [];                           // power-up kapılarını temizle
+    newGateAway();
+    g.flash = Math.max(g.flash, 0.7); g.shake = Math.max(g.shake, 16); g.pulse = 1;
+    ring(CX,CY, g.col); ring(CX,CY, [255,255,255]);
+    floatText('AŞAMA '+(n+1), CX, CY - R*1.5, '#fff', 30);
+    floatText(SHAPE_NAME[id], CX, CY - R*1.5 + 34, rgb(g.col), 40);
+    beep(300,0.16,'sawtooth',0.2,520); setTimeout(()=>beep(880,0.14,'triangle',0.2),120); setTimeout(()=>beep(1320,0.2,'sine',0.2),240);
+    vibe([0,30,20,40]);
   }
   function effGate(){ return g.gateHalf * (g.wideTime>0 ? 1.7 : 1); }
   function newGateAway(){
@@ -751,14 +830,10 @@
       const fade = o.t<1 ? o.t/1 : 1;
       const th = orbHalf(o);   // kapı süre doldukça daralır
       ctx.save(); ctx.globalAlpha=fade; ctx.lineCap='round';
-      // ikinci kapı (arc) — power-up rengi
-      ctx.shadowColor=rgb(P.col,0.9); ctx.shadowBlur=22;
-      ctx.lineWidth=22; ctx.strokeStyle=rgb(P.col,0.30);
-      ctx.beginPath(); ctx.arc(CX,CY,R, o.center-th, o.center+th); ctx.stroke();
-      ctx.shadowBlur=12; ctx.lineWidth=13; ctx.strokeStyle=rgb(lerpCol(P.col,[255,255,255],0.45));
-      ctx.beginPath(); ctx.arc(CX,CY,R, o.center-th, o.center+th); ctx.stroke();
-      ctx.shadowBlur=0;
-      // ikon — kapının tam ortasında, çemberin üzerinde
+      // ikinci kapı — power-up rengi (pist üzerinde)
+      strokeArc(o.center, th, 22, rgb(P.col,0.30), rgb(P.col,0.9), 22);
+      strokeArc(o.center, th, 13, rgb(lerpCol(P.col,[255,255,255],0.45)), rgb(P.col,0.9), 12);
+      // ikon — kapının tam ortasında, pistin üzerinde
       const [ex,ey]=pos(o.center);
       ctx.fillStyle='#fff'; ctx.shadowColor=rgb(P.col,1); ctx.shadowBlur=20;
       ctx.beginPath(); ctx.arc(ex,ey,18*o.pop,0,TAU); ctx.fill();
@@ -1254,7 +1329,6 @@
     }
     onMiss();
   }
-  function pos(angle){ return [CX + Math.cos(angle)*R, CY + Math.sin(angle)*R]; }
 
   function onHit(perfect, d){
     const prevTier = tierIndex(g.hits);
@@ -1301,6 +1375,9 @@
     g.gateHalf = Math.max(g.gateHalf * 0.965, 0.20);
     newGateAway();
     if(g.hits % 5 === 0){ g.dir *= -1; floatText('YÖN!', CX, CY+R+50, rgb(curTier.col), 26); }
+    // tur-içi aşama: pist başkalaşır
+    const newStage = Math.floor(g.hits/STAGE_EVERY);
+    if(newStage !== g.stage) advanceStage(newStage);
   }
 
   function onMiss(){
@@ -1452,40 +1529,21 @@
     drawMotes(accent);
     if(!g) return;
 
-    // track — ince iz
+    // track — pist (şekle göre polyline)
     ctx.save();
-    ctx.lineCap='round';
-    ctx.lineWidth = 12;
-    ctx.strokeStyle = rgb(lerpCol([120,95,190], accent, 0.35), 0.20);
-    ctx.beginPath(); ctx.arc(CX,CY,R,0,TAU); ctx.stroke();
-    // kalkan halkası (aktifken çemberin dışında parlar)
+    // kalkan halkası (aktifken tüm pist mavi parlar)
     if(g.shield){
-      const sp=0.4+0.2*Math.sin(performance.now()/200);
-      ctx.shadowColor='rgba(90,200,255,0.9)'; ctx.shadowBlur=18;
-      ctx.lineWidth=4; ctx.strokeStyle=`rgba(120,215,255,${sp})`;
-      ctx.beginPath(); ctx.arc(CX,CY,R+13,0,TAU); ctx.stroke(); ctx.shadowBlur=0;
+      const sp=0.35+0.2*Math.sin(performance.now()/200);
+      strokeFullTrack(20, `rgba(120,215,255,${sp*0.5})`, 'rgba(90,200,255,0.9)', 16);
     }
+    strokeFullTrack(12, rgb(lerpCol([120,95,190], accent, 0.35), 0.20));
 
     // kapı — katmanlı neon-bloom
     const c=g.col;
     const gh = effGate() * (1 + g.gatePop*0.4);
-    // 1) geniş, yumuşak dış parıltı
-    ctx.shadowColor=rgb(c,0.95); ctx.shadowBlur = 34 + g.pulse*34;
-    ctx.lineWidth = 26; ctx.strokeStyle = rgb(c, 0.28);
-    ctx.beginPath(); ctx.arc(CX,CY,R, g.gateCenter-gh, g.gateCenter+gh); ctx.stroke();
-    // 2) ana gövde (gradyan)
-    const [gsx,gsy]=pos(g.gateCenter-gh), [gex,gey]=pos(g.gateCenter+gh);
-    const gg = ctx.createLinearGradient(gsx,gsy,gex,gey);
-    gg.addColorStop(0, rgb(lerpCol(c,[255,255,255],0.12)));
-    gg.addColorStop(0.5, rgb(lerpCol(c,[255,255,255],0.5)));
-    gg.addColorStop(1, rgb(lerpCol(c,[255,255,255],0.12)));
-    ctx.shadowBlur = 18 + g.pulse*20; ctx.lineWidth = 16; ctx.strokeStyle = gg;
-    ctx.beginPath(); ctx.arc(CX,CY,R, g.gateCenter-gh, g.gateCenter+gh); ctx.stroke();
-    // 3) perfect çekirdek
-    ctx.shadowBlur=10; ctx.lineWidth=5; ctx.strokeStyle='rgba(255,255,255,0.92)';
-    const pz=effGate()*0.34;
-    ctx.beginPath(); ctx.arc(CX,CY,R, g.gateCenter-pz, g.gateCenter+pz); ctx.stroke();
-    ctx.shadowBlur=0;
+    strokeArc(g.gateCenter, gh, 26, rgb(c,0.28), rgb(c,0.95), 34 + g.pulse*34);      // dış parıltı
+    strokeArc(g.gateCenter, gh, 16, rgb(lerpCol(c,[255,255,255],0.42)), rgb(c,0.95), 18 + g.pulse*20); // gövde
+    strokeArc(g.gateCenter, effGate()*0.34, 5, 'rgba(255,255,255,0.92)', rgb(c,0.9), 10);  // perfect çekirdek
     ctx.restore();
 
     drawOrbs();
@@ -1559,7 +1617,7 @@
         g.angle += g.dir * spd * dt; g.angle = (g.angle%TAU+TAU)%TAU;
       }
     }
-    updateOrbs(dt); updateBuffs();
+    updateOrbs(dt); updateBuffs(); if(g) updateMorph(dt);
 
     ctx.save();
     let sh = g? g.shake:0;

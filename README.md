@@ -85,6 +85,21 @@ Ses ve titreşim ilk dokunuşta (tarayıcı politikası gereği) etkinleşir.
 - Responsive + `safe-area-inset` ile çentikli telefon uyumu, `touch-action`
   ile mobilde kaydırma/zoom engeli.
 
+## Pist şekilleri (tur-içi aşamalar)
+
+Tek çember monotonlaşmasın diye pist, tur ilerledikçe **başkalaşır**. Her ~12
+vuruşta bir yeni şekle **morph animasyonuyla** dönüşür ve büyük bir
+"**AŞAMA n · İSİM**" bandı + juice ile "yeni bir yere ulaştın" hissi verir:
+
+**ÇEMBER → ELİPS → SONSUZLUK (∞) → DALGA → YILDIZ** (sonra döngü).
+
+Her şekil farklı bir refleks meydan okuması sunar (∞'in kesişme noktası, dalga
+ve yıldızın keskin dönüşleri). Teknik: yol **yay-uzunluğuna göre** örneklenir,
+böylece kıvılcım tüm şekillerde **sabit hızda** akar; oyun mantığı hâlâ
+açı-uzayında (kapı/perfect/power-up hepsi şekilden bağımsız çalışır), sadece
+render bir polyline'a döner. Bu, planlanan **ilerleme sistemi**nin ilk adımıdır
+(sonraki adımlar: kalıcı Seviye+XP ve kalıcı upgrade'ler).
+
 ## Kasa (risk / ödül) — bağımlılık motoru
 
 Oyunun greed döngüsü **Kasa** sistemiyle çalışır:
