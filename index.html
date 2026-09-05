@@ -186,6 +186,18 @@
     box-shadow:0 10px 30px rgba(255,71,111,.6), inset 0 1px 0 rgba(255,255,255,.35);}
   @keyframes cashPulse{0%,100%{transform:translateX(-50%) scale(1)}50%{transform:translateX(-50%) scale(1.055)}}
 
+  /* menu level bar */
+  .levelbar{width:min(320px,78vw);margin:2px 0 20px;}
+  .lb-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:7px;}
+  .lb-lvl{font-size:13px;font-weight:800;letter-spacing:2px;color:var(--ink2);text-transform:uppercase;}
+  .lb-lvl b{color:var(--gold);font-size:16px;}
+  .lb-xp{font-size:12px;font-weight:800;color:var(--ink2);font-variant-numeric:tabular-nums;}
+  .lb-track{height:12px;border-radius:100px;background:rgba(255,255,255,.09);overflow:hidden;
+    border:1px solid var(--brd);}
+  .lb-track i{display:block;height:100%;border-radius:100px;transform-origin:left;transform:scaleX(var(--t,0));
+    background:linear-gradient(90deg,var(--gold-deep),var(--gold),#fff);transition:transform .5s cubic-bezier(.2,.8,.2,1);
+    box-shadow:0 0 14px rgba(255,204,77,.6);}
+
   /* menu button row */
   .menu-row{display:flex;gap:10px;margin-top:16px;}
   .menu-row .ghost-btn{margin-top:0;}
@@ -299,6 +311,10 @@
   <div class="overlay" id="startScreen">
     <div class="logo">MİDAS</div>
     <div class="tag">Dokun · Altına Çevir</div>
+    <div class="levelbar">
+      <div class="lb-top"><span class="lb-lvl">SEVİYE <b id="lvl-num">1</b></span><span class="lb-xp" id="lvl-xp">0/125</span></div>
+      <div class="lb-track"><i id="lvl-fill"></i></div>
+    </div>
     <div class="mstats">
       <div class="mstat"><span class="v" id="menu-bank" style="color:var(--gold)">0</span><span class="l">Kasa</span></div>
       <div class="mstat"><span class="v" id="menu-best" style="color:#cbb9ff">0</span><span class="l">Rekor</span></div>
@@ -975,9 +991,42 @@
   let savedSkin='altin'; try{ savedSkin = localStorage.getItem('midas_skin')||'altin'; }catch(e){}
   if(!owned.has(savedSkin)) savedSkin='altin';
   applySkin(skinById(savedSkin));
+
+  // ---- Kalıcı oyuncu seviyesi + XP ----
+  let playerLevel=1, playerXP=0;
+  try{ playerLevel = Math.max(1, parseInt(localStorage.getItem('midas_level')||'1',10)||1); }catch(e){}
+  try{ playerXP = Math.max(0, parseInt(localStorage.getItem('midas_xp')||'0',10)||0); }catch(e){}
+  function xpNeeded(lvl){ return Math.round(80 + lvl*45); }
+  const lvlNum=document.getElementById('lvl-num'), lvlXp=document.getElementById('lvl-xp'), lvlFill=document.getElementById('lvl-fill');
+  function updateLevelUI(){
+    const need=xpNeeded(playerLevel);
+    lvlNum.textContent=playerLevel; lvlXp.textContent=playerXP+'/'+need;
+    lvlFill.style.setProperty('--t', clamp(playerXP/need,0,1));
+  }
+  function saveLevel(){ try{ localStorage.setItem('midas_level',String(playerLevel)); localStorage.setItem('midas_xp',String(playerXP)); }catch(e){} }
+  function onLevelUp(){
+    const reward = 100 + playerLevel*50;
+    bank += reward;
+    try{ localStorage.setItem('midas_bank', String(bank)); }catch(e){}
+    el.bank.textContent = bank; refreshMenu();
+    showToast('SEVİYE ATLADIN', 'Seviye '+playerLevel+' — devam et!', '+'+reward, 3000);
+    burstScreen();
+    if(g){ g.flash=Math.max(g.flash,0.6); g.pulse=1; ring(CX,CY,[255,225,120]); ring(CX,CY,[255,255,255]); }
+    cashSound(); setTimeout(()=>beep(1046,0.16,'triangle',0.2),150); setTimeout(()=>beep(1568,0.22,'sine',0.2),300);
+    vibe([0,30,25,30,25,60]);
+  }
+  function gainXP(amount){
+    if(amount<=0) return;
+    playerXP += amount;
+    let safety=0;
+    while(playerXP >= xpNeeded(playerLevel) && safety++<50){ playerXP -= xpNeeded(playerLevel); playerLevel++; onLevelUp(); }
+    saveLevel(); updateLevelUI();
+  }
+
   function refreshMenu(){
     el.menuBank.textContent = bank; el.menuBest.textContent = best;
     document.getElementById('equipped-name').textContent = activeSkin.name;
+    updateLevelUI();
   }
   refreshMenu();
   el.sound.textContent = soundOn ? '🔊' : '🔇';
@@ -1022,6 +1071,7 @@
     try{ localStorage.setItem('midas_bank', String(bank)); }catch(e){}
     el.bank.textContent = bank;
     missionEvent('bank', amount);
+    gainXP(Math.max(1, Math.floor(amount/20)));
     g.pot = 0; g.streak = 0; g.mult = 1;
     el.money.textContent = '0';
     updateCashUI();
@@ -1352,6 +1402,7 @@
     g.colTarget = curTier.col.slice();
 
     missionEvent('hit',1); if(perfect) missionEvent('perfect',1); missionEvent('multReach', g.mult);
+    gainXP(perfect?3:2);
 
     const col = perfect ? lerpCol(curTier.col,[255,255,255],0.35) : curTier.col;
     burst(px,py, perfect?34:18, {color:col, smax:perfect?560:380, grav:1100, up:120});

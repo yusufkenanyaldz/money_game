@@ -85,6 +85,22 @@ Ses ve titreşim ilk dokunuşta (tarayıcı politikası gereği) etkinleşir.
 - Responsive + `safe-area-inset` ile çentikli telefon uyumu, `touch-action`
   ile mobilde kaydırma/zoom engeli.
 
+## Kalıcı Seviye + XP (ilerlemenin belkemiği)
+
+Oyuncunun **asla sıfırlanmayan** bir hesap seviyesi vardır. Her vuruş (+2, perfect
++3) ve her "Kasaya Al" (miktara göre) **XP** kazandırır. Menüde büyük bir
+**SEVİYE + XP çubuğu** ilerlemeyi gösterir.
+
+- Yeterli XP → **seviye atla**: oyun-içi *"SEVİYE ATLADIN"* bildirimi (toast),
+  **altın yağmuru** kutlaması, yükselen fanfar + titreşim ve **Kasa ödülü**
+  (100 + seviye×50).
+- XP eğrisi: sonraki seviye için gereken = `80 + seviye×45` (giderek artar).
+- Seviye ve XP `localStorage`'da kalıcı (oturumlar arası).
+
+**Neden:** "İlerliyor muyum / bir üst seviyeye çıktım mı?" sorusunun somut
+cevabı budur — pist aşamalarıyla (tur-içi) birlikte hem kısa hem uzun vadeli
+ilerleme hissi verir. (Planın 2. adımı; 3. adım: Kasa ile kalıcı upgrade'ler.)
+
 ## Pist şekilleri (tur-içi aşamalar)
 
 Tek çember monotonlaşmasın diye pist, tur ilerledikçe **başkalaşır**. Her ~12
