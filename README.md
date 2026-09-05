@@ -16,8 +16,8 @@ Arayüz **derin mor zemin + canlı doygun neon aksanlar + güçlü juice**
 üzerine kuruludur (Subway Surfers mantığı). Cam (glass) kartlar, katmanlı
 neon-bloom parıltı, derinlik vinyeti ve temiz **Poppins** fontu ile
 "ucuz neon" değil premium bir his hedeflenir. Temalar canlı: Altın, Buz,
-Lav, Neon, Zümrüt, Galaksi, Prizma. Rütbeler: KIVILCIM → ATEŞ → KOR →
-ALEV → İNFERNO → NOVA → SÜPERNOVA → TANRISAL.
+Lav, Neon, Zümrüt, Galaksi, Prizma. Rütbeler (açık tavan): KIVILCIM → ATEŞ →
+KOR → ALEV → İNFERNO → NOVA → SÜPERNOVA → TANRISAL → … → AŞKIN.
 
 **Bu yön neden seçildi (araştırma):** Bağımlılık odaklı hyper-casual
 oyunlarda **yüksek doygunluk + yüksek kontrast** kazandırır; koyu/donuk
@@ -125,10 +125,14 @@ Tek çember monotonlaşmasın diye pist, tur ilerledikçe **başkalaşır**. Her
 vuruşta bir yeni şekle **morph animasyonuyla** dönüşür ve büyük bir
 "**AŞAMA n · İSİM**" bandı + juice ile "yeni bir yere ulaştın" hissi verir:
 
-**ÇEMBER → ELİPS → SONSUZLUK (∞) → DALGA → YILDIZ** (sonra döngü).
+**ÇEMBER → ELİPS → SONSUZLUK (∞) → DALGA → YILDIZ → ZİKZAK** (sonra döngü).
 
 Her şekil farklı bir refleks meydan okuması sunar (∞'in kesişme noktası, dalga
-ve yıldızın keskin dönüşleri). Teknik: yol **yay-uzunluğuna göre** örneklenir,
+ve yıldızın keskin dönüşleri, zikzağın testere kenarları). **Adalet:** zor
+pistlerde kapı biraz genişler ve hız biraz düşer (`SHAPE_GATE`/`SHAPE_SPEED` —
+en çok yardım SONSUZLUK'ta), ayrıca her aşama geçişinde ~2.6sn "**alışma payı**"
+ile kapı geçici genişler; böylece şekil değişimi ani bir zorluk zıplaması olmaz.
+Teknik: yol **yay-uzunluğuna göre** örneklenir,
 böylece kıvılcım tüm şekillerde **sabit hızda** akar; oyun mantığı hâlâ
 açı-uzayında (kapı/perfect/power-up hepsi şekilden bağımsız çalışır), sadece
 render bir polyline'a döner. Bu, planlanan **ilerleme sistemi**nin ilk adımıdır
@@ -242,17 +246,44 @@ Biriken **Kasa**'yı harcayacağın yer. Menü ya da oyun-sonu ekranından
   Galaksi (22K) · Prizma (55K).
 - Açtığın tema **seçilebilir**; seçim ve sahiplik kalıcı (`localStorage`).
 - Satın alım tatmin edici kutlamayla gelir (altın yağmuru + ses + titreşim).
-- **Rütbe sistemi:** seviye adları temadan bağımsızdır —
-  KIVILCIM → ATEŞ → KOR → ALEV → İNFERNO → NOVA → SÜPERNOVA → TANRISAL.
+- **Rütbe sistemi:** seviye adları temadan bağımsızdır. Tavan **açıktır**, asla
+  tıkanmaz — TANRISAL sonrası prestij rütbeleri devreye girer:
+  KIVILCIM → ATEŞ → KOR → ALEV → İNFERNO → NOVA → SÜPERNOVA → TANRISAL →
+  KOZMİK → EBEDİ → SONSUZ → MUTLAK → EFSANE → AŞKIN.
 
 Serveti harcamak (spending) tıpkı kazanmak kadar tatmin edicidir; bu da
 oyuncuyu daha çok oynayıp Kasa büyütmeye iter — kalıcı bir grind döngüsü.
 
-## Geliştirme fikirleri (sonraki adımlar)
+## Sıralama + skor paylaşımı
 
-- Günlük ödül / seri (streak) takvimi — geri dönüş kancası.
-- Skor paylaş + lider tablosu (yerel çoklu oyuncu / cihaz).
-- Arka plan müziği.
+- **Yerel en iyi 5 tur** (`localStorage`): her turun Kasa'sı, rütbesi, vuruşu ve
+  tarihi kaydedilir; menü/oyun-sonundan **Sıralama** ile açılır. #1 altınla
+  vurgulanır.
+- **Skor paylaş:** oyun-sonu ve sıralama ekranındaki **PAYLAŞ** butonu, cihazın
+  yerel paylaşım sayfasını (`navigator.share`) açar; yoksa panoya kopyalar.
+  Metin bir meydan okumadır: "MİDAS'ta X Kasa topladım · rütbem … Geçebilir
+  misin?" — viral/geri dönüş kancası.
+
+## Günlük ödül / seri (streak)
+
+Her gün ilk açılışta **GÜNLÜK ÖDÜL** açılır. 7 günlük döngü; ödül gün
+büyüdükçe artar (100·gün), **7. günde büyük bonus** (+400). Ardışık günler
+**seriyi** büyütür; bir gün kaçarsan seri sıfırlanır. Klasik geri dönüş kancası.
+
+## Onboarding (kademeli açılım)
+
+Oyun ~10 sistemi ilk anda yüzüne çarpmaz:
+- **İlk açılışta 3 adımlık rehber** (tek kural → Kasaya Al → büyü/ilerle).
+- **Menü butonları kademeli açılır:** başta yalnız **BAŞLA + Dükkan**; 1 tur
+  sonra **Görevler + Sıralama**, 2 tur sonra **Yükselt** görünür. Yeni oyuncu
+  boğulmaz, kıdemli oyuncu her şeye erişir.
+
+## Arka plan müziği
+
+WebAudio ile **prosedürel lo-fi arpej** (dosya yok, ~0 KB). Sağ alttaki 🎵
+düğmesiyle açılır/kapanır (SFX'ten bağımsız); tercih `localStorage`'ta tutulur.
+Üst üste binen bildirim/toast'lar artık **sıraya alınır** (yüksek hızda karmaşa
+olmaz).
 
 ---
 _MİDAS — dokun, altına çevir._
