@@ -105,6 +105,11 @@
   #sound{right:20px;} #music{right:76px;} #langBtn{right:132px;font-size:14px;font-weight:900;letter-spacing:.5px;}
   #sound:active,#music:active,#langBtn:active{transform:scale(.9);}
   #music.off{opacity:.5;}
+  #sound svg,#music svg{width:21px;height:21px;display:block;}
+  .rev-heart svg{width:64px;height:64px;}
+  .mt-badge svg{width:20px;height:20px;}
+  .play-ic{display:inline-flex;} .play-ic svg{width:18px;height:18px;}
+  .vault-ic{display:inline-flex;vertical-align:-3px;}
 
   /* ---- Overlays ---- */
   .overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
@@ -363,20 +368,6 @@
   .rev-timer-bar.run{width:0%;transition:width var(--revdur,6s) linear;}
 
   /* ---- Mock ad ---- */
-  #adScreen{background:linear-gradient(160deg,#1c1730,#0a0714);}
-  .ad-badge{position:absolute;top:calc(env(safe-area-inset-top) + 18px);left:18px;
-    font-size:11px;font-weight:900;letter-spacing:2px;color:#0a0714;background:#ffd24a;
-    padding:5px 12px;border-radius:8px;}
-  .ad-card{width:min(340px,84vw);padding:34px 24px;border-radius:26px;text-align:center;
-    background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.03));
-    border:1px solid var(--brd);display:flex;flex-direction:column;align-items:center;gap:10px;}
-  .ad-emoji{font-size:74px;animation:bob 1.4s ease-in-out infinite;}
-  .ad-name{font-size:13px;letter-spacing:3px;color:var(--ink2);text-transform:uppercase;font-weight:800;}
-  .ad-desc{font-size:20px;font-weight:800;color:#fff;}
-  .ad-count{margin-top:8px;font-size:44px;font-weight:900;color:var(--gold);
-    width:74px;height:74px;border-radius:50%;display:flex;align-items:center;justify-content:center;
-    border:3px solid rgba(255,204,77,.35);font-variant-numeric:tabular-nums;}
-  .ad-note{margin-top:26px;font-size:13px;color:var(--ink2);font-weight:600;letter-spacing:.5px;}
 </style>
 </head>
 <body>
@@ -407,8 +398,8 @@
     <div id="coach"></div>
   </div>
   <!-- ses/muzik: #hud'un yigin baglamindan cikarildi ki menude de tiklanabilsin -->
-  <div id="sound">🔊</div>
-  <div id="music">🎵</div>
+  <div id="sound"></div>
+  <div id="music"></div>
   <div id="langBtn">TR</div>
 
   <!-- Start -->
@@ -423,7 +414,6 @@
       <div class="mstat"><span class="v" id="menu-bank" style="color:var(--gold)">0</span><span class="l" data-i18n="bank">Kasa</span></div>
       <div class="mstat"><span class="v" id="menu-best" style="color:#cbb9ff">0</span><span class="l" data-i18n="best">Rekor</span></div>
     </div>
-    <div class="cta"><span data-i18n="cta1">Kapıda dokun, altını büyüt.</span><br><span data-i18n-html="cta2"></span></div>
     <button class="pulse-btn" id="startBtn" data-i18n="play">BAŞLA</button>
     <div class="menu-row">
       <button class="ghost-btn" id="shopBtn" data-i18n="shop">Dükkan</button>
@@ -431,8 +421,6 @@
       <button class="ghost-btn" id="upgradeBtn" data-i18n="upgrades">Yükselt</button>
       <button class="ghost-btn" id="lbBtn" data-i18n="ranking">Sıralama</button>
     </div>
-    <div class="equipped-tag"><span data-i18n="themeLbl">Tema:</span> <b id="equipped-name">Altın</b></div>
-    <div class="hint" data-i18n="hint">Dokun · Tıkla · Boşluk tuşu</div>
   </div>
 
   <!-- Shop -->
@@ -502,7 +490,7 @@
     <div class="score-box">
       <div id="go-money">0</div>
     </div>
-    <div id="go-bank"><span>🏦</span> KASA <span id="go-bankval">0</span></div>
+    <div id="go-bank"><span class="vault-ic"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="2.5"/><path d="M3 10h18"/><circle cx="12" cy="14.5" r="2.2"/></svg></span> KASA <span id="go-bankval">0</span></div>
     <div class="go-labels">
       <div class="gl"><span class="glv" id="go-hits" style="color:var(--cyan)">0</span><span class="gll" data-i18n="hitsLbl">Vuruş</span></div>
       <div class="gl"><span class="glv" id="go-tier" style="color:var(--violet)">1</span><span class="gll" data-i18n="levelLbl">Seviye</span></div>
@@ -524,30 +512,18 @@
 
   <!-- Revive offer -->
   <div class="overlay hidden" id="reviveScreen">
-    <div class="rev-heart">💛</div>
+    <div class="rev-heart"><svg viewBox="0 0 24 24" fill="none" stroke="none" fill="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.5S3.6 15 3.6 9.2A4.6 4.6 0 0 1 12 6.6a4.6 4.6 0 0 1 8.4 2.6c0 5.8-8.4 11.3-8.4 11.3z"/></svg></div>
     <div class="rev-title" data-i18n="continueQ">DEVAM ET?</div>
     <div class="rev-sub" id="rev-sub"></div>
-    <button class="pulse-btn ad-btn" id="reviveBtn"><span>▶</span> <span data-i18n="watchAd">REKLAM İZLE &amp; DEVAM</span></button>
+    <button class="pulse-btn ad-btn" id="reviveBtn"><span class="play-ic"><svg viewBox="0 0 24 24" fill="none" stroke="none" fill="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 5.5v13l11-6.5z"/></svg></span> <span data-i18n="watchAd">REKLAM İZLE &amp; DEVAM</span></button>
     <div class="rev-timer"><div class="rev-timer-bar" id="rev-bar"></div></div>
     <button class="ghost-btn" id="reviveSkip" data-i18n="noEnd">Hayır, bitir</button>
     <div class="hint" data-i18n="oncePerRun">Tur başına 1 kez</div>
   </div>
 
-  <!-- Mock rewarded ad -->
-  <div class="overlay hidden" id="adScreen">
-    <div class="ad-badge" data-i18n="adLbl">REKLAM</div>
-    <div class="ad-card">
-      <div class="ad-emoji">🎁</div>
-      <div class="ad-name" data-i18n="sponsor">Sponsor</div>
-      <div class="ad-desc" data-i18n="adPrep">Ödülün hazırlanıyor…</div>
-      <div class="ad-count" id="ad-count">5</div>
-    </div>
-    <div class="ad-note" data-i18n="adSub">Reklam bitince kaldığın yerden devam edeceksin</div>
-  </div>
-
   <!-- Toast (görev / hile bildirimi) — tüm katmanların üstünde -->
   <div id="mtoast" class="hidden">
-    <div class="mt-badge">✓</div>
+    <div class="mt-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
     <div class="mt-body"><div class="mt-title">GÖREV TAMAM</div><div class="mt-desc" id="mt-desc"></div></div>
     <div class="mt-rew" id="mt-rew">+0</div>
   </div>
@@ -757,7 +733,7 @@
     shieldGot:'KALKAN!', safe:'GÜVENDE!', go:'DEVAM!', stage:'AŞAMA {0}',
     levelUp:'SEVİYE ATLADIN', levelUpSub:'Seviye {0} — devam et!',
     copied:'KOPYALANDI', copiedSub:'Skorun panoya kopyalandı',
-    shareTxt:"MİDAS'ta {0} Kasa topladım{1}! Geçebilir misin? 🪙", shareRank:' · rütbem {0}',
+    shareTxt:"MİDAS'ta {0} Kasa topladım{1}! Geçebilir misin?", shareRank:' · rütbem {0}',
     ranks:['KIVILCIM','ATEŞ','KOR','ALEV','İNFERNO','NOVA','SÜPERNOVA','TANRISAL','KOZMİK','EBEDİ','SONSUZ','MUTLAK','EFSANE','AŞKIN'],
     shape_circle:'ÇEMBER', shape_ellipse:'ELİPS', shape_infinity:'SONSUZLUK',
     shape_wave:'DALGA', shape_star:'YILDIZ', shape_zigzag:'ZİKZAK',
@@ -810,7 +786,7 @@
     shieldGot:'SHIELD!', safe:'SAFE!', go:'GO!', stage:'STAGE {0}',
     levelUp:'LEVEL UP', levelUpSub:'Level {0} — keep going!',
     copied:'COPIED', copiedSub:'Your score was copied to the clipboard',
-    shareTxt:'I banked {0} gold in MİDAS{1}! Can you beat it? 🪙', shareRank:' · rank {0}',
+    shareTxt:'I banked {0} gold in MİDAS{1}! Can you beat it?', shareRank:' · rank {0}',
     ranks:['SPARK','FLAME','EMBER','BLAZE','INFERNO','NOVA','SUPERNOVA','DIVINE','COSMIC','ETERNAL','INFINITE','ABSOLUTE','LEGEND','TRANSCENDENT'],
     shape_circle:'CIRCLE', shape_ellipse:'ELLIPSE', shape_infinity:'INFINITY',
     shape_wave:'WAVE', shape_star:'STAR', shape_zigzag:'ZIGZAG',
@@ -1149,10 +1125,10 @@
 
   // ---- Power-up'lar ----
   const POWERUPS = {
-    shield:{ emoji:'🛡️', col:[90,200,255],  key:'pu_shield', w:0.9 },
-    x2:    { emoji:'✨', col:[255,138,30],  key:'pu_x2',     w:1.1 },
-    slow:  { emoji:'🐌', col:[130,230,150], key:'pu_slow',   w:1.0 },
-    wide:  { emoji:'🎯', col:[255,120,200], key:'pu_wide',   w:1.0 },
+    shield:{ col:[90,200,255],  key:'pu_shield', w:0.9 },
+    x2:    { col:[255,138,30],  key:'pu_x2',     w:1.1 },
+    slow:  { col:[130,230,150], key:'pu_slow',   w:1.0 },
+    wide:  { col:[255,120,200], key:'pu_wide',   w:1.0 },
   };
   const PU_KEYS = Object.keys(POWERUPS);
   const PU_DUR = { x2:8, slow:6, wide:8 };   // saniye (shield süresiz, kullanılınca biter)
@@ -1480,20 +1456,24 @@
 
   function refreshMenu(){
     el.menuBank.textContent = bank; el.menuBest.textContent = best;
-    document.getElementById('equipped-name').textContent = skinName(activeSkin);
+    const eq=document.getElementById('equipped-name'); if(eq) eq.textContent = skinName(activeSkin);
     updateLevelUI();
   }
   refreshMenu();
-  el.sound.textContent = soundOn ? '🔊' : '🔇';
+  const ICO_SOUND_ON=`<svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7"/><path d="M19 6a8.5 8.5 0 0 1 0 12"/></svg>`, ICO_SOUND_OFF=`<svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M17 9.5l4 5M21 9.5l-4 5"/></svg>`;
+  const ICO_MUSIC_ON=`<svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.6"/><circle cx="16.5" cy="16" r="2.6"/></svg>`, ICO_MUSIC_OFF=`<svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V6l10-2v12" opacity=".45"/><circle cx="6.5" cy="18" r="2.6" opacity=".45"/><circle cx="16.5" cy="16" r="2.6" opacity=".45"/><path d="M3 3l18 18"/></svg>`;
+  el.sound.innerHTML = soundOn ? ICO_SOUND_ON : ICO_SOUND_OFF;
   el.sound.addEventListener('pointerdown',(e)=>{ e.preventDefault(); e.stopPropagation();
-    soundOn=!soundOn; el.sound.textContent = soundOn?'🔊':'🔇';
+    soundOn=!soundOn; el.sound.innerHTML = soundOn?ICO_SOUND_ON:ICO_SOUND_OFF;
     try{ localStorage.setItem('midas_sound', soundOn?'1':'0'); }catch(e2){}
     if(soundOn) beep(660,0.1,'triangle',0.2);
   });
   const musicBtn=document.getElementById('music');
+  musicBtn.innerHTML = musicOn ? ICO_MUSIC_ON : ICO_MUSIC_OFF;
   musicBtn.classList.toggle('off', !musicOn);
   musicBtn.addEventListener('pointerdown',(e)=>{ e.preventDefault(); e.stopPropagation();
-    musicOn=!musicOn; musicBtn.classList.toggle('off', !musicOn);
+    musicOn=!musicOn; musicBtn.innerHTML = musicOn?ICO_MUSIC_ON:ICO_MUSIC_OFF;
+    musicBtn.classList.toggle('off', !musicOn);
     try{ localStorage.setItem('midas_music', musicOn?'1':'0'); }catch(e2){}
     if(musicOn) startMusic(); else stopMusic();
   });
@@ -2201,7 +2181,6 @@
 
   // ---- Revive / ödüllü reklam ----
   const reviveScreen = document.getElementById('reviveScreen');
-  const adScreen = document.getElementById('adScreen');
   const revBar = document.getElementById('rev-bar');
   let reviveTimer = null;
   const REVIVE_WINDOW = 6; // saniye
@@ -2243,8 +2222,7 @@
     reviveScreen.classList.add('hidden');
     state = STATE.AD;
     // Portal (Poki/CrazyGames) varsa GERÇEK ödüllü reklam onun SDK'siyle oynatılır.
-    if(Portal.rewarded(()=>{ adScreen.classList.add('hidden'); grantRevive(); },
-                       ()=>{ adScreen.classList.add('hidden'); declineRevive(); })){
+    if(Portal.rewarded(grantRevive, declineRevive)){
       return;
     }
     // ---- YEDEK: portal yok -> sahte reklam gostermeyiz, ikinci sansi direkt ver.
@@ -2252,7 +2230,6 @@
     grantRevive();
   }
   function grantRevive(){
-    adScreen.classList.add('hidden');
     g.over = false; g.revivesUsed++;
     g.streak = 0; g.mult = 1;               // seri sıfırlanır (pot korunur)
     newGateAway();                          // taze kapı, kıvılcımdan uzağa
