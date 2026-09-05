@@ -475,13 +475,16 @@
   // ---- Pist şekilleri (tur-içi aşamalar) ----
   const SHAPES = ['circle','ellipse','infinity','wave','star'];
   const SHAPE_NAME = { circle:'ÇEMBER', ellipse:'ELİPS', infinity:'SONSUZLUK', wave:'DALGA', star:'YILDIZ' };
+  // Şekle göre zorluk yardımı: zor pistlerde kapı biraz genişler, hız biraz düşer (sonsuzluk en çok)
+  const SHAPE_GATE  = { circle:1, ellipse:1.05, infinity:1.42, wave:1.14, star:1.22 };
+  const SHAPE_SPEED = { circle:1, ellipse:0.98, infinity:0.86, wave:0.94, star:0.9 };
   const STAGE_EVERY = 12;               // her 12 vuruşta pist başkalaşır
   function shapeForStage(n){ return SHAPES[n % SHAPES.length]; }
   // birim şekil noktası (merkeze göre, R ölçekli, mutlak koordinat)
   function shapePoint(id,t){
     const th=t*TAU, c=Math.cos(th), s=Math.sin(th); let x,y;
     if(id==='ellipse'){ x=c*1.28; y=s*0.78; }
-    else if(id==='infinity'){ const d=1+s*s; x=1.42*c/d; y=1.42*s*c/d*1.6; }
+    else if(id==='infinity'){ const d=1+s*s; x=1.34*c/d; y=1.34*s*c/d*1.28; } // daha yuvarlak loblar, sivri uçlar yumuşadı
     else if(id==='wave'){ const r=1+0.18*Math.sin(6*th); x=c*r; y=s*r; }
     else if(id==='star'){ const r=1+0.24*Math.cos(5*th); x=c*r; y=s*r; }
     else { x=c; y=s; }
@@ -771,7 +774,7 @@
       col: activeSkin.ramp[0].slice(), colTarget: activeSkin.ramp[0].slice(),
       over: false, revivesUsed: 0, countdown: 0,
       shieldCount: UP.shield, x2Time:0, slowTime:0, wideTime:0, spawnTimer:rand(3,5),  // Başlangıç Kalkanı
-      stage:0
+      stage:0, stageGrace:0
     };
     orbs = [];
     setShape('circle', false);          // her tur çemberle başlar
@@ -784,6 +787,7 @@
     const id = shapeForStage(n);
     setShape(id, true);                  // morph animasyonu
     orbs = [];                           // power-up kapılarını temizle
+    g.stageGrace = 2.6;                  // yeni şekle alışma payı: kapı bir süre daha geniş
     newGateAway();
     g.flash = Math.max(g.flash, 0.7); g.shake = Math.max(g.shake, 16); g.pulse = 1;
     ring(CX,CY, g.col); ring(CX,CY, [255,255,255]);
@@ -792,7 +796,7 @@
     beep(300,0.16,'sawtooth',0.2,520); setTimeout(()=>beep(880,0.14,'triangle',0.2),120); setTimeout(()=>beep(1320,0.2,'sine',0.2),240);
     vibe([0,30,20,40]);
   }
-  function effGate(){ return g.gateHalf * (g.wideTime>0 ? 1.7 : 1); }
+  function effGate(){ return g.gateHalf * (g.wideTime>0 ? 1.7 : 1) * (SHAPE_GATE[currentShape]||1) * (g.stageGrace>0 ? 1.35 : 1); }
   function perfectFactor(){ return 0.34 * (1 + UP.perfect*0.12); }   // Geniş Perfect upgrade'i
   function newGateAway(){
     let ng; do{ ng = rand(0,TAU); }while(Math.abs(angDiff(ng, g.angle)) < 1.1);
@@ -1513,8 +1517,8 @@
       missionEvent('tierReach', tierIndex(g.hits)+1);
     }
 
-    g.speed = Math.min(g.speed + 0.14, 8.5);
-    g.gateHalf = Math.max(g.gateHalf * 0.965, 0.20);
+    g.speed = Math.min(g.speed + 0.115, 7.6);
+    g.gateHalf = Math.max(g.gateHalf * 0.972, 0.235);
     newGateAway();
     if(g.hits % 5 === 0){ g.dir *= -1; floatText('YÖN!', CX, CY+R+50, rgb(curTier.col), 26); }
     // tur-içi aşama: pist başkalaşır
@@ -1755,7 +1759,8 @@
         if(g.x2Time>0) g.x2Time=Math.max(0,g.x2Time-dt);
         if(g.slowTime>0) g.slowTime=Math.max(0,g.slowTime-dt);
         if(g.wideTime>0) g.wideTime=Math.max(0,g.wideTime-dt);
-        const spd = g.speed * (g.slowTime>0 ? 0.5 : 1);   // yavaşlatma
+        if(g.stageGrace>0) g.stageGrace=Math.max(0,g.stageGrace-dt);
+        const spd = g.speed * (g.slowTime>0 ? 0.5 : 1) * (SHAPE_SPEED[currentShape]||1);   // yavaşlatma + şekil zorluk yardımı
         g.angle += g.dir * spd * dt; g.angle = (g.angle%TAU+TAU)%TAU;
       }
     }
