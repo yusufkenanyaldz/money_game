@@ -559,7 +559,7 @@
     canvas.width = Math.floor(W*DPR); canvas.height = Math.floor(H*DPR);
     canvas.style.width = W+'px'; canvas.style.height = H+'px';
     ctx.setTransform(DPR,0,0,DPR,0,0);
-    CX = W/2; CY = H/2; R = Math.min(W,H) * 0.30;
+    CX = W/2; CY = H/2; R = Math.min(W,H) * 0.335;   // egim dikeyde daralttigi icin buyutuldu
   }
   window.addEventListener('resize', resize);
   resize();
@@ -601,8 +601,13 @@
     else if(id==='star'){ const r=1+0.24*Math.cos(5*th); x=c*r; y=s*r; }
     else if(id==='zigzag'){ const u=(7*th)/TAU; const tri=2*Math.abs(u-Math.floor(u+0.5)); const r=1+0.19*(tri-0.5); x=c*r; y=s*r; } // testere-dişi kenarlı zikzak halka
     else { x=c; y=s; }
-    return [CX + x*R, CY + y*R];
+    // Perspektif: pist hafif yatik bir elips olarak cizilir (derinlik hissi).
+    // Ezme burada yapilir; boylece asagidaki yay-uzunlugu ornekleme bunu
+    // hesaba katar ve kivilcimin GORSEL hizi her yerde sabit kalir.
+    return [CX + x*R, CY + y*R*TILT_Y];
   }
+  const TILT_Y = 0.86;                  // dikey ezme (1 = duz daire) — ince tutuldu
+  const WALL_H = 0.15;                  // silindir duvar yuksekligi (R carpani)
   const N_TRACK=200;
   let trackPts=[], prevPts=null, targetPts=[], morphT=1, currentShape='circle';
   function buildShape(id){
@@ -620,7 +625,7 @@
     currentShape=id; targetPts=buildShape(id);
     if(morph && trackPts.length===N_TRACK){ prevPts=trackPts.map(p=>p.slice()); morphT=0; }
     else { trackPts=targetPts.map(p=>p.slice()); prevPts=null; morphT=1; }
-    trackPath=null;                       // önbelleği tazele
+    trackPath=null; wallPath=null;        // önbelleği tazele
   }
   function updateMorph(dt){
     if(morphT>=1) return;
@@ -628,7 +633,7 @@
     const e = morphT<0.5 ? 2*morphT*morphT : 1-Math.pow(-2*morphT+2,2)/2; // easeInOut
     for(let i=0;i<N_TRACK;i++){ trackPts[i]=[ lerp(prevPts[i][0],targetPts[i][0],e), lerp(prevPts[i][1],targetPts[i][1],e) ]; }
     if(morphT>=1){ trackPts=targetPts.map(p=>p.slice()); prevPts=null; }
-    trackPath=null;                       // morph sürerken her kare yeniden kur
+    trackPath=null; wallPath=null;        // morph sürerken her kare yeniden kur
   }
   function trackPos(u){ u=((u%1)+1)%1; const f=u*N_TRACK, i=Math.floor(f)%N_TRACK, n=(i+1)%N_TRACK, fr=f-Math.floor(f);
     const a=trackPts[i], b=trackPts[n]; return [ a[0]+(b[0]-a[0])*fr, a[1]+(b[1]-a[1])*fr ]; }
@@ -640,11 +645,17 @@
   // Aynı görünümü 'lighter' harmanlı katmanlı çizgilerle ~5-10x ucuza alıyoruz.
   // FX seviyesi düşük FPS'te otomatik düşer (adaptif kalite).
   let FX = 2;                      // 2=tam bloom, 1=hafif, 0=kapalı (glow yok)
-  let trackPath = null;            // tüm pist için önbelleklenmiş Path2D
+  let trackPath = null, wallPath = null;   // önbelleklenmiş Path2D'ler
   function buildTrackPath(){
     const p2 = new Path2D();
     for(let k=0;k<N_TRACK;k++){ const p=trackPts[k]; k?p2.lineTo(p[0],p[1]):p2.moveTo(p[0],p[1]); }
     p2.closePath(); trackPath = p2;
+    // silindir duvari: pist + asagi otelenmis kopyasi (kare basina degil, sekil basina)
+    const wh = R*WALL_H, w2 = new Path2D();
+    w2.moveTo(trackPts[0][0], trackPts[0][1]);
+    for(let k=1;k<N_TRACK;k++) w2.lineTo(trackPts[k][0], trackPts[k][1]);
+    for(let k=N_TRACK-1;k>=0;k--) w2.lineTo(trackPts[k][0], trackPts[k][1]+wh);
+    w2.closePath(); wallPath = w2;
   }
   function arcPath(cAng, hAng){
     const uc=cAng/TAU, uh=hAng/TAU, steps=Math.max(2, Math.ceil(uh*2*N_TRACK)+2);
@@ -2268,6 +2279,29 @@
       const sp=0.35+0.2*Math.sin(performance.now()/200);
       strokeFullTrack(20, `rgba(120,215,255,${sp*0.5})`, 'rgba(90,200,255,0.9)', 16);
     }
+    // --- silindir duvari: pisti bir kaide uzerinde gosterir (derinlik) ---
+    if(trackPts.length===N_TRACK){
+      const wh = R*WALL_H;
+      ctx.save();
+      const wg = ctx.createLinearGradient(0, CY + R*TILT_Y*0.55, 0, CY + R*TILT_Y + wh);
+      wg.addColorStop(0, rgb(lerpCol([120,95,200], accent, 0.35), 0.26));
+      wg.addColorStop(0.45, rgb(lerpCol([70,50,130], accent, 0.20), 0.10));
+      wg.addColorStop(1, 'rgba(0,0,0,0)');
+      if(!wallPath) buildTrackPath();
+      ctx.fillStyle = wg;
+      if(wallPath) ctx.fill(wallPath);
+      ctx.restore();
+    }
+    // --- es merkezli kilavuz halkalar (zenginlik, ucuz) ---
+    ctx.save();
+    ctx.strokeStyle = rgb(lerpCol([150,120,220], accent, 0.35), 0.13);
+    ctx.lineWidth = 2;
+    for(const f of [0.80, 0.90]){
+      ctx.beginPath();
+      ctx.ellipse(CX, CY, R*f*1.02, R*f*TILT_Y*1.02, 0, 0, TAU);
+      ctx.stroke();
+    }
+    ctx.restore();
     strokeFullTrack(12, rgb(lerpCol([120,95,190], accent, 0.35), 0.20));
 
     // kapı — katmanlı neon-bloom
@@ -2287,10 +2321,23 @@
     mg.addColorStop(0, rgb(c,0.16)); mg.addColorStop(1, rgb(c,0));
     ctx.fillStyle=mg; ctx.beginPath(); ctx.arc(CX,CY,mr,0,TAU); ctx.fill();
     if(g.streak>0){
+      // Combo: kalin rakam + altinda COMBO etiketi, koyu konturla okunakli.
+      // (Eskiden merkezde soluk bir sayiydi; kazanma hissi zayif kaliyordu.)
       ctx.textAlign='center'; ctx.textBaseline='middle';
-      ctx.font=`900 ${R*0.5}px ${FONT}`;
-      ctx.fillStyle=rgb(c, 0.30+0.06*Math.sin(performance.now()/120));
-      ctx.fillText('x'+g.mult, CX, CY);
+      const pulse = 1 + 0.05*Math.sin(performance.now()/110);
+      const big = R*0.40*pulse;
+      ctx.lineJoin='round';
+      ctx.font=`900 ${big}px ${FONT}`;
+      ctx.lineWidth = Math.max(5, big*0.10);
+      ctx.strokeStyle = 'rgba(10,4,22,0.55)';
+      ctx.strokeText('x'+g.mult, CX, CY - R*0.04);
+      ctx.fillStyle = rgb(lerpCol(c,[255,255,255],0.35), 0.62);
+      ctx.fillText('x'+g.mult, CX, CY - R*0.04);
+      ctx.font=`800 ${R*0.105}px ${FONT}`;
+      ctx.lineWidth = Math.max(3, R*0.026);
+      ctx.strokeText('COMBO', CX, CY + R*0.21);
+      ctx.fillStyle = rgb(c, 0.45);
+      ctx.fillText('COMBO', CX, CY + R*0.21);
     }
     ctx.restore();
 
