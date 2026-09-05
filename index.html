@@ -680,6 +680,31 @@
     for(let k=0;k<=steps;k++){ const p=trackPos(uc-uh + (2*uh)*k/steps); k?p2.lineTo(p[0],p[1]):p2.moveTo(p[0],p[1]); }
     return p2;
   }
+  // Yontulmuş kristal kapı: yay, faset (yüzey) parçalarına bölünür ve her
+  // faset farklı parlaklıkta çizilir -> düz neon yerine mücevher hissi.
+  function strokeCrystal(cAng, hAng, lw, col){
+    const uc=cAng/TAU, uh=hAng/TAU;
+    const facets = Math.max(4, Math.round(uh*2*N_TRACK/7));
+    ctx.save(); ctx.lineCap='butt'; ctx.lineJoin='miter';
+    for(let i=0;i<facets;i++){
+      const u0=uc-uh + (2*uh)*i/facets, u1=uc-uh + (2*uh)*(i+1)/facets;
+      const a=trackPos(u0), b=trackPos(u1);
+      // faset parlaklığı: kenarlarda sönük, ortada parlak + hafif rastgelelik
+      const t=(i+0.5)/facets, edge=Math.sin(Math.PI*t);
+      const shine=0.30+0.70*edge*(0.72+0.28*Math.sin(i*2.4));
+      ctx.strokeStyle=rgb(lerpCol(col,[255,255,255],0.42*shine), 0.28+0.68*shine);
+      ctx.lineWidth=lw*(0.80+0.30*edge);
+      ctx.beginPath(); ctx.moveTo(a[0],a[1]); ctx.lineTo(b[0],b[1]); ctx.stroke();
+      // faset ayrım çizgisi — kesik taş görünümü
+      if(i){ ctx.strokeStyle='rgba(20,10,30,0.34)'; ctx.lineWidth=1.6;
+             const nx=-(b[1]-a[1]), ny=(b[0]-a[0]), L=Math.hypot(nx,ny)||1;
+             ctx.beginPath();
+             ctx.moveTo(a[0]-nx/L*lw*0.45, a[1]-ny/L*lw*0.45);
+             ctx.lineTo(a[0]+nx/L*lw*0.45, a[1]+ny/L*lw*0.45); ctx.stroke(); }
+    }
+    ctx.restore();
+  }
+
   // tek bir yolu: önce geniş+saydam glow katmanları, sonra net gövde
   function strokeGlowPath(p2, lw, style, glowCol, glow){
     ctx.lineCap='round'; ctx.lineJoin='round';
@@ -1353,10 +1378,13 @@
     }
   }
   function drawMotes(accent){
+    // Nebula arka plan geldiğinden beri zerrecikler dokuyu ÇOĞALTMIYOR,
+    // sahneyi kirletiyordu. Menüde tamamen kapalı, oyunda çok hafif.
+    if(!g) return;
     for(const m of motes){
-      const a = m.a * (0.6+0.4*Math.sin(m.tw));
-      ctx.fillStyle = rgb(accent, a);
-      ctx.beginPath(); ctx.arc(m.x,m.y,m.r,0,TAU); ctx.fill();
+      const a = m.a * (0.6+0.4*Math.sin(m.tw)) * 0.28;
+      ctx.fillStyle = rgb(lerpCol(accent,[255,255,255],0.5), a);
+      ctx.beginPath(); ctx.arc(m.x,m.y,m.r*0.7,0,TAU); ctx.fill();
     }
   }
   initMotes();
@@ -2392,6 +2420,17 @@
       x.fillStyle=`rgba(255,255,255,${a})`;
       x.beginPath(); x.arc(px,py,r,0,TAU); x.fill();
     }
+    // en parlak yıldızlara kırınım çizgileri (teleskop hissi)
+    x.lineCap='round';
+    for(let i=0;i<9;i++){
+      const px=Math.random()*W, py=Math.random()*H, L=5+Math.random()*13;
+      x.strokeStyle='rgba(255,255,255,'+(0.20+Math.random()*0.30)+')';
+      x.lineWidth=1;
+      x.beginPath(); x.moveTo(px-L,py); x.lineTo(px+L,py);
+                     x.moveTo(px,py-L); x.lineTo(px,py+L); x.stroke();
+      x.fillStyle='rgba(255,255,255,0.85)';
+      x.beginPath(); x.arc(px,py,1.5,0,TAU); x.fill();
+    }
     // birkaç parlak odak
     for(let i=0;i<5;i++){
       const px=Math.random()*W, py=Math.random()*H*0.8, rr=8+Math.random()*22;
@@ -2410,19 +2449,20 @@
 
   let _bgKey='', _bgGrad=null, _bgHalo=null;
   function drawBg(accent){
-    if(!g){ drawMenuBg(accent); return; }   // menüde nebula
+    // Nebula artık OYUN İÇİNDE de kullanılır (önceden düz gradyandı).
+    // Önbellek anahtarı TEMA rengine bağlıdır (tur içinde değişen tier rengine
+    // değil), yoksa her karede yeniden çizilirdi.
+    drawMenuBg(activeSkin.coin);
+    if(!g) return;
+    // Oyun içi: sahneyi biraz karart ki kapı/kıvılcım net okunsun.
+    ctx.fillStyle='rgba(5,3,14,0.62)'; ctx.fillRect(0,0,W,H);
     const key = (accent[0]>>3)+'_'+(accent[1]>>3)+'_'+(accent[2]>>3)+'_'+W+'x'+H;
     if(key!==_bgKey){
       _bgKey=key;
-      _bgGrad = ctx.createRadialGradient(CX,CY,R*0.1, CX,CY, Math.max(W,H)*0.82);
-      _bgGrad.addColorStop(0, rgb(lerpCol(BG, accent, 0.14)) );
-      _bgGrad.addColorStop(0.55, '#120a26');
-      _bgGrad.addColorStop(1, '#080414');
       _bgHalo = ctx.createRadialGradient(CX,CY,R*0.3, CX,CY, R*2.0);
-      _bgHalo.addColorStop(0, rgb(accent, 0.12));
+      _bgHalo.addColorStop(0, rgb(accent, 0.14));
       _bgHalo.addColorStop(1, rgb(accent, 0));
     }
-    ctx.fillStyle=_bgGrad; ctx.fillRect(0,0,W,H);
     ctx.fillStyle=_bgHalo; ctx.fillRect(0,0,W,H);
   }
 
@@ -2453,14 +2493,16 @@
       if(wallPath) ctx.fill(wallPath);
       ctx.restore();
     }
-    // --- es merkezli kilavuz halkalar (zenginlik, ucuz) ---
+    // --- cam halka sistemi: iç içe saydam halkalar, kenarları ışıklı ---
     ctx.save();
-    ctx.strokeStyle = rgb(lerpCol([150,120,220], accent, 0.35), 0.13);
-    ctx.lineWidth = 2;
-    for(const f of [0.80, 0.90]){
-      ctx.beginPath();
-      ctx.ellipse(CX, CY, R*f*1.02, R*f*TILT_Y*1.02, 0, 0, TAU);
-      ctx.stroke();
+    for(const [f,w,a] of [[1.13,9,0.10],[1.04,6,0.13],[0.86,5,0.11],[0.66,3,0.09],[0.50,2,0.07]]){
+      const rx=R*f, ry=R*f*TILT_Y;
+      // gövde (buzlu cam)
+      ctx.strokeStyle=`rgba(214,224,255,${a})`; ctx.lineWidth=w;
+      ctx.beginPath(); ctx.ellipse(CX,CY,rx,ry,0,0,TAU); ctx.stroke();
+      // üst kenar vurgusu — cama hacim veren şey bu
+      ctx.strokeStyle=`rgba(255,255,255,${a*1.5})`; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.ellipse(CX,CY,rx+w*0.45,ry+w*0.45*TILT_Y,0,0,TAU); ctx.stroke();
     }
     ctx.restore();
     strokeFullTrack(12, rgb(lerpCol([120,95,190], accent, 0.35), 0.20));
@@ -2474,8 +2516,9 @@
     // Beklenti, ödülün kendisi kadar güçlü bir uyarandır.
     const near = 1 - Math.min(1, Math.abs(angDiff(g.angle, g.gateCenter)) / (gh*3.2));
     const antic = 1 + near*near*0.55;
-    strokeArc(g.gateCenter, gh, 26*gp, rgb(c,(gold?0.42:0.28)*antic), rgb(c,0.95), (34 + g.pulse*34)*(gold?1.5:1)*antic);
-    strokeArc(g.gateCenter, gh, 16*gp, rgb(lerpCol(c,[255,255,255],gold?0.60:0.42)), rgb(c,0.95), (18 + g.pulse*20)*(gold?1.5:1)*antic);
+    strokeArc(g.gateCenter, gh, 26*gp, rgb(c,(gold?0.28:0.16)*antic), rgb(c,0.92), (28 + g.pulse*30)*(gold?1.5:1)*antic);
+    strokeCrystal(g.gateCenter, gh, 19*gp, c);                       // yontulmuş gövde
+    strokeArc(g.gateCenter, gh*0.995, 5*gp, rgb(lerpCol(c,[255,255,255],0.75), 0.9), rgb(c,0.9), 12*antic); // parlak çekirdek
     strokeArc(g.gateCenter, effGate()*perfectFactor(), 5, 'rgba(255,255,255,0.92)', rgb(c,0.9), 10);  // perfect çekirdek
 
     drawOrbs();
@@ -2511,13 +2554,18 @@
     const [sx,sy]=pos(g.angle);
     const bcol = equippedBallObj.base || g.col;
     ctx.save();
-    for(let i=1;i<=10;i++){
-      const ta = g.angle - g.dir*i*0.05; const [tx,ty]=pos(ta);
-      const a=(1-i/10)*0.5;
-      if(equippedBall==='rainbow') ctx.fillStyle='hsla('+((i*40+performance.now()/5)%360)+',90%,65%,'+a+')';
-      else ctx.fillStyle=rgb(lerpCol(bcol,[255,255,255],0.35), a);
-      ctx.beginPath(); ctx.arc(tx,ty, 9*(1-i/12), 0, TAU); ctx.fill();
+    // Kuyruklu yıldız izi: uzun, incelerek sönen, sıcak çekirdekli kuyruk
+    const TAIL = 22;
+    ctx.globalCompositeOperation='lighter';
+    for(let i=1;i<=TAIL;i++){
+      const ta = g.angle - g.dir*i*0.032; const [tx,ty]=pos(ta);
+      const k = 1 - i/TAIL;                       // 1 -> 0
+      const a = k*k*0.55;                          // hızlı sönüm = kuyruk hissi
+      if(equippedBall==='rainbow') ctx.fillStyle='hsla('+((i*26+performance.now()/5)%360)+',90%,66%,'+a+')';
+      else ctx.fillStyle=rgb(lerpCol(bcol,[255,245,215],0.45*k), a);
+      ctx.beginPath(); ctx.arc(tx,ty, 10*k+1.5, 0, TAU); ctx.fill();
     }
+    ctx.globalCompositeOperation='source-over';
     ctx.restore();
     drawBall(ctx, sx, sy, 13, equippedBall, g.angle, bcol);
     ctx.restore();                     // yalpalama biter: yazılar ekran uzayında

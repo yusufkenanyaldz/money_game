@@ -218,6 +218,28 @@ taraf" sayabilir ve ilerleme oturumlar arası silinebilir. Oyun bu durumda
 **çökmez** (test edildi), yalnızca kayıt tutmaz. itch sayfasında
 *"Click to launch in fullscreen"* seçeneğini açmak sorunu giderir.
 
+## Sahne: derin uzay
+
+Oyun içi arka plan düz bir gradyandı; artık menüdeki **prosedürel nebula**
+oyunda da kullanılır (yıldızlar, renkli bulut kümeleri, en parlak yıldızlarda
+kırınım çizgileri). Üstüne sahneyi karartan bir katman gelir ki kapı ve
+kıvılcım net okunsun. Nebula tema rengine göre üretilir ve offscreen
+canvas'ta önbelleklenir — dış dosya yok.
+
+Sahnenin diğer parçaları:
+- **Cam halka sistemi:** iç içe 5 saydam halka, her birinin üst kenarında
+  ince ışık vurgusu — hacim hissi buradan gelir.
+- **Yontulmuş kristal kapı:** kapı düz bir neon çubuk değil; yay faset
+  parçalarına bölünür, her faset farklı parlaklıkta çizilir ve aralarına
+  koyu ayrım çizgileri konur → mücevher görünümü.
+- **Kuyruklu yıldız izi:** kıvılcımın arkasında 22 parçalı, karesel sönümlü,
+  `lighter` harmanlı sıcak çekirdekli kuyruk.
+
+**Performans:** Bu sahne daha ağır değil, daha HAFİF. Zerrecik (mote) sistemi
+nebula geldiği için gereksizleşti ve %72 kısıldı; iki tam ekran gradyan
+dolgusu tek bir önbellekli `drawImage`'a indi. 6× CPU kısıtlı ölçümde
+**14.7 → 16.6 fps.**
+
 ## Ekonomi dengesi (ölçülmüş)
 
 **Sorun:** Kazanç, combo çarpanı sınırsız büyüdüğü için tur uzunluğuyla
