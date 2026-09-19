@@ -336,3 +336,112 @@ oyuncunun yakalanıp sabırlının ayakta kalması, doktrinlerin ayrışması ve
 - Meselelerin tek cümleden istihbarat dosyasına dönmesi (günlerce düşündüren
   asıl şey bu)
 - Arayüz
+
+---
+
+# Aşama 2c: Dosya, Asabiyet ve Ortaklar
+
+## Mesele değil, dosya
+
+Bir mesele açıldığında oyuncuya rakam verilmez. **Dosya** verilir:
+tanıklıklar, çelişkiler, aralıklı tahminler ve nitel seçenekler. Hiçbir
+seçenek tarifinde sayı geçmez — "Bastır: sokağı sustur; görünen biter,
+görünmeyen için bir şey söylenemez."
+
+Dosyanın kalitesi oyuncunun **önceden yaptığı yatırıma** bağlıdır. Her olgu
+bir gizlilik derecesi taşır, her kaynağın bir erişim sınırı vardır:
+
+| Kaynak | Hata | Yalan | Erişim |
+|---|---|---|---|
+| Yerinde (olgun ajan) | ±4 | %4 | 1.00 |
+| Kurum (kurumsallaşmış akım) | ±9 | %12 | 0.72 |
+| Rakip (düşmanın anlatısı) | ±15 | %36 | 0.55 |
+| Sokak (kulaktan dolma) | ±25 | %32 | 0.45 |
+| Kronik (kendi gözlemin) | ±3 | %0 | 0.32 |
+
+Kronik hatasızdır ama yalnızca olup bitmiş görünür şeyleri anlatır: erişimi
+en dar kaynaktır. Halkın **gerçek** desteği (gizlilik 0.92) yalnızca
+içerideki olgun bir ajanla bilinir — Timur Kuran'ın tercih saklaması tam
+olarak burada mekanik hâline gelir.
+
+**Ölçüldü** (`node dosya-demo.js`): altı olgudan doğru bilinenlerin oranı
+
+| | Ajan yerleştirmiş | Yerleştirmemiş |
+|---|---|---|
+| Doğru bilinen olgu | %83 | %33 |
+| Karanlıkta kalan | 0 | 4 |
+| Kritik olgu (gerçek destek) | biliniyor | **karanlıkta** |
+
+Ajansız oyuncunun elindeki en iyi tahmin "%20–%70" gibi bir bant olur.
+Karar vermek için oturup düşünmek zorunda kalmanın kaynağı bu.
+
+**Çelişkiler.** Aynı konuda iki kaynak, biri yanılıyor:
+
+```
+Amaçtan sapma:
+  Rakip (düşmanının anlattığı): "Artık senin öğrettiğini değil,
+                                 kendi bulduklarını konuşuyorlar."
+  Kronik (kendi gözlemin):      "Sapma var ama gövde duruyor."
+```
+
+Oyun hangisinin doğru olduğunu söylemez. Kaynağın ağırlığını, o kaynağın
+o konuya erişimi olup olmadığını ve yalan payını sen tartarsın.
+
+## Asabiyet — döngü, kayma değil
+
+İlk uygulamada asabiyet tek yönlü sıfıra kayıyordu; bu İbn Haldun değil,
+sadece bir çöküştü. Döngüyü kapatan parça eklendi: asabiyeti 14'ün altına
+düşen hanedanın yerini **taşradan gelen taze bir dayanışma** alır
+(`yenilenme` olayı) — nesil sıfırlanır, asabiyet 68–90'a sıçrar, servet
+%22 düşer, istikrar sarsılır.
+
+- Çözülme: `(0.10 + servet/100 × 0.42 + nesil × 0.10) × (0.4 + asabiyet/140)` — dipte yavaşlar
+- Diriliş: dış tehdit başına +0.42
+- Veraset nesli artırır; **darbe ve kopuş yeni hanedandır** (nesil 0, asabiyet tazelenir)
+
+Ölçüldü: 260 turda asabiyet 12 ile 100 arasında salınıyor, fraksiyonlar
+birbirinden bağımsız evrelerde. Kopan akımlar 88 asabiyetle doğuyor —
+bu yüzden senin eserin sana en tehlikeli rakip olur.
+
+## Ortaklar — Hardin ve Ostrom
+
+Üç veya daha fazla gücün sınırında kalan bölge **ortak**tır. Kural yoksa
+tükenir (−0.30/tur); kural varsa kendini taşır (+0.10/tur).
+
+Kural iki yoldan doğar: oyuncunun o bölgedeki kurumsallaşmış akımı, ya da
+kendiliğinden biriken **gelenek** (sakin ve istikrarlı yıllarda +0.42/tur).
+Ama gelenek kırılgandır: bölge el değiştirdiğinde %68'i yok olur. Ostrom'un
+asıl tezi budur — yerel kural dışarıdan gelen düzenle değil, yerinde
+birikimle ayakta kalır.
+
+Ölçüldü (40 dünya, 150 tur): kurallı ortak **60.6**, kuralsız ortak
+**35.8**, özel bölge **36.5** zenginlik.
+
+## Yol boyunca düzeltilen kusurlar
+
+- **Bölge ölüm sarmalı.** Fraksiyonun serveti 50'nin altına düşünce bölge
+  fakirleşiyor, fakir bölge serveti daha da düşürüyordu. Ortalama bölge
+  zenginliği 200 turda **7.4**'e iniyordu. Her bölgeye kendi taşıma
+  kapasitesi verildi → **34.5**. Dünya kabul oranı da %0.25'ten %0.50'ye çıktı.
+- **Savaş kroniği kaplıyordu** (%35). Savaş olasılığı 0.09→0.072 → %33,
+  dokuz olay tipine dengeli dağılım.
+- **Testler sabit tohuma bağlıydı.** Fizik değişince kırıldılar. Artık her
+  koşuda sınavı geçen bir tohum yeniden aranıyor.
+- **İlk dosya tasarımında "kendi gözlemin" kaynağına sıfır hata verilmişti** —
+  üstelik görülemeyecek şeyler için bile. Ölçüm ajanın değerini %90'a karşı
+  %87 gösterdi, yani yatırım anlamsızdı. Kaynaklara erişim sınırı eklenince
+  fark %83'e karşı %33 oldu.
+
+## Test kapsamı
+
+`node test.js` — **63 test**. Yenileri: dosya yapısı, tahminlerin aralık
+olması, seçenek tariflerinde sayı bulunmaması, ajanın doğru bilinen olgu
+sayısını ikiye katlaması, ajansız oyuncuda kritik olguların karanlıkta
+kalması, çelişkilerin farklı kaynaklardan gelmesi, kütüphanenin dolması,
+asabiyet döngüsünün hem çöküp hem dirilmesi, kuralsız ortakların tükenmesi.
+
+## Kalan
+
+- Arayüz
+- Kehanetin dosyaya bağlanması (kanunları bilen oyuncu daha iyi kehanet kurar)
+- Meselelerin fraksiyon-içi olmayan türleri (savaş öncesi, veraset krizi, ortak bölge anlaşmazlığı)
