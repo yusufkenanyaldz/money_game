@@ -236,3 +236,103 @@ sahiplikleri tutarlı kalıyor.
 4. Kalan kuramların mekaniğe bağlanması (Asabiyet hanedan döngüsüne, Goodhart
    tekrarlanan müdahaleye, Olson kolektif eyleme, Scott merkezileşmeye)
 5. Doktrinler ve arayüz
+
+---
+
+# Aşama 2b: Gizli El — fiiller, kaynaklar, doktrin
+
+Oyuncu hiçbir fraksiyonu yönetmez. İki kaynağı vardır ve asıl kısıt
+nüfuz değil, **ifşa**dır.
+
+| Kaynak | Davranış |
+|---|---|
+| **Nüfuz** | Harcanır. Dolma hızı doktrinine hizalanmayla belirlenir: `0.5 + (hizalanma/100)^1.4 × 3.4`. Tavan 24. |
+| **İfşa** | Birikir, yavaş söner (1.15/tur), 100'e varırsa oyun biter. |
+
+## Tur başına 381 meşru hamle
+
+Ölçüldü: 12. turda 381, olgun ajanlarla 500'ün üstü.
+
+| Fiil | Nüfuz | İfşa | Hedef uzayı | Bağlı kuram |
+|---|---|---|---|---|
+| İncele | 3 | 0.4 | her gizli kanun | — (araştırma döngüsü) |
+| Fısılda | 2 | 1.0 | her lider (ajan gerekir) | Vekil sorunu |
+| Ajan yerleştir | 4 | 1.5 | her fraksiyon | Vekil sorunu |
+| Koru | 3 | 0.8 | her fraksiyon | — |
+| Finanse et | 4 | 1.5 | her fraksiyon | Tocqueville |
+| Sızdır | 2 | 1.7 | her fraksiyon çifti | Scott |
+| Kışkırt | 3 | 2.4 | her fraksiyon | Olson |
+| Tohum ek | 5 | 1.0 | fraksiyon × 5 katman × 6 amaç = 240 | Michels |
+| Kehanet | 4 | 2.0 | fraksiyon × 6 değişken × 2 yön = 96 | Merton |
+| İfşa et | 3 | 2.9 | her sır × her fraksiyon | Girard |
+
+## Goodhart: aynı kaldıraca basmak onu bozar
+
+Her `(fiil, hedef)` çifti yıpranır. Etkinlik `1 / (1 + yıpranma^1.3 × 0.38)`
+ile düşer, yıpranma turda yalnızca 0.035 iyileşir. Düşük etkinlik ayrıca
+ifşayı artırır (`ifşa × (2 − etkinlik)`) — beceriksiz hamle daha görünürdür.
+
+Ölçüldü: aynı hamleyi 40 kez tekrarlayan oyuncunun etkinliği **0.05**'e
+çöküyor; altı fiil arasında dönen oyuncu **0.64**'te kalıyor.
+
+## İfşa riski dünyaya bağlıdır
+
+`(0.5 + hedef.bilgi/115) × (orada olgun ajan varsa 0.72) × (korunuyorsa 1.15)`
+
+Ölçüldü: aynı fiilin maliyeti hedefe göre 0.70 ile 1.18 arasında değişiyor;
+olgun bir ajan izi 0.92'den 0.66'ya düşürüyor. Yani *nereye* dokunduğun,
+*ne yaptığın* kadar önemli.
+
+**Tempo eğrisi** (ölçüldü, 3 dünya):
+
+| Tempo | Sonuç |
+|---|---|
+| Her tur hamle | 65–86. turda yakalanır |
+| İki turda bir | 142–166. turda yakalanır (bir dünyada hayatta kalır) |
+| Üç turda bir | 200+ tur ayakta, etkinlik 0.72–0.80 |
+| Tek fiili spamlamak | Güvenli ama etkisiz (0.05–0.13) — ölü yol, sömürü değil |
+
+## Kehanet — geleceğe göre şimdi karar vermek
+
+Bir fraksiyonun bir değişkeni hakkında 12 mevsimlik iddia. Tutarsa +9 nüfuz
+ve −4 ifşa; tutmazsa +7 ifşa ("yalancı peygamber fark edilir"). İlan etmek
+dünyayı iddiaya doğru hafifçe iter (**Merton**, kendini gerçekleştiren
+kehanet) — ama bu itiş, iddiayı kanıt olmaktan da çıkarır.
+
+Kehanet oyunun "gelecekteki kararına göre şimdi karar ver" talebinin
+karşılığıdır: doğru kehanet için kanunları bilmen gerekir, kanunları
+bilmek için nüfuz harcaman gerekir.
+
+## Doktrin: hem amaç hem motor
+
+| Doktrin | Tarif |
+|---|---|
+| **Denge** | Hiçbir güç ötekini ezmesin. |
+| **Bilgelik** | Dünya bilsin ve öfkelenmesin. |
+| **Dirlik** | Kimin elinde olduğu önemli değil; halk rahat etsin. |
+| **Çözülme** | Büyük olan hiçbir şey ayakta kalmasın. |
+| **Arılık** | Tek bir fikir dünyaya sinsin. |
+| **Süreklilik** | Aynı el hep üstte kalsın — kim olduğu fark etmez. |
+
+Doktrin yalnızca puan tablosu değil: dünya doktrinine benzedikçe nüfuzun
+dolar. Bu yüzden doktrinine aykırı her hamle iki kez pahalıdır — bir kez
+nüfuz olarak, bir kez de nüfuzunun kaynağını kuruttuğu için.
+
+Ölçüldü: aynı dünyayı doktrinler 0 ile 59 arasında puanlıyor. Aynı doktrin
+(Bilgelik) üç farklı dünyada 10 / 27 / 57 ortalama veriyor — yani amaç sabit
+olsa bile oyun her dünyada baştan öğrenilir.
+
+## Test kapsamı
+
+`node test.js` — 49 test. Yenileri: 381 hamle sayımı, Goodhart yıpranması
+(0.05 vs 0.64), ifşanın hedefe göre değişmesi, ajanın iz örtmesi, gizli
+kanunların incelemeyle açılması, kehanetin vadesinde çözülmesi, aceleci
+oyuncunun yakalanıp sabırlının ayakta kalması, doktrinlerin ayrışması ve
+**oyuncu hiç hamle yapmazsa dünyanın birebir aynı akması**.
+
+## Kalan
+
+- Asabiyet (İbn Haldun) hanedan döngüsüne, Ostrom ortak bölgelere bağlanacak
+- Meselelerin tek cümleden istihbarat dosyasına dönmesi (günlerce düşündüren
+  asıl şey bu)
+- Arayüz

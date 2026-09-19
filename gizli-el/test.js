@@ -234,5 +234,137 @@ const saglamKonak = (w) => w.fac.map((f,i)=>({i,f,z:f.v.bilgi*0.5+f.v.istikrar*0
     Object.keys(G.KAVRAMLAR).length + ' kavram');
 }
 
+
+/* ===== GİZLİ EL: FİİLLER, KAYNAKLAR, DOKTRİN ===== */
+
+const kur = (seed, dk) => { const w = G.dunyaKur(seed); G.oyuncuKur(w, { doktrin: dk||'denge' });
+  for (let t=0;t<10;t++) G.adim(w); return w; };
+
+/* 17. Hamle uzayı geniş ve ajanla büyüyor */
+{
+  const w = kur(328);
+  const once = G.hamleler(w).length;
+  w.el.ajanlar.push({ id:0, fac:0, dikildi:0, olgun:true, yakalandi:false });
+  const sonra = G.hamleler(w).length;
+  T('tur başına 300+ meşru hamle', once >= 300, once + ' hamle');
+  T('ajan yeni fiiller açıyor', sonra > once, once + ' → ' + sonra);
+}
+
+/* 18. GOODHART: aynı kaldıraca basmak onu bozar */
+{
+  const a = kur(328), b = kur(328);
+  let tekEt = 0, cesitEt = 0, n = 0;
+  for (let t=0;t<40;t++){
+    const ha = G.hamleler(a).filter(h=>h.karsilanir).find(h=>h.fiil==='finanse' && h.fac===0);
+    if (ha){ tekEt = ha.etkinlik; G.hamleYap(a, ha); }
+    const fiil = ['finanse','kiskirt','koru','ajan','incele','kehanet'][t%6];
+    const hb = G.hamleler(b).filter(h=>h.karsilanir).find(h=>h.fiil===fiil);
+    if (hb){ cesitEt += hb.etkinlik; n++; G.hamleYap(b, hb); }
+    G.adim(a); G.adim(b);
+  }
+  T('tekrar eden hamle etkisini yitiriyor', tekEt < 0.25, 'etkinlik ' + tekEt.toFixed(2));
+  T('çeşitlendiren oyuncu etkisini koruyor', cesitEt/Math.max(1,n) > 0.5,
+    'ort ' + (cesitEt/Math.max(1,n)).toFixed(2));
+}
+
+/* 19. İfşa riski dünyaya bağlı, sabit değil */
+{
+  const w = kur(328);
+  const carp = w.fac.filter(f=>f.canli).map((f,i)=>G.ifsaCarpani(w, i));
+  T('ifşa riski hedefe göre değişiyor', Math.max(...carp) - Math.min(...carp) > 0.1,
+    carp.map(x=>x.toFixed(2)).join(' '));
+  const oncesi = G.ifsaCarpani(w, 0);
+  w.el.ajanlar.push({ id:0, fac:0, dikildi:0, olgun:true, yakalandi:false });
+  T('olgun ajan izi örtüyor', G.ifsaCarpani(w, 0) < oncesi,
+    oncesi.toFixed(2) + ' → ' + G.ifsaCarpani(w, 0).toFixed(2));
+}
+
+/* 20. İncele gizli kanunları açıyor */
+{
+  const w = kur(328);
+  const h = G.hamleler(w).filter(x=>x.fiil==='incele');
+  T('başlangıçta kanunlar gizli', w.el.bilinen.length === 0 && h.length === w.kanunlar.length,
+    w.kanunlar.length + ' gizli kanun');
+  G.hamleYap(w, h[0]);
+  T('incelemek bir kanunu açıyor', w.el.bilinen.length === 1);
+  T('açılan kanun listeden çıkıyor',
+    G.hamleler(w).filter(x=>x.fiil==='incele').length === h.length - 1);
+}
+
+/* 21. Kehanet vadesinde çözülüyor ve ödül/ceza veriyor */
+{
+  const w = kur(328);
+  const kh = G.hamleler(w).find(h=>h.fiil==='kehanet');
+  G.hamleYap(w, kh);
+  T('kehanet kaydediliyor', w.el.kehanetler.length === 1, 'vade tur ' + w.el.kehanetler[0].vade);
+  for (let t=0;t<16;t++) G.adim(w);
+  const k = w.el.kehanetler[0];
+  T('kehanet vadesinde çözülüyor', k.cozuldu, k.tuttu ? 'tuttu (' + k.fark + ')' : 'tutmadı (' + k.fark + ')');
+}
+
+/* 22. Kaybetmek mümkün ama kaçınılmaz değil */
+{
+  const hizli = kur(757), sabirli = kur(757);
+  for (let t=0;t<160;t++){
+    const f1 = ['kiskirt','ifsaEt','kehanet','finanse','sizdir','ajan'][t%6];
+    const h1 = G.hamleler(hizli).filter(h=>h.karsilanir).find(h=>h.fiil===f1);
+    if (h1) G.hamleYap(hizli, h1);
+    if (t%4===0){
+      const f2 = ['finanse','koru','incele','ajan'][(t/4)%4];
+      const h2 = G.hamleler(sabirli).filter(h=>h.karsilanir).find(h=>h.fiil===f2);
+      if (h2) G.hamleYap(sabirli, h2);
+    }
+    G.adim(hizli); G.adim(sabirli);
+  }
+  T('aceleci oyuncu yakalanıyor', hizli.el.bitti,
+    hizli.el.bitti ? ('tur ' + hizli.tur + ' · ' + hizli.el.bitisSebebi) : 'ifşa ' + hizli.el.ifsa.toFixed(0));
+  T('sabırlı oyuncu ayakta kalıyor', !sabirli.el.bitti, 'ifşa ' + sabirli.el.ifsa.toFixed(0));
+}
+
+/* 23. Doktrinler aynı dünyayı farklı puanlıyor */
+{
+  const w = kur(328);
+  for (let t=0;t<60;t++) G.adim(w);
+  const puanlar = {};
+  for (const dk in G.DOKTRINLER){ w.el.doktrin = dk; puanlar[dk] = Math.round(G.hizalanma(w)); }
+  const vals = Object.values(puanlar);
+  T('doktrinler aynı dünyayı farklı değerlendiriyor',
+    Math.max(...vals) - Math.min(...vals) > 25, JSON.stringify(puanlar));
+  let eksik = Object.keys(G.DOKTRINLER).filter(d=>!G.DOKTRINLER[d].ad || !G.DOKTRINLER[d].tarif);
+  T('her doktrinin adı ve tarifi var', eksik.length === 0, Object.keys(G.DOKTRINLER).length + ' doktrin');
+}
+
+/* 24. Aynı doktrin farklı dünyalarda farklı oyun */
+{
+  const ort = [];
+  for (const seed of [328, 410, 757]){
+    const w = kur(seed, 'bilgelik');
+    for (let t=0;t<80;t++) G.adim(w);
+    const g = w.el.hizGecmis;
+    ort.push(Math.round(g.reduce((a,b)=>a+b,0)/g.length));
+  }
+  T('aynı doktrin dünyadan dünyaya değişiyor', Math.max(...ort) - Math.min(...ort) > 8, ort.join(' · '));
+}
+
+/* 25. Doktrine hizalanma nüfuzu besliyor */
+{
+  const iyi = kur(328), kotu = kur(328);
+  iyi.el.doktrin = 'denge'; kotu.el.doktrin = 'bilgelik';
+  for (let t=0;t<50;t++){ G.adim(iyi); G.adim(kotu); }
+  const hIyi = iyi.el.hizGecmis.reduce((a,b)=>a+b,0)/iyi.el.hizGecmis.length;
+  const hKotu = kotu.el.hizGecmis.reduce((a,b)=>a+b,0)/kotu.el.hizGecmis.length;
+  T('hizalanma ölçülüyor ve doktrine göre farklı',
+    Math.abs(hIyi - hKotu) > 10, hIyi.toFixed(0) + ' vs ' + hKotu.toFixed(0));
+}
+
+/* 26. Oyuncusuz dünya hâlâ etkilenmiyor */
+{
+  const a = G.dunyaKur(909), b = G.dunyaKur(909);
+  G.oyuncuKur(b);
+  for (let t=0;t<80;t++){ G.adim(a); G.adim(b); }
+  T('oyuncu hiç hamle yapmazsa dünya aynı akar',
+    JSON.stringify(G.durumVektoru(a)) === JSON.stringify(G.durumVektoru(b)));
+}
+
 console.log('\n' + (kaldi === 0 ? 'HEPSİ GEÇTİ' : kaldi + ' TEST KALDI') + '  (' + gecti + '/' + (gecti + kaldi) + ')\n');
 process.exit(kaldi ? 1 : 0);

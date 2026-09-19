@@ -433,7 +433,8 @@ function adim(w, sec_){
   // 11) liderler
   olaylar.push(...liderleriIsle(w));
 
-  // 12) akımlar, meseleler ve kopuşlar
+  // 12) akımlar, meseleler, kopuşlar ve gizli el
+  if (w.el) olaylar.push(...eliIsle(w));
   olaylar.push(...tohumOlay);
   olaylar.push(...kopuslariIsle(w));
   olaylar.push(...meseleleriIsle(w));
@@ -605,6 +606,11 @@ const KAVRAMLAR = {
     ad: 'Günah Keçisi',
     tek: 'Kriz, suçun tek bir kurbanda toplanmasıyla çözülür — ve bir süre işe yarar.',
     kaynak: 'René Girard — Şiddet ve Kutsal (1972)'
+  },
+  merton: {
+    ad: 'Kendini Gerçekleştiren Kehanet',
+    tek: 'Yanlış bir tanım, ona göre davranıldığı için doğru çıkar.',
+    kaynak: 'Robert K. Merton — Social Theory and Social Structure (1948)'
   },
   ostrom: {
     ad: 'Ortakların Yönetimi',
@@ -995,6 +1001,345 @@ function kopuslariIsle(w){
   return out;
 }
 
+/* ================= OYUNCU: GİZLİ EL =================
+ * Oyuncu hiçbir fraksiyonu yönetmez. İki kaynağı vardır:
+ *   nüfuz — harcanır, yavaş dolar
+ *   ifşa  — birikir, silinmez; 100'e varırsa oyun biter
+ * Her fiil ikisini de tüketir. Asıl kısıt nüfuz değil, ifşadır.
+ */
+const FIILLER = {
+  incele:   { ad:'İncele',          nufuz:3, ifsa:0.4, kavram:null },
+  fisilda:  { ad:'Fısılda',         nufuz:2, ifsa:1.0, kavram:'vekil' },
+  ajan:     { ad:'Ajan yerleştir',  nufuz:4, ifsa:1.5, kavram:'vekil' },
+  koru:     { ad:'Koru',            nufuz:3, ifsa:0.8, kavram:null },
+  finanse:  { ad:'Finanse et',      nufuz:4, ifsa:1.5, kavram:'tocqueville' },
+  sizdir:   { ad:'Sızdır',          nufuz:2, ifsa:1.7, kavram:'scott' },
+  kiskirt:  { ad:'Kışkırt',         nufuz:3, ifsa:2.4, kavram:'olson' },
+  tohum:    { ad:'Tohum ek',        nufuz:5, ifsa:1.0, kavram:'michels' },
+  kehanet:  { ad:'Kehanet',         nufuz:4, ifsa:2.0, kavram:'merton' },
+  ifsaEt:   { ad:'İfşa et',         nufuz:3, ifsa:2.9, kavram:'girard' }
+};
+
+/* ================= DOKTRİN =================
+ * Oyuncunun amacı. Hangi dünya durumunun "iyi" olduğunu doktrin tanımlar
+ * ve aynı doktrin nüfuzunu besler: dünya sana benzedikçe güçlenirsin.
+ * Bu yüzden doktrinine aykırı her hamle iki kez pahalıdır.
+ */
+function _canli(w){ return w.fac.filter(f=>f.canli); }
+function _sapma(xs){
+  if (!xs.length) return 0;
+  const m = xs.reduce((a,b)=>a+b,0)/xs.length;
+  return Math.sqrt(xs.reduce((a,b)=>a+(b-m)*(b-m),0)/xs.length);
+}
+const DOKTRINLER = {
+  denge: {
+    ad: 'Denge', tarif: 'Hiçbir güç ötekini ezmesin.',
+    puan(w){ const F=_canli(w); if(F.length<2) return 0;
+      return kirp(100 - _sapma(F.map(f=>f.v.guc))*3.2 - Math.max(0, F.length<4 ? (4-F.length)*15 : 0), 0, 100); }
+  },
+  bilgelik: {
+    ad: 'Bilgelik', tarif: 'Dünya bilsin ve öfkelenmesin.',
+    puan(w){ const F=_canli(w); if(!F.length) return 0;
+      const b=F.reduce((a,f)=>a+f.v.bilgi,0)/F.length, o=F.reduce((a,f)=>a+f.v.ofke,0)/F.length;
+      return kirp(b*1.15 - o*0.85, 0, 100); }
+  },
+  dirlik: {
+    ad: 'Dirlik', tarif: 'Kimin elinde olduğu önemli değil; halk rahat etsin.',
+    puan(w){ const F=_canli(w); if(!F.length) return 0;
+      const sv=F.reduce((a,f)=>a+f.v.servet,0)/F.length, is=F.reduce((a,f)=>a+f.v.istikrar,0)/F.length;
+      const hz=w.bolgeler.reduce((a,b)=>a+b.huzursuzluk,0)/(w.bolgeler.length||1);
+      return kirp(sv*0.55 + is*0.55 - hz*0.35, 0, 100); }
+  },
+  cozulme: {
+    ad: 'Çözülme', tarif: 'Büyük olan hiçbir şey ayakta kalmasın.',
+    puan(w){ const F=_canli(w); if(!F.length) return 0;
+      const enBuyuk = Math.max(...F.map(f=>f.bolgeler.length));
+      const ort = w.bolgeler.length / F.length;
+      return kirp(F.length*9 - (enBuyuk-ort)*11, 0, 100); }
+  },
+  arilik: {
+    ad: 'Arılık', tarif: 'Tek bir fikir dünyaya sinsin.',
+    puan(w){ const F=_canli(w); if(F.length<2) return 0;
+      let top=0, n=0;
+      for(let i=0;i<F.length;i++) for(let j=i+1;j<F.length;j++){ top+=ideolojikMesafe(F[i],F[j]); n++; }
+      return kirp(100 - (top/(n||1))*190, 0, 100); }
+  },
+  sureklilik: {
+    ad: 'Süreklilik', tarif: 'Aynı el hep üstte kalsın — kim olduğu fark etmez.',
+    puan(w){ const F=_canli(w); if(!F.length) return 0;
+      const s2 = F.map((f)=>({f,s:skor(f)})).sort((a,b)=>b.s-a.s);
+      const E = w.el;
+      if (!E) return 0;
+      if (E.sonUst === s2[0].f.id) E.ustSure = (E.ustSure||0)+1; else { E.sonUst = s2[0].f.id; E.ustSure = 0; }
+      // sallantılı üstünlük süreklilik sayılmaz
+      const fark = s2.length>1 ? s2[0].s - s2[1].s : 30;
+      return kirp((E.ustSure||0)*1.0 - (fark < 6 ? 25 : 0), 0, 100); }
+  }
+};
+
+function hizalanma(w){
+  if (!w.el || !w.el.doktrin) return 50;
+  return DOKTRINLER[w.el.doktrin].puan(w);
+}
+
+function oyuncuKur(w, ayar){
+  w.el = {
+    doktrin: (ayar && ayar.doktrin) || 'denge',
+    nufuz: 10, ifsa: 0, hiz: 50, hizGecmis: [],
+    ajanlar: [], sirlar: [], kehanetler: [],
+    asinma: {},            // GOODHART: (fiil|hedef) → yıpranma
+    bilinen: [],           // keşfedilmiş kanunların id'leri
+    gunluk: [], av: 0,     // av: seni arayan fraksiyonların toplam dikkati
+    bitti: false, bitisSebebi: null
+  };
+  return w.el;
+}
+
+/* --- GOODHART: aynı kaldıraca basmak onu kaldıraç olmaktan çıkarır --- */
+function asinmaAnahtar(fiil, hedef){ return fiil + '|' + (hedef == null ? '-' : hedef); }
+// İfşa riski dünyaya bağlıdır: bilgisi yüksek bir fraksiyona dokunmak
+// seni ele verir; orada olgun bir ajanın varsa iz örtülür.
+function ifsaCarpani(w, fac){
+  if (fac == null || !w.fac[fac]) return 1;
+  const f = w.fac[fac];
+  const ajan = w.el && w.el.ajanlar.some(a=>a.fac===fac && a.olgun && !a.yakalandi);
+  return (0.5 + f.v.bilgi/115) * (ajan ? 0.72 : 1) * (f.korunma > 0 ? 1.15 : 1);
+}
+
+function etkinlik(w, fiil, hedef){
+  const a = w.el.asinma[asinmaAnahtar(fiil, hedef)] || 0;
+  return 1 / (1 + Math.pow(a, 1.3) * 0.38);
+}
+function asindir(w, fiil, hedef){
+  const k = asinmaAnahtar(fiil, hedef);
+  w.el.asinma[k] = (w.el.asinma[k] || 0) + 1;
+}
+
+/* --- meşru hamlelerin tamamı --- */
+function hamleler(w){
+  const L = [], E = w.el;
+  const canli = w.fac.map((f,i)=>({f,i})).filter(x=>x.f.canli);
+  const ajanli = (i)=> E.ajanlar.some(a=>a.fac===i && a.olgun);
+  const ek = (fiil, hedef, etiket, ayrinti)=>{
+    const F = FIILLER[fiil];
+    const et = etkinlik(w, fiil, hedef);
+    const ic = ifsaCarpani(w, (ayrinti && ayrinti.fac != null) ? ayrinti.fac : null);
+    L.push(Object.assign({ fiil, hedef, etiket, nufuz:F.nufuz, ifsa:+(F.ifsa*(2-et)*ic).toFixed(2),
+                           etkinlik:+et.toFixed(2), karsilanir: E.nufuz >= F.nufuz }, ayrinti||{}));
+  };
+
+  // İNCELE — dünyanın gizli kanunlarını öğren (araştırma döngüsü)
+  for (const k of w.kanunlar) if (E.bilinen.indexOf(k.id) < 0)
+    ek('incele', 'k'+k.id, `${VAD[k.hedef]} kanunlarından birini incele`, { kanun:k.id });
+
+  for (const {f,i} of canli){
+    ek('ajan',    i, `${f.ad} içine ajan yerleştir`, { fac:i });
+    ek('finanse', i, `${f.ad} gizlice finanse edilsin`, { fac:i });
+    ek('kiskirt', i, `${f.ad} kışkırtılsın`, { fac:i });
+    ek('koru',    i, `${f.ad} korunsun`, { fac:i });
+    if (ajanli(i)) ek('fisilda', i, `${f.lider.ad} kulağına fısılda`, { fac:i });
+    // KEHANET — geleceğe dair bir iddia; tutarsa nüfuz, tutmazsa ifşa
+    for (const v of VARS) for (const yon of ['yukselecek','dusecek'])
+      ek('kehanet', i+'|'+v+'|'+yon, `Kehanet: ${f.ad} — ${VAD[v]} ${yon}`,
+         { fac:i, vr:v, yon });
+    // TOHUM — katman × amaç
+    for (const kat in KATMANLAR) for (const am in AMACLAR)
+      ek('tohum', i+'|'+kat+'|'+am,
+         `${f.ad} · ${KATMANLAR[kat].ad} katmanına ${AMACLAR[am].ad} ek`,
+         { fac:i, katman:kat, amac:am });
+  }
+
+  // SIZDIR / İFŞA ET — çiftler
+  for (const {f:a,i} of canli) for (const {f:b,i:j} of canli){
+    if (i===j) continue;
+    if (ajanli(i)) ek('sizdir', i+'>'+j, `${a.ad}'nın bildiğini ${b.ad} da öğrensin`, { fac:i, hedefFac:j });
+  }
+  for (const sir of E.sirlar){
+    if (sir.kullanildi) continue;
+    for (const {f:b,i:j} of canli){
+      if (j===sir.fac) continue;
+      ek('ifsaEt', sir.id+'>'+j, `${w.fac[sir.fac].ad} hakkındaki sırrı ${b.ad}'na ver`,
+         { sir:sir.id, fac:sir.fac, hedefFac:j });
+    }
+  }
+  return L;
+}
+
+function hamleYap(w, h){
+  const E = w.el, out = [];
+  const F = FIILLER[h.fiil];
+  if (!F) return out;
+  if (E.nufuz < F.nufuz) return [{ tur:w.tur, tip:'ret', metin:'Nüfuzun yetmiyor.' }];
+  const et = etkinlik(w, h.fiil, h.hedef);
+  E.nufuz -= F.nufuz;
+  E.ifsa   = kirp(E.ifsa + F.ifsa * (2 - et) * ifsaCarpani(w, h.fac), 0, 100);
+  asindir(w, h.fiil, h.hedef);
+  const not = (metin, ek)=> out.push(Object.assign({ tur:w.tur, tip:'el', fiil:h.fiil, metin }, ek||{}));
+  const f = h.fac != null ? w.fac[h.fac] : null;
+
+  switch (h.fiil){
+    case 'incele': {
+      const k = w.kanunlar[h.kanun];
+      if (k && E.bilinen.indexOf(k.id) < 0) E.bilinen.push(k.id);
+      not(`Bir kanun açığa çıktı: ${kanunMetni(k)}`, { kanun:k.id, kavram:null });
+      break;
+    }
+    case 'ajan':
+      E.ajanlar.push({ id:E.ajanlar.length, fac:h.fac, dikildi:w.tur, olgun:false, yakalandi:false });
+      not(`${f.ad} içine bir ajan yerleştirildi. Olgunlaşması zaman alır.`, { kavram:'vekil' });
+      break;
+    case 'fisilda':
+      f.lider.kusku = kirp(f.lider.kusku + 9*et, 0, 100);
+      f.v.istikrar  = kirp(f.v.istikrar - 3*et, 0.4, 99.6);
+      not(`${f.lider.ad} artık çevresine daha az güveniyor.`);
+      break;
+    case 'koru':
+      f.korunma = (f.korunma || 0) + 6*et;
+      not(`${f.ad} bir süre korunuyor.`);
+      break;
+    case 'finanse':
+      f.v.servet = kirp(f.v.servet + 7*et, 0.4, 99.6);
+      not(`${f.ad} kasasına sessizce para aktı.`, { kavram:'tocqueville' });
+      break;
+    case 'kiskirt': {
+      // OLSON: küçük ve yoğun gruplar örgütlenir, geniş kalabalık örgütlenmez
+      const akim = w.tohumlar.find(t=>t.canli && t.fac===h.fac);
+      const yogunluk = akim ? (1.45 - (akim.katman==='halk' ? 0.75 : 0)) : 0.7;
+      f.v.ofke = kirp(f.v.ofke + 9*et*yogunluk, 0.4, 99.6);
+      f.v.istikrar = kirp(f.v.istikrar - 4*et*yogunluk, 0.4, 99.6);
+      not(`${f.ad} kışkırtıldı.` + (yogunluk < 0.8 ? ' Kalabalık dağınık; öfke dağılıyor.' : ''),
+          { kavram:'olson' });
+      break;
+    }
+    case 'tohum': {
+      const t = tohumEk(w, { fac:h.fac, katman:h.katman, amac:h.amac, bolge:f.bolgeler[0] });
+      not(`${f.ad} içinde ${KATMANLAR[h.katman].ad} katmanına ${AMACLAR[h.amac].ad} ekildi: ${t.ad}.`,
+          { tohum:t.id, kavram:'michels' });
+      break;
+    }
+    case 'sizdir': {
+      // SCOTT: merkez görebilmek için basitleştirir; gördüğü şey artık o şey değildir
+      const b = w.fac[h.hedefFac];
+      b.v.bilgi = kirp(b.v.bilgi + 6*et, 0.4, 99.6);
+      f.v.bilgi = kirp(f.v.bilgi - 2*et, 0.4, 99.6);
+      w.R[h.fac][h.hedefFac] = kirp(w.R[h.fac][h.hedefFac] - 8*et, -100, 100);
+      not(`${f.ad}'nın bildiği ${b.ad}'na ulaştı.`, { kavram:'scott' });
+      break;
+    }
+    case 'ifsaEt': {
+      const sir = E.sirlar.find(x=>x.id===h.sir);
+      const b = w.fac[h.hedefFac];
+      if (sir) sir.kullanildi = true;
+      const agirlik = sir ? sir.agirlik : 6;
+      f.v.mesruiyet = kirp(f.v.mesruiyet - agirlik*et, 0.4, 99.6);
+      w.R[h.hedefFac][h.fac] = kirp(w.R[h.hedefFac][h.fac] - agirlik*2.2*et, -100, 100);
+      b.v.bilgi = kirp(b.v.bilgi + 4*et, 0.4, 99.6);
+      not(`${b.ad}, ${f.ad} hakkındaki sırrı öğrendi.`, { kavram:'girard' });
+      break;
+    }
+    case 'kehanet': {
+      const baslangic = f.v[h.vr];
+      E.kehanetler.push({ id:E.kehanetler.length, fac:h.fac, vr:h.vr, yon:h.yon,
+                          baslangic, acilis:w.tur, vade:w.tur+12, cozuldu:false });
+      // MERTON: ilan edilmiş kehanet, ona göre davranıldığı için kendini besler
+      const itis = (h.yon==='yukselecek' ? 1 : -1) * 1.6 * et;
+      f.v[h.vr] = kirp(f.v[h.vr] + itis, 0.4, 99.6);
+      not(`Kehanet ilan edildi: ${f.ad} — ${VAD[h.vr]} ${h.yon}. Vade 12 mevsim.`, { kavram:'merton' });
+      break;
+    }
+  }
+  E.gunluk.push({ tur:w.tur, fiil:h.fiil, hedef:h.hedef, etkinlik:+et.toFixed(2) });
+  return out;
+}
+
+/* --- oyuncunun turu: kaynak, ajanlar, kehanetler, av --- */
+function eliIsle(w){
+  const E = w.el, out = [];
+  if (!E || E.bitti) return out;
+
+  // nüfuz: kurumsallaşmış akımlar ve olgun ajanlar besler
+  const kurumsal = w.tohumlar.filter(t=>t.canli && t.kurumsal).length;
+  const olgunAjan = E.ajanlar.filter(a=>a.olgun && !a.yakalandi).length;
+  // Dünya doktrinine benzedikçe güçlenirsin: amaç ve motor aynı şeydir
+  E.hiz = hizalanma(w);
+  E.hizGecmis.push(Math.round(E.hiz));
+  if (E.hizGecmis.length > 400) E.hizGecmis.shift();
+  // hizalanma keskin: doktrinine aykırı giden dünya seni aç bırakır
+  const besin = 0.5 + Math.pow(E.hiz/100, 1.4) * 3.4;
+  E.nufuz = Math.min(24, E.nufuz + besin + kurumsal*0.85 + olgunAjan*0.45 - E.ifsa/70);
+
+  // ifşa yavaş söner ama sıfırlanmaz
+  E.ifsa = kirp(E.ifsa - (1.15 + (E.ifsa>60 ? 0.5 : 0)), 0, 100);
+
+  // GOODHART yıpranması çok yavaş iyileşir
+  for (const k in E.asinma) E.asinma[k] = Math.max(0, E.asinma[k] - 0.035);
+
+  // ajanlar olgunlaşır, sır üretir, yakalanabilir
+  for (const a of E.ajanlar){
+    if (a.yakalandi) continue;
+    const f = w.fac[a.fac];
+    if (!f || !f.canli){ a.yakalandi = true; continue; }
+    const yas = w.tur - a.dikildi;
+    if (!a.olgun && yas >= 6){
+      a.olgun = true;
+      out.push({ tur:w.tur, tip:'el', metin:`${f.ad} içindeki ajanın artık işe yarar.` });
+    }
+    if (a.olgun && hsh(w.seed+'|sr|'+w.tur+'|'+a.id) < 0.09){
+      const sir = { id:E.sirlar.length, fac:a.fac, agirlik:Math.round(ara(()=>hsh(w.seed+'|sa|'+w.tur+'|'+a.id),4,11)),
+                    bulundu:w.tur, kullanildi:false };
+      E.sirlar.push(sir);
+      out.push({ tur:w.tur, tip:'el', sir:sir.id,
+        metin:`${f.ad} hakkında bir sır elinde: ağırlık ${sir.agirlik}.` });
+    }
+    // yakalanma: fraksiyonun bilgisi ve senin ifşan yükseldikçe
+    const risk = (f.v.bilgi/100)*0.022 + E.ifsa/2600;
+    if (a.olgun && hsh(w.seed+'|ay|'+w.tur+'|'+a.id) < risk){
+      a.yakalandi = true;
+      E.ifsa = kirp(E.ifsa + 9, 0, 100);
+      out.push({ tur:w.tur, tip:'el', metin:`${f.ad} ajanını yakaladı. İzin daha da belirginleşti.` });
+    }
+  }
+
+  // kehanetler vadesinde çözülür
+  for (const kh of E.kehanetler){
+    if (kh.cozuldu || w.tur < kh.vade) continue;
+    kh.cozuldu = true;
+    const f = w.fac[kh.fac];
+    const simdi = f && f.canli ? f.v[kh.vr] : 0;
+    const fark = simdi - kh.baslangic;
+    const tuttu = (kh.yon==='yukselecek' && fark > 4) || (kh.yon==='dusecek' && fark < -4);
+    kh.tuttu = tuttu; kh.fark = +fark.toFixed(1);
+    if (tuttu){
+      E.nufuz = Math.min(24, E.nufuz + 9);
+      E.ifsa  = kirp(E.ifsa - 4, 0, 100);
+      out.push({ tur:w.tur, tip:'el', kavram:'merton',
+        metin:`Kehanet tuttu: ${f.ad} — ${VAD[kh.vr]} ${kh.yon} (${fark>0?'+':''}${fark.toFixed(1)}). Görünmez el güçlendi.` });
+    } else {
+      E.ifsa = kirp(E.ifsa + 7, 0, 100);
+      out.push({ tur:w.tur, tip:'el', kavram:'merton',
+        metin:`Kehanet tutmadı: ${f && f.canli ? f.ad : 'fraksiyon'} — ${VAD[kh.vr]} ${kh.yon} (${fark>0?'+':''}${fark.toFixed(1)}). Yalancı peygamber fark edilir.` });
+    }
+  }
+
+  // korunma söner
+  for (const f of w.fac) if (f.korunma) f.korunma = Math.max(0, f.korunma - 1.5);
+
+  // AV: bilgisi yüksek fraksiyonlar izi sürer
+  let dikkat = 0;
+  for (const f of w.fac) if (f.canli) dikkat += Math.max(0, f.v.bilgi - 58) / 100;
+  E.av = kirp(E.av + dikkat * (E.ifsa/55) - 0.25, 0, 100);
+
+  if (E.ifsa >= 100 || E.av >= 100){
+    E.bitti = true;
+    E.bitisSebebi = E.ifsa >= 100 ? 'ifsa' : 'av';
+    out.push({ tur:w.tur, tip:'son',
+      metin: E.bitisSebebi === 'ifsa'
+        ? 'Artık görünüyorsun. Gizli el kalmadı.'
+        : 'İzini sürdüler ve buldular.' });
+  }
+  return out;
+}
+
 /* ---------- DOĞRULAMA ---------- */
 // Üretilen fizik oyuna layık mı? Donuk, çığ gibi, ölü veya kaderi yazılmış
 // dünyalar elenir. En kritik sınav: tek bir küçük müdahale, 100 tur sonra
@@ -1121,6 +1466,7 @@ function iyiTohum(baslangic, ayar, limit){
 }
 
 return { VARS, VAD, SEKIL, KAPSAM, KAVRAMLAR, KATMANLAR, AMACLAR, EVRELER,
+           FIILLER, DOKTRINLER, hizalanma, ifsaCarpani, oyuncuKur, hamleler, hamleYap, eliIsle, etkinlik,
            klonla, tohumEk, tohumlariIsle, meseleAc, meseleKarar, meselePencere, fraksiyonEkle, evreAdi,
            kanunSetiUret, kalibreEt, ekBelirtme, ekYonelme, durumVektoru, yapisalImza, dunyaKur, adim, skor, dogrula, iyiTohum, kanunMetni, ideolojikMesafe, mulberry32, hsh };
 });
