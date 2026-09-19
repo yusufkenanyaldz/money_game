@@ -107,5 +107,132 @@ console.log('\nGİZLİ EL — çekirdek testleri\n');
     ' · ' + Object.keys(tip).length + ' tip');
 }
 
+
+/* ===== AKIMLAR, MESELELER, KOPUŞLAR ===== */
+
+const saglamKonak = (w) => w.fac.map((f,i)=>({i,f,z:f.v.bilgi*0.5+f.v.istikrar*0.3+G.skor(f)*0.4}))
+  .filter(x=>x.f.canli && G.skor(x.f)>28 && x.f.v.ofke<60).sort((a,b)=>b.z-a.z)[0];
+
+/* 10. Tohumsuz dünya tohum sisteminden etkilenmiyor */
+{
+  const a = G.dunyaKur(555);
+  for (let t=0;t<150;t++) G.adim(a);
+  T('tohum ekilmeyen dünyada akım yok', a.tohumlar.length === 0 && a.meseleler.length === 0);
+}
+
+/* 11. Olgunluk artar, denetim erir (Michels) */
+{
+  const w = G.dunyaKur(328);
+  for (let t=0;t<12;t++) G.adim(w);
+  const h = saglamKonak(w);
+  const th = G.tohumEk(w, { fac:h.i, katman:'esnaf', amac:'okuryazarlik', bolge:h.f.bolgeler[0] });
+  let artan = 0, eriyen = 0, n = 0;
+  let oO = th.olgunluk, oD = th.denetim;
+  for (let t=0;t<50;t++){
+    G.adim(w);
+    if (!th.canli) break;
+    if (th.olgunluk > oO) artan++;
+    if (th.denetim < oD) eriyen++;
+    oO = th.olgunluk; oD = th.denetim; n++;
+  }
+  T('olgunluk büyür', artan >= n*0.9, artan+'/'+n);
+  T('denetim kendiliğinden geri gelmez', eriyen >= n*0.9, eriyen+'/'+n+' · son %'+Math.round(th.denetim));
+  T('getiri ile risk aynı değişkene bağlı', th.olgunluk > 40 && th.denetim < 80,
+    'olgunluk '+Math.round(th.olgunluk)+' denetim %'+Math.round(th.denetim));
+}
+
+/* 12. Mesele açılır ve penceresi işler */
+{
+  const w = G.dunyaKur(328);
+  for (let t=0;t<12;t++) G.adim(w);
+  const h = saglamKonak(w);
+  const th = G.tohumEk(w, { fac:h.i, katman:'esnaf', amac:'okuryazarlik', bolge:h.f.bolgeler[0] });
+  let acilan = null;
+  for (let t=0;t<90 && !acilan;t++){ G.adim(w); acilan = w.meseleler.find(m=>m.acik); }
+  T('kontrolden çıkma meselesi açılıyor', !!acilan, acilan ? acilan.baslik+' (tur '+acilan.acilis+')' : 'açılmadı');
+  if (acilan){
+    T('mesele penceresi sayılıyor', G.meselePencere(w, acilan) > 0, G.meselePencere(w, acilan)+' mevsim');
+    T('mesele gerçek bir kurama bağlı', !!G.KAVRAMLAR[acilan.kavram], acilan.kavram);
+    const oncekiGunluk = acilan.gunluk.length;
+    G.adim(w);
+    T('durum açık kaldıkça gelişiyor (durağan değil)', acilan.gunluk.length > oncekiGunluk);
+  }
+}
+
+/* 13. Kararlar tarihi ayırıyor */
+{
+  const w = G.dunyaKur(328);
+  for (let t=0;t<12;t++) G.adim(w);
+  const h = saglamKonak(w);
+  const th = G.tohumEk(w, { fac:h.i, katman:'esnaf', amac:'okuryazarlik', bolge:h.f.bolgeler[0] });
+  let m = null;
+  for (let t=0;t<90 && !m;t++){ G.adim(w); m = w.meseleler.find(x=>x.acik); }
+  if (m){
+    const izler = [];
+    for (const karar of m.secenekler){
+      const d = G.klonla(w);
+      G.meseleKarar(d, m.id, karar);
+      for (let t=0;t<60;t++) G.adim(d);
+      izler.push({ karar, iz: G.durumVektoru(d).map(x=>Math.round(x)).join(','),
+                   fac: d.fac.length, akim: d.tohumlar[th.id].canli });
+    }
+    const benzersiz = new Set(izler.map(x=>x.iz)).size;
+    T('beş karar beş farklı tarih üretiyor', benzersiz === izler.length, benzersiz+'/'+izler.length);
+    const yapisalFarkli = new Set(izler.map(x=>x.fac+'|'+x.akim)).size;
+    T('kararlar yapısal olarak da ayrışıyor', yapisalFarkli >= 2, yapisalFarkli+' farklı yapı');
+  } else { T('beş karar beş farklı tarih üretiyor', false, 'mesele açılmadı'); }
+}
+
+/* 14. KURAN: bastırma görüneni kırar, gerçeği büyütür */
+{
+  const w = G.dunyaKur(328);
+  for (let t=0;t<12;t++) G.adim(w);
+  const h = saglamKonak(w);
+  const th = G.tohumEk(w, { fac:h.i, katman:'esnaf', amac:'kuskuculuk', bolge:h.f.bolgeler[0] });
+  for (let t=0;t<70;t++) G.adim(w);
+  const m = G.meseleAc(w, 'kopusEsigi', { tohum:th.id, fac:th.fac });
+  const gOnce = th.gorunurDestek, rOnce = th.gercekDestek;
+  G.meseleKarar(w, m.id, 'bastir');
+  T('bastırma görünür desteği kırar', th.gorunurDestek < gOnce*0.5,
+    Math.round(gOnce)+' → '+Math.round(th.gorunurDestek));
+  T('bastırma gerçek desteği büyütür', th.gercekDestek > rOnce,
+    Math.round(rOnce)+' → '+Math.round(th.gercekDestek));
+}
+
+/* 15. Kopuş sağlam bir fraksiyon üretiyor */
+{
+  let kopusGorulen = 0, bozuk = 0, denenen = 0;
+  for (let s=300; s<340; s++){
+    const d = G.dogrula(s); if (!d.gecti) continue;
+    denenen++;
+    const w = G.dunyaKur(s);
+    for (let t=0;t<12;t++) G.adim(w);
+    const h = saglamKonak(w); if (!h) continue;
+    G.tohumEk(w, { fac:h.i, katman:'asker', amac:'direnc', bolge:h.f.bolgeler[0] });
+    const n0 = w.fac.length;
+    for (let t=0;t<160;t++) G.adim(w);
+    if (w.fac.length > n0){
+      kopusGorulen++;
+      const n = w.fac.length;
+      if (w.R.length !== n) bozuk++;
+      for (const row of w.R) if (row.length !== n) bozuk++;
+      for (const b of w.bolgeler) if (w.fac[b.sahip].bolgeler.indexOf(b.id) < 0) bozuk++;
+      for (const f of w.fac) for (const v of G.VARS) if (!isFinite(f.v[v])) bozuk++;
+    }
+  }
+  T('terk edilmiş akım kopup fraksiyon olabiliyor', kopusGorulen > 0, kopusGorulen+'/'+denenen+' dünyada');
+  T('kopuş sonrası dünya tutarlı', bozuk === 0, bozuk+' bozukluk');
+}
+
+/* 16. Kavram tablosu bütün */
+{
+  let eksik = [];
+  for (const a in G.AMACLAR) if (!G.KAVRAMLAR[G.AMACLAR[a].kavram]) eksik.push('amac:'+a);
+  T('her amaç gerçek bir kurama bağlı', eksik.length === 0, eksik.join(','));
+  let kaynaksiz = Object.keys(G.KAVRAMLAR).filter(k=>!G.KAVRAMLAR[k].kaynak || !G.KAVRAMLAR[k].tek);
+  T('her kavramın kaynağı ve tek cümlesi var', kaynaksiz.length === 0,
+    Object.keys(G.KAVRAMLAR).length + ' kavram');
+}
+
 console.log('\n' + (kaldi === 0 ? 'HEPSİ GEÇTİ' : kaldi + ' TEST KALDI') + '  (' + gecti + '/' + (gecti + kaldi) + ')\n');
 process.exit(kaldi ? 1 : 0);

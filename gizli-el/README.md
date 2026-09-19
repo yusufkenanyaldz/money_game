@@ -136,9 +136,103 @@ kalbi tutarlı, keşfedilebilir ve tekrar üretilebilir bir matematik olmalı.
 
 ## Sonraki aşamalar
 
-2. Oyuncu fiilleri (Fısılda, İfşa et, Sızdır, Finanse et, Kışkırt, Koru,
-   Tohum ek, Kehanet) — her biri her fraksiyona/lidere/çifte/bölgeye
-   yönelebilir: tur başına 200–400 meşru hamle
-3. Derinlik: olgunlaşan ajanlar, saklanan sırlar, gecikmeli etkiler,
-   gizli bilgi (kanunları keşfetmek için nüfuz harcamak)
-4. Doktrinler (hangi dünya durumunun değerli olduğunu yeniden tanımlar) + arayüz
+Aşama 2a aşağıda. Kalanlar: oyuncunun tam fiil dağarcığı, nüfuz/ifşa
+ekonomisi, doktrinler ve arayüz.
+
+---
+
+# Aşama 2a: Tohumlar, Meseleler ve Kontrolden Çıkma
+
+Oyunun ekrandan çok kafada dönmesi için iki şey gerekiyordu: **iyi şeylerin
+kontrolden çıkabilmesi** ve **kararların gerçek bilgi gerektirmesi**. İkisi
+de mekaniğe gömüldü.
+
+## Fayda ile risk ayrılamaz
+
+Oyuncu bir fikri bir toplumsal katmana eker (`tohumEk`). Tohumun tek bir
+büyüme değişkeni var: **olgunluk**. Getirisi olgunlukla artar — ve üzerindeki
+**denetim** aynı olgunlukla erir:
+
+```
+getiri   = olgunluk × (denetim/100) × 2.6  +  olgunluk × 0.55
+erime    = (olgunluk/100)^1.55 × katman.tehlike × 1.05  +  ideolojik sapma × 1.30
+bağımsız = olgunluk × (1 − denetim/100)
+    → öfke +2.5×bağımsız, meşruiyet −1.9×bağımsız, istikrar −1.1×bağımsız
+```
+
+Yani kendini geliştirmiş ama düzeni kabul etmeyen bir topluluk, tam olarak
+onu değerli kılan olgunluk yüzünden tehlikelidir. Bu iki etkiyi ayıran bir
+düğme yok — tasarımın özü bu.
+
+Denetim kendiliğinden **geri gelmez**. Ancak bir bedelle (gözetim, bastırma,
+kurumsallaştırma) durdurulabilir.
+
+**Katmanlar** farklı davranır: asker hızlı ve en tehlikeli (tehlike 2.10),
+esnaf hızlı ama görünmez, halk yavaş, seçkinler hızlı ve gözle görülür.
+Aynı fikri nereye ektiğin, ne olacağını belirler.
+
+## Mekanikler gerçek kuramların matematiğidir
+
+Bu oyunun kuralları uydurulmuş değil. Her mesele bir kuramın modelidir:
+
+| Kavram | Kaynak | Oyunda nasıl işliyor |
+|---|---|---|
+| Tunç Oligarşi Yasası | Michels, *Siyasal Partiler* (1911) | Denetim olgunlukla erir; hareket kendi seçkinini üretir ve doğrultusu katmanın çıkarına kayar |
+| Tercih Saklama | Timur Kuran, *Yalanla Yaşamak* (1995) | `görünürDestek` ≠ `gerçekDestek`; bastırma ilkini kırar, ikincisini büyütür; fark 30'u aşınca çağlayan riski |
+| Tocqueville Paradoksu | Tocqueville, *Eski Rejim ve Devrim* (1856) | Konağın serveti hızla düzelirken öfke artar — iyileşme isyanı besler |
+| Günah Keçisi | Girard, *Şiddet ve Kutsal* (1972) | Suçu tek bir kurbana yıkmak öfkeyi gerçekten düşürür — meşruiyet bedeliyle |
+| Vekil Sorunu | Jensen & Meckling (1976) | Gözetim işe yarar ama serveti yer ve fark edilir |
+| Asabiyet · Goodhart · Olson · Okunabilirlik · Ortakların Yönetimi | İbn Haldun, Goodhart, Olson, Scott, Ostrom | Kütüphanede; sonraki aşamalarda mekaniğe bağlanacak |
+
+**Oyun bu kavramları açıklamaz.** Mesele kapandıktan sonra yalnızca kavramın
+adını, tek cümlesini ve kaynağını kütüphaneye ekler. Okuyan oyuncu bir
+sonrakini önceden görür. Araştırmaya zorlayan şey bu: bilgi gerçekten
+oynanış avantajına dönüşüyor.
+
+## Meseleler durağan değildir
+
+Mesele açıldığında dünya durmaz. Pencere açık kaldığı sürece akım büyümeye,
+denetim erimeye, saklı destek birikmeye devam eder; her tur `mesele.günlük`'e
+yeni bir satır düşer. **Beklemek de bir karardır** ve denetimden 6 puan götürür.
+Süre dolarsa karar senin yerine verilir.
+
+Kritik bilgi (gerçek destek) oyuncudan **gizlenir**; öğrenmek için gözetim
+gerekir ve gözetimin kendi bedeli vardır.
+
+## Kopuş: eserin sana rakip olur
+
+`olgunluk > 78` **ve** `denetim < 8` **ve** ideolojik sapma > 0.30 **ve**
+gerçek destek > %52 olduğunda akım kopabilir: `fraksiyonEkle` yeni bir
+fraksiyon doğurur, ilişki matrisini büyütür, ana gövdeyle ilişkisini −85'e
+sabitler, konağın meşruiyet ve istikrarını düşürür, destek yeterliyse bir
+bölgeyi de götürür. Artık dünyada senin yarattığın ama sana ait olmayan
+bir güç vardır.
+
+## Ölçülen: aynı andan beş farklı tarih
+
+`node mesele-demo.js` — bir akımı olgunlaştırır, mesele açıldığı anda dünyayı
+beşe dallandırır ve 60 mevsim sonrasını karşılaştırır. Tipik bir çıktı:
+
+| Karar | Konağın hâli | Akımın hâli | 60 mevsim |
+|---|---|---|---|
+| Bekle | meşruiyet 42 · öfke 60 | **koptu** | 18 ayaklanma · 1 yeni fraksiyon |
+| Gözetle | meşruiyet 28 · öfke 71 · **bilgi 77** | senin · denetim %29 · **gerçek destek %84** | 16 ayaklanma |
+| Kurumsallaştır | meşruiyet 25 · öfke 70 | düzenin parçası · sökülemez | 16 ayaklanma |
+| Yönlendir (tuttu/tutmadı) | meşruiyet 47 · öfke 56 | direndi, koptu | 18 ayaklanma · 1 yeni fraksiyon |
+| Terk et | meşruiyet 38 · öfke 56 | koptu | 18 ayaklanma · 1 yeni fraksiyon |
+
+Dikkat: **en parlak görünen dal (Gözetle, bilgi 77) en tehlikelisi** —
+saklanan destek %84. Oyun bunu söylemez.
+
+`test.js` 31 testle doğruluyor: olgunluk 50/50 turda büyüyor, denetim 50/50
+turda eriyor, beş karar beş farklı durum vektörü üretiyor, bastırma görüneni
+31→8 kırarken gerçeği 37→59 büyütüyor, kopuş sonrası ilişki matrisi ve bölge
+sahiplikleri tutarlı kalıyor.
+
+## Sonraki
+
+3. Oyuncunun tam fiil dağarcığı (tur başına 200–400 meşru hamle) ve nüfuz/ifşa
+   ekonomisi
+4. Kalan kuramların mekaniğe bağlanması (Asabiyet hanedan döngüsüne, Goodhart
+   tekrarlanan müdahaleye, Olson kolektif eyleme, Scott merkezileşmeye)
+5. Doktrinler ve arayüz
