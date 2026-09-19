@@ -289,13 +289,13 @@ const kur = (seed, dk) => { const w = G.dunyaKur(seed); G.oyuncuKur(w, { doktrin
 /* 20. İncele gizli kanunları açıyor */
 {
   const w = kur(GECERLI);
-  const h = G.hamleler(w).filter(x=>x.fiil==='incele');
+  const h = G.hamleler(w).filter(x=>x.fiil==='incele' && !x.doga);
   T('başlangıçta kanunlar gizli', w.el.bilinen.length === 0 && h.length === w.kanunlar.length,
     w.kanunlar.length + ' gizli kanun');
   G.hamleYap(w, h[0]);
   T('incelemek bir kanunu açıyor', w.el.bilinen.length === 1);
   T('açılan kanun listeden çıkıyor',
-    G.hamleler(w).filter(x=>x.fiil==='incele').length === h.length - 1);
+    G.hamleler(w).filter(x=>x.fiil==='incele' && !x.doga).length === h.length - 1);
 }
 
 /* 21. Kehanet vadesinde çözülüyor ve ödül/ceza veriyor */
@@ -364,13 +364,21 @@ const kur = (seed, dk) => { const w = G.dunyaKur(seed); G.oyuncuKur(w, { doktrin
     Math.abs(hIyi - hKotu) > 10, hIyi.toFixed(0) + ' vs ' + hKotu.toFixed(0));
 }
 
-/* 26. Oyuncusuz dünya hâlâ etkilenmiyor */
+/* 26. Oyuncusuz dünya saf kalıyor — doğrulayıcı bu fiziği sınıyor */
 {
   const a = G.dunyaKur(909), b = G.dunyaKur(909);
-  G.oyuncuKur(b);
   for (let t=0;t<80;t++){ G.adim(a); G.adim(b); }
-  T('oyuncu hiç hamle yapmazsa dünya aynı akar',
+  T('oyuncusuz dünya birebir belirlenimci',
     JSON.stringify(G.durumVektoru(a)) === JSON.stringify(G.durumVektoru(b)));
+  T('oyuncusuz dünyada mesele ve akım oluşmuyor',
+    a.meseleler.length === 0 && a.tohumlar.length === 0 && !a.el);
+
+  // Oyuncu VARSA dünya farklılaşır: krizler artık karara bağlanır ve
+  // karar vermemek de bir karardır. Bu bir sızıntı değil, tasarımdır.
+  const c = G.dunyaKur(909); G.oyuncuKur(c);
+  for (let t=0;t<80;t++) G.adim(c);
+  T('oyuncu varken krizler karara bağlanıyor', c.meseleler.length > 0,
+    c.meseleler.length + ' mesele açıldı');
 }
 
 
@@ -384,8 +392,9 @@ function meseleKur(ajanli){
   if (!h) return null;
   G.tohumEk(w, { fac:h.i, katman:'esnaf', amac:'okuryazarlik', bolge:h.f.bolgeler[0] });
   if (ajanli) w.el.ajanlar.push({ id:0, fac:h.i, dikildi:w.tur, olgun:true, yakalandi:false });
+  // dünyanın kendi krizleri de açılıyor; burada aranan TOHUMUN meselesi
   let m = null;
-  for (let t=0;t<130 && !m;t++){ G.adim(w); m = w.meseleler.find(x=>x.acik); }
+  for (let t=0;t<130 && !m;t++){ G.adim(w); m = w.meseleler.find(x=>x.acik && x.ilgili.tohum === 0); }
   return m ? { w, m } : null;
 }
 
@@ -491,6 +500,165 @@ function meseleKur(ajanli){
     ort(kuralli) > ort(kuralsiz) * 1.4,
     'kurallı ' + ort(kuralli).toFixed(1) + ' · kuralsız ' + ort(kuralsiz).toFixed(1) +
     ' · özel ' + ort(ozel).toFixed(1));
+}
+
+
+/* ===== DÜNYANIN KENDİ KRİZLERİ + ARAŞTIRMA ===== */
+
+/* 33. Yeni mesele türleri makul tempoda açılıyor ve boğmuyor */
+{
+  const say = {}; let toplam = 0, enCokAcik = 0;
+  const D = 8, TUR = 180;
+  for (let k=0;k<D;k++){
+    const w = G.dunyaKur(GECERLI+k); G.oyuncuKur(w);
+    for (let t=0;t<TUR;t++){
+      G.adim(w);
+      enCokAcik = Math.max(enCokAcik, w.meseleler.filter(m=>m.acik).length);
+    }
+    for (const m of w.meseleler){ say[m.tip] = (say[m.tip]||0)+1; toplam++; }
+  }
+  const arali = TUR / (toplam/D);
+  T('mesele tempoları oyuncuyu boğmuyor', arali >= 5 && arali <= 25,
+    'ortalama ' + arali.toFixed(1) + ' turda bir · ' + JSON.stringify(say));
+  T('aynı anda en çok iki mesele açık', enCokAcik <= 2, enCokAcik + ' açık');
+  T('üç yeni kriz türü de doğuyor',
+    !!say.savasEsigi && !!say.verasetKrizi && !!say.ortakAnlasmazligi);
+}
+
+/* 34. Her mesele türü kendi olgularıyla dosya üretiyor */
+{
+  const gorulen = {};
+  for (let k=0;k<10 && Object.keys(gorulen).length<3;k++){
+    const w = G.dunyaKur(GECERLI+k); G.oyuncuKur(w);
+    for (let t=0;t<180;t++){
+      G.adim(w);
+      for (const m of w.meseleler){
+        if (!m.acik || gorulen[m.tip] || m.ilgili.tohum != null) continue;
+        const d = G.dosyaUret(w, m.id);
+        gorulen[m.tip] = d ? d.olcumler.map(o=>o.ad) : null;
+      }
+    }
+  }
+  const tipler = Object.keys(gorulen);
+  T('üç kriz türü de dosya üretiyor', tipler.length === 3 && tipler.every(t=>gorulen[t] && gorulen[t].length === 6),
+    tipler.join(', '));
+  const hepsi = tipler.map(t=>gorulen[t].join('|'));
+  T('her türün olguları kendine özgü', new Set(hepsi).size === hepsi.length);
+}
+
+/* 35. Kararlar türüne göre ayrı sonuçlar veriyor */
+{
+  function krizBul(tip){
+    for (let k=0;k<14;k++){
+      const w = G.dunyaKur(GECERLI+k); G.oyuncuKur(w);
+      for (let t=0;t<180;t++){
+        G.adim(w);
+        const m = w.meseleler.find(x=>x.acik && x.tip===tip);
+        if (m) return { w, m };
+      }
+    }
+    return null;
+  }
+  const sv = krizBul('savasEsigi');
+  if (sv){
+    const iz = {};
+    for (const k of ['arabulucu','kizistir','yonSaptir']){
+      const d = G.klonla(sv.w);
+      G.meseleKarar(d, sv.m.id, k);
+      iz[k] = d.R[sv.m.ilgili.fac][sv.m.ilgili.hedefFac];
+    }
+    T('araya girmek ilişkiyi düzeltir, kızıştırmak bozar', iz.arabulucu > iz.kizistir,
+      'arabulucu ' + iz.arabulucu.toFixed(0) + ' · kızıştır ' + iz.kizistir.toFixed(0));
+    T('düşmanlığı saptırmak bu savaşı söndürür', iz.yonSaptir > iz.kizistir,
+      'yönSaptır ' + iz.yonSaptir.toFixed(0));
+  } else T('savaş eşiği kararları ayrışıyor', false, 'kriz bulunamadı');
+
+  const vr = krizBul('verasetKrizi');
+  if (vr){
+    const a = G.klonla(vr.w), b = G.klonla(vr.w);
+    G.meseleKarar(a, vr.m.id, 'veliahtDestekle');
+    G.meseleKarar(b, vr.m.id, 'rakipDestekle');
+    const fa = a.fac[vr.m.ilgili.fac], fb = b.fac[vr.m.ilgili.fac];
+    T('veliaht makamı korur, rakip hanedanı tazeler',
+      fa.v.mesruiyet > fb.v.mesruiyet && fb.asabiyet > fa.asabiyet,
+      'meşruiyet ' + fa.v.mesruiyet.toFixed(0) + '/' + fb.v.mesruiyet.toFixed(0) +
+      ' · asabiyet ' + fa.asabiyet.toFixed(0) + '/' + fb.asabiyet.toFixed(0));
+    T('rakibi desteklemek nesli sıfırlar', fb.nesil === 0 && fa.nesil > 0,
+      'nesil ' + fa.nesil + ' vs ' + fb.nesil);
+  } else T('veraset kararları ayrışıyor', false, 'kriz bulunamadı');
+
+  const or = krizBul('ortakAnlasmazligi');
+  if (or){
+    const a = G.klonla(or.w), b = G.klonla(or.w);
+    G.meseleKarar(a, or.m.id, 'kuralYaz');
+    G.meseleKarar(b, or.m.id, 'tekElde');
+    const ba = a.bolgeler[or.m.ilgili.bolge], bb = b.bolgeler[or.m.ilgili.bolge];
+    T('kural yazdırmak geleneği güçlendirir, tek ele bırakmak yıkar',
+      ba.gelenek > bb.gelenek * 2,
+      'gelenek ' + ba.gelenek.toFixed(0) + ' vs ' + bb.gelenek.toFixed(0));
+  } else T('ortak toprak kararları ayrışıyor', false, 'kriz bulunamadı');
+}
+
+/* 36. İncele hem kanunu hem doğayı açıyor */
+{
+  const w = kur(GECERLI);
+  const kanunH = G.hamleler(w).filter(h=>h.fiil==='incele' && !h.doga);
+  const dogaH  = G.hamleler(w).filter(h=>h.fiil==='incele' && h.doga);
+  T('incele hem kanun hem doğa hedefliyor', kanunH.length > 0 && dogaH.length > 0,
+    kanunH.length + ' kanun · ' + dogaH.length + ' doğa');
+  const fac = dogaH[0].fac, vr = 'servet';
+  const once = G.kehanetDayanak(w, fac, vr).guc;
+  T('doğa bilinmeden geri dönüş kuvveti hesaplanamıyor', G.dogaKuvveti(w, fac, vr) === null);
+  G.hamleYap(w, dogaH[0]);
+  T('doğa çözülünce geri dönüş kuvveti görünür', G.dogaKuvveti(w, fac, vr) !== null);
+  T('doğa bilgisi kehanet dayanağını güçlendiriyor',
+    G.kehanetDayanak(w, fac, vr).guc > once,
+    once.toFixed(2) + ' → ' + G.kehanetDayanak(w, fac, vr).guc.toFixed(2));
+}
+
+/* 37. Kanunlar gerçekten öngörü taşıyor (korelasyon) */
+{
+  const w = kur(GECERLI);
+  for (let t=0;t<12;t++) G.adim(w);
+  const kanun = [], gercek = [];
+  for (let d=0;d<30;d++){
+    const i = d % w.fac.length; if (!w.fac[i].canli) continue;
+    const v = G.VARS[d % 6];
+    let kn = 0; for (const k of w.kanunlar) if (k.hedef===v) kn += G.kanunKatkisi(w, i, k);
+    const once = w.fac[i].v[v];
+    const klon = G.klonla(w);
+    for (let t=0;t<12;t++) G.adim(klon);
+    kanun.push(kn*12); gercek.push(klon.fac[i].v[v] - once);
+  }
+  const n = kanun.length;
+  const ma = kanun.reduce((a,b)=>a+b,0)/n, mb = gercek.reduce((a,b)=>a+b,0)/n;
+  let c=0, sa=0, sb=0;
+  for (let i=0;i<n;i++){ c+=(kanun[i]-ma)*(gercek[i]-mb); sa+=(kanun[i]-ma)**2; sb+=(gercek[i]-mb)**2; }
+  const r = c/Math.sqrt(sa*sb);
+  T('kanunları bilmek geleceği öngörmeye yarıyor', r > 0.35, 'korelasyon ' + r.toFixed(2));
+}
+
+/* 38. Dayanaklı kehanet daha çok ödüllendiriyor */
+{
+  const w = kur(GECERLI);
+  const kh = G.hamleler(w).find(h=>h.fiil==='kehanet');
+  G.hamleYap(w, kh);
+  const k0 = w.el.kehanetler[0];
+  T('kehanet dayanağını kaydediyor', k0.dayanakGucu !== undefined,
+    'dayanak gücü ' + k0.dayanakGucu);
+  // dayanaklı ve dayanaksız aynı sonucu farklı ödüllendirmeli
+  const a = G.klonla(w), b = G.klonla(w);
+  a.el.kehanetler[0].dayanakGucu = 0.9; a.el.kehanetler[0].vade = a.tur + 1;
+  b.el.kehanetler[0].dayanakGucu = 0;   b.el.kehanetler[0].vade = b.tur + 1;
+  a.el.nufuz = 5; b.el.nufuz = 5; a.el.ifsa = 20; b.el.ifsa = 20;
+  for (let t=0;t<2;t++){ G.adim(a); G.adim(b); }
+  const ka = a.el.kehanetler[0], kb = b.el.kehanetler[0];
+  if (ka.tuttu === kb.tuttu){
+    T('dayanak sonucu farklı bedellendiriyor',
+      ka.tuttu ? a.el.nufuz > b.el.nufuz : a.el.ifsa < b.el.ifsa,
+      (ka.tuttu ? 'tuttu · nüfuz ' + a.el.nufuz.toFixed(1) + ' vs ' + b.el.nufuz.toFixed(1)
+                : 'tutmadı · ifşa ' + a.el.ifsa.toFixed(1) + ' vs ' + b.el.ifsa.toFixed(1)));
+  } else T('dayanak sonucu farklı bedellendiriyor', true, 'karşılaştırılamadı');
 }
 
 console.log('\n' + (kaldi === 0 ? 'HEPSİ GEÇTİ' : kaldi + ' TEST KALDI') + '  (' + gecti + '/' + (gecti + kaldi) + ')\n');

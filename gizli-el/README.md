@@ -445,3 +445,98 @@ asabiyet döngüsünün hem çöküp hem dirilmesi, kuralsız ortakların tüken
 - Arayüz
 - Kehanetin dosyaya bağlanması (kanunları bilen oyuncu daha iyi kehanet kurar)
 - Meselelerin fraksiyon-içi olmayan türleri (savaş öncesi, veraset krizi, ortak bölge anlaşmazlığı)
+
+---
+
+# Aşama 2d: Dünyanın kendi krizleri + araştırmanın karşılığı
+
+## Üç yeni mesele türü
+
+Meseleler artık yalnızca senin ektiğin tohumlardan doğmuyor. Dünyanın kendi
+gerilimleri de dosya açıyor.
+
+| Mesele | Tetik | Kuram | Seçenekler |
+|---|---|---|---|
+| **Savaş eşiği** | İlişki −60'ın altında **ve** saldıranın gücü hızla artıyor | Thukydides Tuzağı | Araya gir · Planı sızdır · Düşmanlığı saptır · Kızıştır · Bekle |
+| **Veraset** | Lider yaşlı/hasta **ve** asabiyet zayıf | Kralın İki Bedeni | Veliahdı destekle · Rakibi destekle · Uzlaştır · Krizi derinleştir · Bekle |
+| **Ortak toprak** | Ortak bölgede gelenek çökmüş **ve** huzursuzluk yüksek | Ostrom | Kural yazdır · Bölüştür · Tek ele bırak · Kızıştır · Bekle |
+
+**Thukydides tetiği önemli:** savaş olasılığını güç *farkı* değil, gücün
+*değişme hızı* belirliyor (`ivme × 0.10 + düşmanlık + fark/600`). Yükselen
+bir güç, hâlâ zayıfken bile krizi açar.
+
+Yeni kavramlar kütüphaneye eklendi: **Thukydides** (Allison, *Kaçınılmaz
+Savaş*, 2017) ve **Kantorowicz** (*Kralın İki Bedeni*, 1957).
+
+**Tempo ölçüldü:** 8 dünya × 180 tur → ortalama **8.8 turda bir mesele**,
+aynı anda en çok **2** açık. Oyuncu 3 turda bir hamle yaptığına göre bu,
+her meseleye birkaç hamlelik nefes alanı bırakıyor.
+
+Kararların gerçekten ayrıştığı ölçüldü: araya girmek ilişkiyi −47'de
+tutarken kızıştırmak −100'e indiriyor; veliahdı desteklemek meşruiyeti
+39'da tutup asabiyeti 17'ye düşürürken rakibi desteklemek meşruiyeti 15'e
+indirip asabiyeti 49'a çıkarıyor ve nesli sıfırlıyor; kural yazdırmak
+geleneği 67'de bırakırken tek ele bırakmak 5'e düşürüyor.
+
+## Araştırma artık gerçekten kazandırıyor
+
+`İncele` fiilinin iki hedefi var:
+
+- **Kanun** — dünyanın fiziğinden bir tanesi açığa çıkar
+- **Doğa** — bir fraksiyonun `taban`ı çözülür: hangi değerlere geri döndüğü
+
+İkisi de gerekli. Ölçüm şunu gösterdi: kanunların anlık net katkısı 12
+turluk değişimle **0.71 korelasyon** taşıyor — yani kanunlar gerçekten
+öngörü veriyor. Ama ikinci büyük kuvvet (doğaya geri dönüş, **−0.44**)
+oyuncuya kapalıydı; bu yüzden ilk halinde araştırma hiçbir işe yaramıyordu
+(%28'e karşı %27).
+
+Doğa incelenebilir hâle gelince kehanet isabet oranları:
+
+| Oyuncu | İsabet |
+|---|---|
+| Hiç araştırmayan | %31 |
+| **Sadece kanunları bilen** | **%25** |
+| Kanun + doğa | **%39** |
+
+Sadece kanunları bilmenin cahilden **kötü** çıkması bir hata değil,
+ölçümün ortaya çıkardığı bir özellik: kanunu bilip geri dönüş kuvvetini
+görmeyen oyuncu, kendinden emin şekilde yanılıyor. Yarım bilgi hiç
+bilgiden zararlı.
+
+Ödül tarafı da dayanağa bağlandı:
+
+```
+tutarsa  : nüfuz += 5 + 11 × dayanakGücü     ifşa −= 2 + 4 × dayanakGücü
+tutmazsa : ifşa  += 9 − 4 × dayanakGücü
+```
+
+Dayanaksız bir kehanet ucuzdur ve tuttuğunda şans sayılır; yanlış çıktığında
+en çok onu yakar. Ayrıca ilan edilen kehanetin Merton itişi de dayanakla
+güçlenir (`× (1 + dayanakGücü × 0.8)`) — kanunu bilen, hangi kaldıraca
+bastığını da bilir.
+
+## Dürüstçe: henüz gösteremediğim şey
+
+Araştırmanın kehanet isabetini ve ödülünü artırdığı ölçüldü. Ama bu
+avantajın **dünya sonucuna** yansıdığını gösteremedim: üç bilgi seviyesinde
+de doktrin hizalanması 57–59 arasında kaldı. Sebebi büyük olasılıkla ölçüm
+oyuncusunun kazandığı fazla nüfuzu hiçbir şeye harcamaması. Bunu ancak
+gerçek bir oyuncu stratejisiyle (ya da arayüzle) doğrulayabilirim.
+
+## Düzeltilen kaçak
+
+Açık mesele tavanı yalnızca dünyanın krizlerine uygulanıyordu; tohum
+meseleleri tavanı deliyordu ve oyuncu 3 dosyayla birden karşılaşabiliyordu.
+Tavan `meseleAc` içine taşındı: artık tohum meselesi de dünyanın krizi de
+aynı kuyruğa giriyor, açılamayan kriz sırasını bekliyor (uyarı bayrağı
+harcanmıyor).
+
+## Test kapsamı
+
+`node test.js` — **82 test**. Yenileri: mesele tempoları, açık mesele
+tavanı, üç kriz türünün de doğması ve kendine özgü olgularla dosya
+üretmesi, her kriz türünde kararların ayrışması, incelemenin hem kanun hem
+doğa açması, doğa bilinmeden geri dönüş kuvvetinin hesaplanamaması,
+kanunların öngörü korelasyonu (0.71) ve dayanaklı kehanetin farklı
+bedellendirilmesi.

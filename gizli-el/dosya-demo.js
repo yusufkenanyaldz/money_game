@@ -14,7 +14,7 @@ function hazirla(ajanliMi){
   G.tohumEk(w, { fac:h.i, katman:'esnaf', amac:'okuryazarlik', bolge:h.f.bolgeler[0] });
   if (ajanliMi) w.el.ajanlar.push({ id:0, fac:h.i, dikildi:w.tur, olgun:true, yakalandi:false });
   let m = null;
-  for (let t=0;t<130 && !m;t++){ G.adim(w); m = w.meseleler.find(x=>x.acik); }
+  for (let t=0;t<130 && !m;t++){ G.adim(w); m = w.meseleler.find(x=>x.acik && x.ilgili.tohum === 0); }
   return { w, m, th: w.tohumlar[0] };
 }
 
@@ -80,7 +80,7 @@ for (let s = seed; s < seed + 900 && n < 12; s++){
     G.tohumEk(w, { fac:h.i, katman:'esnaf', amac:'okuryazarlik', bolge:h.f.bolgeler[0] });
     if (ajanli) w.el.ajanlar.push({ id:0, fac:h.i, dikildi:w.tur, olgun:true, yakalandi:false });
     let m = null;
-    for (let t=0;t<130 && !m;t++){ G.adim(w); m = w.meseleler.find(x=>x.acik); }
+    for (let t=0;t<130 && !m;t++){ G.adim(w); m = w.meseleler.find(x=>x.acik && x.ilgili.tohum === 0); }
     if (!m) continue;
     const d = G.dosyaUret(w, m.id);
     // gerçek ölçüt: altı olgudan kaçını DOĞRU biliyorsun (kapsam × isabet)
