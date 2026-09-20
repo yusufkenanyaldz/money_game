@@ -694,3 +694,40 @@ sebebidir) ve dar ekran için ayrı bir düzen eklendi (`max-width:370px`).
 **`arayuz-test.js`** eklendi: 320 / 360 / 390 / 430 piksel genişliklerde
 beş ekranı gezip ekrandan taşan her öğeyi listeler. Bu sınıf hata bir daha
 sessizce geçmesin diye.
+
+## Servis işçisi hatası: güncellemeler kullanıcıya ulaşmıyordu
+
+İlk `sw.js` **cache-first**ti ve önbellek adı sabitti (`gizliel-v1`). Sonuç:
+bir kez önbelleğe alındıktan sonra sayfa sonsuza kadar eski sürümü
+gösteriyordu. Kullanıcı düzeltilmiş düzeni göremedi çünkü düzeltme
+telefonuna hiç inmedi — çevrimdışı çalışsın diye yazdığım şey güncellemeleri
+kilitlemişti.
+
+Yeni davranış:
+
+- **Ağ önce, önbellek yedek.** Çevrimiçiyken hep güncel, çevrimdışıyken
+  önbellekten açılır.
+- **Sürümlü önbellek adı** (`gizliel-<sürüm>`); eski önbellekler
+  `activate` sırasında silinir.
+- **`sw.js` asla önbellekten servis edilmez**, yoksa işçinin kendisi de
+  güncellenemez.
+- Sayfa `controllerchange`'i dinler ve yeni işçi devralınca **kendini bir
+  kez tazeler**.
+- Giriş ekranında **sürüm numarası** görünür — "önbellek bayat mı?"
+  sorusu artık gözle cevaplanabiliyor.
+
+Ayrıca `navigator.storage.persist()` çağrılıyor: Android'de depolama
+baskısı altında bile kaydın silinmemesi için.
+
+**`sw-test.js`** eklendi: gerçek bir HTTP sunucu ayağa kaldırır, sayfayı
+yükler, sunucudaki sürümü değiştirir, yeniler ve yeni sürümün ulaşıp
+ulaşmadığını ölçer; sonra çevrimdışına geçip hâlâ açıldığını doğrular.
+Ölçüldü: güncelleme tek yenilemede ulaşıyor, çevrimdışı açılış çalışıyor.
+
+## Bir düzeltme
+
+Kullanıcıya defalarca "iOS verileri 7 günde siler, ana ekrana eklemek şart"
+denmişti. Kullanıcı **Android**'de; o kısıt WebKit'e özgü. Android'de
+Chrome/Brave `localStorage`'ı süresiz tutar, yalnızca ağır depolama
+baskısında ve site yüklü değilse temizleyebilir — `storage.persist()` onu
+da kapatır.

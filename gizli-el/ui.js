@@ -623,7 +623,10 @@ function ciz(){
 }
 
 /* ---------- açılış ---------- */
+const SURUM = '2026-09-20-2';
+
 function girisKur(){
+  const sv = $('#surum'); if (sv) sv.textContent = 'sürüm ' + SURUM;
   const d = $('#doktrinler');
   for (const k in GE.DOKTRINLER){
     const D = GE.DOKTRINLER[k];
@@ -644,7 +647,26 @@ function girisKur(){
   };
 }
 
+/* ---------- kalıcılık ve güncelleme ---------- */
+// Android'de depolama baskısı altında bile veri silinmesin diye kalıcılık iste.
+if (navigator.storage && navigator.storage.persist){
+  navigator.storage.persisted().then(v => { if (!v) navigator.storage.persist().catch(()=>{}); })
+    .catch(()=>{});
+}
+
+/* SW-BAS */
+if ('serviceWorker' in navigator){
+  let yenilendi = false;
+  // Yeni işçi devralınca sayfayı bir kez tazele: eski sürümde kalma.
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (yenilendi) return;
+    yenilendi = true;
+    location.reload();
+  });
+  navigator.serviceWorker.register('sw.js').then(r => { r.update().catch(()=>{}); }).catch(()=>{});
+}
+/* SW-SON */
+
 $('#gecBtn').onclick = mevsimGec;
 $('#emirBtn').onclick = emirAc;
 girisKur();
-if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});

@@ -14,7 +14,7 @@ goml('<script src="tohumlar.js"></script>', 'tohumlar.js');
 goml('<script src="sim.js"></script>', 'sim.js');
 goml('<script src="ui.js"></script>', 'ui.js');
 html = html.replace('<link rel="manifest" href="manifest.webmanifest">', '');
-html = html.replace(/if \('serviceWorker' in navigator\)[^\n]*\n/, '');
+html = html.replace(/\/\* SW-BAS \*\/[\s\S]*?\/\* SW-SON \*\//, '');
 
 const cikti = D + '/gizli-el.html';
 fs.writeFileSync(cikti, html);

@@ -195,6 +195,7 @@ summary{font-style:italic;color:var(--cok-soluk);cursor:pointer}
   <section id="kronik" hidden></section>
   <section id="kutuphane" hidden></section>
 </main>
+<div class="sar"><div class="not" id="surum" style="padding-bottom:90px"></div></div>
 
 <div id="alt"><div class="sar">
   <button class="dugme" id="emirBtn">Emir yaz</button>
@@ -3081,7 +3082,10 @@ function ciz(){
 }
 
 /* ---------- açılış ---------- */
+const SURUM = '2026-09-20-2';
+
 function girisKur(){
+  const sv = $('#surum'); if (sv) sv.textContent = 'sürüm ' + SURUM;
   const d = $('#doktrinler');
   for (const k in GE.DOKTRINLER){
     const D = GE.DOKTRINLER[k];
@@ -3101,6 +3105,15 @@ function girisKur(){
     catch(e){ $('#arama').textContent = 'Metin okunamadı.'; }
   };
 }
+
+/* ---------- kalıcılık ve güncelleme ---------- */
+// Android'de depolama baskısı altında bile veri silinmesin diye kalıcılık iste.
+if (navigator.storage && navigator.storage.persist){
+  navigator.storage.persisted().then(v => { if (!v) navigator.storage.persist().catch(()=>{}); })
+    .catch(()=>{});
+}
+
+
 
 $('#gecBtn').onclick = mevsimGec;
 $('#emirBtn').onclick = emirAc;
