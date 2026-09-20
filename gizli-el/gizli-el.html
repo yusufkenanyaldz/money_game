@@ -1,0 +1,3039 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#14110f">
+<title>Gizli El</title>
+
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<style>
+:root{
+  --kagit:#14110f; --kagit2:#1b1714; --cizgi:#2e2822;
+  --murekkep:#e6ddd1; --soluk:#9a9086; --cok-soluk:#6b635b;
+  --kehribar:#c9a227; --kan:#a3564a;
+  --serif:'Iowan Old Style','Palatino Linotype','Book Antiqua',Palatino,Georgia,serif;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;background:var(--kagit);color:var(--murekkep)}
+body{font-family:var(--serif);font-size:17px;line-height:1.62;
+     padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+     overscroll-behavior:none}
+.sar{max-width:640px;margin:0 auto;padding:0 20px}
+h1,h2,h3{font-weight:400;margin:0}
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer;padding:0;text-align:left}
+.kucuk{font-family:var(--sans);font-size:12.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--cok-soluk)}
+.soluk{color:var(--soluk)}
+.ayrac{height:1px;background:var(--cizgi);margin:22px 0}
+
+/* ---- durum satırı ---- */
+#durum{position:sticky;top:0;z-index:20;background:linear-gradient(var(--kagit) 76%,transparent);
+       padding-top:14px;padding-bottom:10px}
+#durum .satir{font-family:var(--sans);font-size:13px;letter-spacing:.04em;color:var(--soluk);
+              display:flex;flex-wrap:wrap;gap:6px 14px}
+#durum .satir b{font-weight:500;color:var(--murekkep)}
+#durum .satir .uyari{color:var(--kan)}
+
+/* ---- çekmeceler ---- */
+#cekmeceler{display:flex;gap:20px;padding:6px 0 14px;border-bottom:1px solid var(--cizgi)}
+#cekmeceler button{font-family:var(--sans);font-size:13px;letter-spacing:.07em;
+                   text-transform:uppercase;color:var(--cok-soluk);padding:4px 0}
+#cekmeceler button[aria-current="true"]{color:var(--kehribar);
+       box-shadow:inset 0 -1px 0 var(--kehribar)}
+
+main{padding:24px 0 120px;min-height:60vh}
+section[hidden]{display:none}
+
+/* ---- kartlar ---- */
+.kart{border:1px solid var(--cizgi);background:var(--kagit2);padding:18px 18px 16px;margin:0 0 16px;
+      display:block;width:100%}
+.kart .ust{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:8px}
+.kart h3{font-size:19px}
+.kart .sure{font-family:var(--sans);font-size:12px;color:var(--kehribar);white-space:nowrap}
+.kart p{margin:6px 0 0;color:var(--soluk);font-size:16px}
+
+/* ---- kronik ---- */
+.olay{display:flex;gap:14px;padding:7px 0;border-bottom:1px solid rgba(46,40,34,.55)}
+.olay .t{font-family:var(--sans);font-size:11.5px;color:var(--cok-soluk);min-width:34px;padding-top:4px}
+.olay .m{flex:1}
+.olay.vurgu .m{color:var(--kehribar)}
+
+/* ---- fraksiyon listesi ---- */
+.frak{padding:14px 0;border-bottom:1px solid rgba(46,40,34,.55)}
+.frak .ad{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.frak .ad .rozet{font-family:var(--sans);font-size:11px;letter-spacing:.06em;color:var(--cok-soluk)}
+.frak .ozet{color:var(--soluk);font-size:15.5px;margin-top:3px}
+.frak .rakam{font-family:var(--sans);font-size:12.5px;color:var(--soluk);margin-top:6px;
+             display:flex;flex-wrap:wrap;gap:4px 16px}
+.frak .rakam b{color:var(--murekkep);font-weight:500}
+.nokta{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:8px;vertical-align:1px}
+
+/* ---- harita ---- */
+#sema{width:100%;height:auto;display:block;margin:6px 0 18px}
+#sema text{font-family:var(--sans);font-size:9px;fill:var(--soluk);pointer-events:none}
+#sema circle{pointer-events:auto}
+.bolgeBilgi{font-family:var(--sans);font-size:12.5px;color:var(--soluk);
+            border-top:1px solid var(--cizgi);padding-top:12px;min-height:54px}
+
+/* ---- kütüphane ---- */
+.kuram{padding:16px 0;border-bottom:1px solid rgba(46,40,34,.55)}
+.kuram h3{font-size:18px;color:var(--kehribar)}
+.kuram .tek{color:var(--murekkep);margin:5px 0 6px}
+.kuram .kaynak{font-family:var(--sans);font-size:12.5px;color:var(--cok-soluk)}
+
+/* ---- alt bar ---- */
+#alt{position:fixed;left:0;right:0;bottom:0;z-index:20;
+     background:linear-gradient(transparent,var(--kagit) 34%);
+     padding:26px 0 calc(16px + env(safe-area-inset-bottom))}
+#alt .sar{display:flex;gap:12px}
+.dugme{flex:1;border:1px solid var(--cizgi);background:var(--kagit2);padding:14px 16px;
+       text-align:center;font-family:var(--sans);font-size:13.5px;letter-spacing:.08em;
+       text-transform:uppercase;color:var(--murekkep)}
+.dugme.vurgu{border-color:var(--kehribar);color:var(--kehribar)}
+.dugme:disabled{opacity:.35}
+
+/* ---- örtü / kip ---- */
+#ortu{position:fixed;inset:0;z-index:40;background:var(--kagit);overflow-y:auto;
+      -webkit-overflow-scrolling:touch}
+#ortu .sar{padding-top:26px;padding-bottom:60px}
+.kapat{font-family:var(--sans);font-size:12.5px;letter-spacing:.07em;text-transform:uppercase;
+       color:var(--cok-soluk);margin-bottom:20px;display:block}
+
+/* ---- dosya ---- */
+.dosyaBaslik{font-size:26px;margin-bottom:2px}
+.taniklik{padding:13px 0;border-bottom:1px solid rgba(46,40,34,.55)}
+.taniklik .kaynak{font-family:var(--sans);font-size:11.5px;letter-spacing:.05em;
+                  text-transform:uppercase;color:var(--cok-soluk)}
+.taniklik .iddia{margin-top:3px;font-style:italic}
+.olcum{display:flex;justify-content:space-between;gap:12px;font-family:var(--sans);
+       font-size:13px;padding:6px 0;color:var(--soluk)}
+.olcum b{color:var(--murekkep);font-weight:500}
+.olcum.yok b{color:var(--cok-soluk);font-style:italic}
+.celiski{border-left:2px solid var(--kan);padding:4px 0 4px 14px;margin:12px 0}
+.celiski .yan{margin:6px 0;font-size:15.5px}
+.celiski .yan span{font-family:var(--sans);font-size:11.5px;color:var(--cok-soluk);
+                   display:block;letter-spacing:.05em;text-transform:uppercase}
+.secenek{display:block;width:100%;border:1px solid var(--cizgi);background:var(--kagit2);
+         padding:14px 16px;margin-bottom:10px}
+.secenek b{display:block;font-weight:400;font-size:17px}
+.secenek span{color:var(--soluk);font-size:15px}
+.secenek:active{border-color:var(--kehribar)}
+
+/* ---- emir ---- */
+.bosluk{border:none;border-bottom:1px dashed var(--cok-soluk);background:none;color:var(--kehribar);
+        padding:2px 4px;font:inherit;min-width:90px;display:inline-block;text-align:center}
+.bosluk.dolu{border-bottom-style:solid;border-color:var(--kehribar)}
+.emirCumle{font-size:21px;line-height:1.9;margin:14px 0 22px}
+.sec-liste button{display:block;width:100%;padding:12px 14px;border-bottom:1px solid var(--cizgi)}
+.sec-liste button .yan{font-family:var(--sans);font-size:12px;color:var(--cok-soluk);float:right}
+.bedel{font-family:var(--sans);font-size:13px;color:var(--soluk);margin:16px 0 20px;
+       border-top:1px solid var(--cizgi);padding-top:14px}
+.bedel b{color:var(--murekkep);font-weight:500}
+
+/* ---- başlangıç ---- */
+#giris{position:fixed;inset:0;z-index:60;background:var(--kagit);overflow-y:auto;display:flex;
+       align-items:center}
+#giris[hidden]{display:none}
+#ortu[hidden]{display:none}
+#giris .sar{width:100%;padding-top:40px;padding-bottom:40px}
+#giris h1{font-size:44px;letter-spacing:.14em;margin-bottom:6px}
+#giris .alt{color:var(--cok-soluk);font-size:15px;margin-bottom:34px}
+.dok{display:block;width:100%;border:1px solid var(--cizgi);background:var(--kagit2);
+     padding:15px 16px;margin-bottom:10px}
+.dok b{display:block;font-weight:400;font-size:18px;color:var(--kehribar)}
+.dok span{color:var(--soluk);font-size:15px}
+#arama{color:var(--cok-soluk);font-family:var(--sans);font-size:13px;margin-top:20px;min-height:22px}
+textarea{width:100%;height:110px;background:var(--kagit2);color:var(--soluk);border:1px solid var(--cizgi);
+         font-family:var(--sans);font-size:11px;padding:10px;margin-top:10px}
+</style>
+</head>
+<body>
+
+<div id="giris">
+  <div class="sar">
+    <h1>GİZLİ EL</h1>
+    <div class="alt">Hiçbir tahtta oturmuyorsun.</div>
+    <div class="kucuk" style="margin-bottom:12px">Doktrinini seç — neyin iyi olduğunu o tanımlar</div>
+    <div id="doktrinler"></div>
+    <div id="arama"></div>
+    <div class="ayrac"></div>
+    <button class="dugme" id="yukleBtn" style="display:none">Kayıtlı oyuna dön</button>
+    <details style="margin-top:14px">
+      <summary class="kucuk" style="cursor:pointer">Kayıt metnini içeri al</summary>
+      <textarea id="iceriAl" placeholder="Dışa aktardığın metni buraya yapıştır"></textarea>
+      <button class="dugme" id="iceriAlBtn" style="margin-top:8px">Yükle</button>
+    </details>
+  </div>
+</div>
+
+<header id="durum"><div class="sar"><div class="satir" id="durumSatir"></div></div></header>
+<nav><div class="sar" id="cekmeceler"></div></nav>
+
+<main class="sar">
+  <section id="masa"></section>
+  <section id="harita" hidden></section>
+  <section id="kronik" hidden></section>
+  <section id="kutuphane" hidden></section>
+</main>
+
+<div id="alt"><div class="sar">
+  <button class="dugme" id="emirBtn">Emir yaz</button>
+  <button class="dugme vurgu" id="gecBtn">Mevsimi geçir</button>
+</div></div>
+
+<div id="ortu" hidden><div class="sar" id="ortuIc"></div></div>
+
+<script>
+/* Sınavı geçmiş dünyalar. 23.726 aday elenerek bulundu (kabul %0.67).
+   Liste tükenirse oyun canlı arama yapar. */
+window.TOHUMLAR = [49,221,368,412,446,457,654,1090,1155,1261,2081,2138,2191,2220,2273,2343,2359,2555,2655,2705,2863,2879,3389,3404,3436,3467,3510,3832,4082,4150,4236,4439,4482,4755,5160,5221,5259,5379,5504,5563,5675,5733,5752,5816,6066,6172,6194,6330,6483,6563,6905,6976,7136,7231,7520,7581,7612,7624,7754,8067,8245,8394,8562,9412,9447,9521,9524,9549,9788,9931,9935,10401,10437,10490,10916,11269,11405,11481,11664,11746,11786,11841,12145,12173,12445,12698,12789,12800,13138,13204,13236,13287,13350,13397,14127,14164,14259,14338,14347,14514,14684,14791,14813,14896,15102,15159,15357,15570,15708,15766,15782,16152,16269,16359,16686,16765,17027,17071,17239,17455,18004,18049,18109,18123,18168,18318,18510,18697,19196,19205,19244,19378,19437,19777,19872,19878,20172,20190,20329,20699,20930,20961,21298,21372,21782,21817,21864,22073,22322,22349,22616,22707,22757,22779,22830,22931,23123,23312,23410,23726];
+
+</script>
+<script>
+/* GİZLİ EL — simülasyon çekirdeği
+ * Dünyanın fiziği her oyunda yeniden üretilir: nedensellik grafiği,
+ * katsayılar, eşikler ve işaretler rastgeledir. Üretilen her kanun seti
+ * oyuna verilmeden önce headless sınavdan geçer (bkz. dogrula()).
+ */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory();
+  else root.GE = factory();
+})(typeof self !== 'undefined' ? self : this, function () {
+'use strict';
+
+/* ---------- deterministik rastgelelik ---------- */
+// sıralı akış (dünya kurulumu için)
+function mulberry32(a){ return function(){ a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+// konumsal hash (tur içi olaylar için — geçmişten bağımsız, kelebek etkisi ölçülebilsin)
+function hsh(str){ let h=1779033703^str.length; for(let i=0;i<str.length;i++){ h=Math.imul(h^str.charCodeAt(i),3432918353); h=h<<13|h>>>19; } h=Math.imul(h^h>>>16,2246822507); h=Math.imul(h^h>>>13,3266489909); return ((h^h>>>16)>>>0)/4294967296; }
+
+/* ---------- değişkenler ---------- */
+const VARS = ['guc','servet','istikrar','mesruiyet','bilgi','ofke'];
+const VAD  = { guc:'Güç', servet:'Servet', istikrar:'İstikrar', mesruiyet:'Meşruiyet', bilgi:'Bilgi', ofke:'Öfke' };
+const KAPSAM = ['oz','dusman','dost','dunya','komsu'];
+const KAD = { oz:'kendi', dusman:'düşmanlarının', dost:'müttefiklerinin', dunya:'dünyanın', komsu:'komşularının' };
+const SEKIL = ['dogrusal','esik','carpim','kitlik','doyum','geri'];
+
+/* ---------- isim üretimi ---------- */
+const SIFAT = ['Kara','Demir','Kızıl','Sessiz','Yedinci','Kırık','Altın','Gri','Uzak','Sonsuz','Tuzlu','Çıplak','Beyaz','Küllü','Yıldızsız','Boğuk','Mavi','Derin','Solgun','Çelik'];
+const KURUM = ['Divan','Ahit','Locası','Konseyi','Hanedanı','Kapısı','Ocağı','Meclisi','Kardeşliği','Sofrası','Mührü','Kolu','Yemini','Sancağı','Halkası','Tarikatı'];
+const AD = ['Vehbi','Sarya','Danyal','Melek','Kerem','Nuray','İskender','Bahar','Teoman','Zeliha','Rüzgar','Ferhat','Nergis','Cahit','İdris','Ayla','Sinan','Reyhan','Orhun','Peri','Kasım','Şahnur','Ünal','Defne','Bekir','Yıldız','Hamza','Mine','Tarık','Esma','Volkan','Ceren','Salih','Neva','Burak','Alev'];
+const LAKAP = ['Sabırlı','Topal','Ölçücü','Yalancı','Kuzgun','Zehirli','Sağır','Yorgun','Kanlı','Nazik','Uykusuz','Tilki','Kilitli','Gülmeyen','İpek','Dilsiz','Tutkulu','Buzlu','Hesapçı','Çıplak Ayak'];
+const BOLGE = ['Tuz Ovası','Kırık Liman','Bakır Geçidi','Alacakaranlık Vadisi','Dokuz Kuyu','Sazlık','Demirkapı','Ak Yayla','Sisli Boğaz','Yankı Tepeleri','Kestane Havzası','Cam Çölü','Kuyruklu Burun','Soğuk Dere','Yedi Değirmen','Batık Tarla'];
+
+// Türkçe ek uyumu — "Kırık Liman'nı" gibi hatalar olmasın
+const _ONLU = { 'a':'ı','ı':'ı','o':'u','u':'u','e':'i','i':'i','ö':'ü','ü':'ü' };
+function sonUnlu(ad){
+  const x = ad.toLowerCase();
+  for (let i=x.length-1;i>=0;i--) if (_ONLU[x[i]]) return _ONLU[x[i]];
+  return 'ı';
+}
+function unluMu(c){ return !!_ONLU[c.toLowerCase()]; }
+function ekBelirtme(ad){            // -ı / -yı  (belirtme hâli)
+  const u = sonUnlu(ad);
+  return ad + "'" + (unluMu(ad[ad.length-1]) ? 'n' : '') + u;
+}
+function ekYonelme(ad){             // -a / -na  (yönelme hâli)
+  const u = sonUnlu(ad), e = (u==='ı'||u==='u') ? 'a' : 'e';
+  return ad + "'" + (unluMu(ad[ad.length-1]) ? 'n' : '') + e;
+}
+
+function sec(r, arr){ return arr[Math.floor(r()*arr.length)|0]; }
+function secBenzersiz(r, arr, n){ const c=arr.slice(), o=[]; for(let i=0;i<n && c.length;i++) o.push(c.splice(Math.floor(r()*c.length),1)[0]); return o; }
+function ara(r,a,b){ return a + r()*(b-a); }
+function kirp(v,a,b){ return v<a?a:(v>b?b:v); }
+
+/* ---------- KANUN ÜRETECİ ---------- */
+// Bir kanun: hedef değişkenin turluk değişimine, kaynak değişkenin
+// belirli bir kapsamdaki değerinden türeyen bir katkı ekler.
+function kanunUret(r, i){
+  const hedef = sec(r, VARS);
+  const kaynak = sec(r, VARS);
+  const sekil = sec(r, SEKIL);
+  const kapsam = sec(r, KAPSAM);
+  const isaret = r() < 0.5 ? -1 : 1;
+  const k = {
+    id: i,
+    hedef, kaynak, sekil, kapsam,
+    kat: isaret * ara(r, 0.45, 3.0),
+    esik: Math.round(ara(r, 22, 78)),
+    gizli: true                      // oyuncu keşfedene kadar görünmez
+  };
+  if (sekil === 'carpim') k.kaynak2 = sec(r, VARS);
+  return k;
+}
+
+// Kanun SETİ üretimi. Kurallar hâlâ rastgele formülize edilir; yalnızca
+// baştan ölü doğan setler (yetim değişken, fraksiyonlar arası kopukluk,
+// geri besleme yokluğu) elenir — gerisini dogrula() karara bağlar.
+function kanunSetiUret(r, nK){
+  const K=[];
+  // 1) her hedef değişken en az bir kanunla beslensin (yetim değişken olmasın)
+  const sira = VARS.slice();
+  for (let i=sira.length-1;i>0;i--){ const j=Math.floor(r()*(i+1)); const t=sira[i]; sira[i]=sira[j]; sira[j]=t; }
+  for (const hedef of sira){ const k=kanunUret(r, K.length); k.hedef=hedef; K.push(k); }
+  // 2) kalanı tamamen serbest
+  while (K.length < nK) K.push(kanunUret(r, K.length));
+  // 3) fraksiyonlar arası bağ kotası — dalga yayılabilsin
+  const kota = Math.ceil(nK*0.45);
+  let dis = K.filter(k=>k.kapsam!=='oz').length;
+  let guvenlik = 0;
+  while (dis < kota && guvenlik++ < 200){
+    const aday = K.filter(k=>k.kapsam==='oz');
+    if (!aday.length) break;
+    const k = aday[Math.floor(r()*aday.length)];
+    k.kapsam = KAPSAM[1 + Math.floor(r()*(KAPSAM.length-1))];
+    dis++;
+  }
+  // 4) en az bir geri besleme çevrimi (X→Y ve Y→X) bulunsun
+  const cevrimVar = K.some(a=>K.some(b=>a!==b && a.hedef===b.kaynak && b.hedef===a.kaynak));
+  if (!cevrimVar && K.length>=2){
+    const a=K[Math.floor(r()*K.length)];
+    let b=K[Math.floor(r()*K.length)]; if(b===a) b=K[(K.indexOf(a)+1)%K.length];
+    b.kaynak=a.hedef; a.kaynak=b.hedef;
+    if (a.sekil==='carpim') a.kaynak2=sec(r,VARS);
+    if (b.sekil==='carpim') b.kaynak2=sec(r,VARS);
+  }
+  K.forEach((k,i)=>k.id=i);
+  return K;
+}
+
+function sekilDeger(k, a, b){
+  switch(k.sekil){
+    case 'dogrusal': return (a - k.esik) / 50;
+    case 'esik':     return a > k.esik ? 1 : -0.6;
+    case 'carpim':   return (a/100) * (b/100) * 2 - 0.5;
+    case 'kitlik':   return a < k.esik ? (k.esik - a) / 50 : 0;
+    case 'doyum':    return Math.sqrt(a/100) - 0.5;
+    case 'geri':     return 0.5 - Math.pow(a/100, 2);
+  }
+  return 0;
+}
+
+function kanunMetni(k){
+  const s = k.kat >= 0 ? 'artırır' : 'azaltır';
+  const kap = KAD[k.kapsam];
+  const kv = VAD[k.kaynak];
+  let kos;
+  switch(k.sekil){
+    case 'dogrusal': kos = `${kap} ${kv} değeri ${k.esik}'in üstüne çıktıkça`; break;
+    case 'esik':     kos = `${kap} ${kv} değeri ${k.esik}'i aştığında`; break;
+    case 'carpim':   kos = `${kap} ${kv} ile ${VAD[k.kaynak2]} birlikte yükseldikçe`; break;
+    case 'kitlik':   kos = `${kap} ${kv} değeri ${k.esik}'in altına düştükçe`; break;
+    case 'doyum':    kos = `${kap} ${kv} yükseldikçe (giderek azalan hızla)`; break;
+    case 'geri':     kos = `${kap} ${kv} yükseldikçe (hızlanarak tersine)`; break;
+  }
+  return `${kos}, ${VAD[k.hedef]} ${s}. [${Math.abs(k.kat).toFixed(2)}]`;
+}
+
+/* ---------- KALİBRASYON ----------
+ * Rastgele kanunların toplamı hiçbir zaman sıfıra yakınsamaz; kalibre
+ * edilmemiş bir dünyada değişkenler tavana veya tabana park eder ve
+ * dünya ölür. Bu yüzden üretilen her fizik, kendi denge sabitlerini
+ * headless deneme turlarıyla bulur. Kanunlar değişmez — yalnızca
+ * dünyanın "sıfır noktası" kendi kurallarına göre kaydırılır. */
+const _kalibreOnbellek = new Map();
+function kalibreEt(seed, ayar){
+  const anahtar = seed + '|' + JSON.stringify(ayar||{});
+  if (_kalibreOnbellek.has(anahtar)) return _kalibreOnbellek.get(anahtar);
+  let sabit = {}, olcek = {};
+  for (const v of VARS){ sabit[v] = 0; olcek[v] = 1; }
+  let cekimCarpani = 1;
+  const UFUK = 110, OLC = 45;
+  for (let tur=0; tur<4; tur++){
+    const pw = dunyaKur(seed, Object.assign({}, ayar||{}, { sabit: sabit, olcek: olcek, cekimCarpani: cekimCarpani }));
+    const top={}, kare={}, say={};
+    for (const v of VARS){ top[v]=0; kare[v]=0; say[v]=0; }
+    let ray=0, orn=0;
+    for (let t=0;t<UFUK;t++){
+      adim(pw);
+      if (t>=OLC) for (const f of pw.fac){
+        if(!f.canli) continue;
+        for (const v of VARS){ const x=f.v[v]; top[v]+=x; kare[v]+=x*x; say[v]++; orn++; if (x<=3||x>=97) ray++; }
+      }
+    }
+    const ys={}, yo={};
+    for (const v of VARS){
+      const nn = say[v]||1, m = top[v]/nn;
+      const sd = Math.sqrt(Math.max(0, kare[v]/nn - m*m));
+      ys[v] = kirp(sabit[v] - (m-48)*0.055, -6, 6);
+      let o = olcek[v];
+      // kanun sürüklemesi ofsetin taşıyamayacağı kadar güçlüyse kanunları kıs
+      if (Math.abs(m-48) > 16) o *= 0.68;
+      // boyut tamamen tek tipleşmişse kanunları kıs ki mizaç/taban farkları görünsün
+      if (sd < 6) o *= 0.80;
+      else if (Math.abs(m-48) < 7 && sd > 11 && o < 1) o = Math.min(1, o*1.15);
+      yo[v] = kirp(o, 0.2, 1);
+    }
+    sabit = ys; olcek = yo;
+    const rayOran = orn ? ray/orn : 1;
+    if (rayOran > 0.09) cekimCarpani = Math.min(cekimCarpani * 1.5, 2.5);
+    else if (rayOran < 0.01 && cekimCarpani > 1) cekimCarpani = Math.max(1, cekimCarpani * 0.75);
+  }
+  const sonuc = { sabit, olcek, cekimCarpani };
+  if (_kalibreOnbellek.size > 400) _kalibreOnbellek.clear();
+  _kalibreOnbellek.set(anahtar, sonuc);
+  return sonuc;
+}
+
+/* ---------- DÜNYA KURULUMU ---------- */
+function dunyaKur(seed, ayar){
+  ayar = ayar || {};
+  const r = mulberry32(seed >>> 0);
+  const nF = ayar.fraksiyon || (6 + Math.floor(r()*3));   // 6-8
+  const nB = ayar.bolge || (nF + 3 + Math.floor(r()*3));
+
+  const w = {
+    seed: seed >>> 0,
+    tur: 0,
+    fac: [], bolgeler: [], R: [], kanunlar: [], liderEtki: [], iliskiYasasi: null,
+    cekim: ara(r, 0.0008, 0.0095),        // dünyanın ortalamaya dönüş gücü (fizik!)
+    gurultu: ara(r, 0.10, 0.45),        // rastgele dalgalanma genliği
+    olaylar: [], gunluk: [], sabit: null, tohumlar: [], meseleler: [], kutuphane: []
+  };
+  // ayar.sabit verilmişse kalibrasyon denemesindeyiz (özyineleme yok)
+  w.sabit = ayar.sabit || null;
+  w.olcek = ayar.olcek || null;
+  if (ayar.cekimCarpani) w.cekim *= ayar.cekimCarpani;
+
+  const sifatlar = secBenzersiz(r, SIFAT, nF);
+  const kurumlar = secBenzersiz(r, KURUM, nF);
+  const adlar = secBenzersiz(r, AD, nF*3);
+  for (let i=0;i<nF;i++){
+    const f = {
+      id:i,
+      ad: sifatlar[i] + ' ' + kurumlar[i],
+      ideoloji: [ara(r,-1,1), ara(r,-1,1), ara(r,-1,1)],
+      v: {}, bolgeler: [], canli:true,
+      lider: liderUret(r, adlar[i]),
+      // oyuncunun bu fraksiyonda biriktirdikleri
+      nufuz:0, ajan:[], sir:[], borc:0,
+      // İBN HALDUN: dayanışma ruhu. Refah ve nesiller onu çözer.
+      asabiyet: Math.round(ara(r, 42, 88)), nesil: Math.round(ara(r, 0, 3))
+    };
+    // mizaç: aynı kanun her fraksiyonu aynı şiddette etkilemez
+    f.mizac = {};
+    for (const v of VARS) f.mizac[v] = ara(r, 0.55, 1.5);
+    f.taban = {};
+    for (const v of VARS){
+      // her fraksiyonun kendi doğası var: dünya onu buraya çeker, ortalamaya değil
+      f.taban[v] = Math.round(v==='ofke' ? ara(r,14,52) : ara(r,26,74));
+      f.v[v] = Math.round(kirp(f.taban[v] + ara(r,-12,12), 5, 95));
+    }
+    w.fac.push(f);
+  }
+
+  // ilişki matrisi (asimetrik: A, B'ye güvenirken B, A'dan nefret edebilir)
+  for (let i=0;i<nF;i++){
+    w.R.push([]);
+    for (let j=0;j<nF;j++){
+      if (i===j){ w.R[i].push(0); continue; }
+      w.R[i].push(0);
+    }
+  }
+  for (let i=0;i<nF;i++) for (let j=0;j<nF;j++){
+    if (i===j) continue;
+    const d = ideolojikMesafe(w.fac[i], w.fac[j]);
+    // dünya tarihsiz doğmaz: ilk günden dostluklar ve kan davaları vardır
+    w.R[i][j] = Math.round(kirp(72 - d*150 + ara(r,-32,32), -95, 95));
+  }
+
+  // bölgeler
+  const badlar = secBenzersiz(r, BOLGE, nB);
+  for (let i=0;i<nB;i++){
+    const sahip = i < nF ? i : Math.floor(r()*nF);
+    const zn = Math.round(ara(r,26,82));
+    // her bölgenin kendi taşıma kapasitesi var; yoksa servet düştükçe
+    // bölge fakirleşir, fakir bölge serveti düşürür — ölüm sarmalı
+    const b = { id:i, ad:badlar[i], sahip, zenginlik: zn, taban: zn,
+                huzursuzluk: Math.round(ara(r,5,40)), komsu:[] };
+    w.bolgeler.push(b);
+    w.fac[sahip].bolgeler.push(i);
+  }
+  // bölge komşulukları (halka + rastgele kısayollar)
+  for (let i=0;i<nB;i++){
+    const j=(i+1)%nB; w.bolgeler[i].komsu.push(j); w.bolgeler[j].komsu.push(i);
+    if (r()<0.45){ const k2=Math.floor(r()*nB); if(k2!==i && w.bolgeler[i].komsu.indexOf(k2)<0){ w.bolgeler[i].komsu.push(k2); w.bolgeler[k2].komsu.push(i);} }
+  }
+
+  // KANUNLAR — dünyanın fiziği
+  const nK = ayar.kanun || (13 + Math.floor(r()*7));   // 13-19
+  w.kanunlar = kanunSetiUret(r, nK);
+
+  // lider huyları → değişkenler eşlemesi de rastgele
+  const HUY = ['hirs','kusku','kurnaz','sadakat','zalim'];
+  const nL = 4 + Math.floor(r()*3);
+  for (let i=0;i<nL;i++){
+    w.liderEtki.push({ huy: sec(r,HUY), hedef: sec(r,VARS), kat: (r()<0.5?-1:1)*ara(r,0.3,1.5) });
+  }
+
+  // ilişki yasası — dostluk/düşmanlık neyle beslenir?
+  w.iliskiYasasi = {
+    guc:    (r()<0.5?-1:1)*ara(r,0.2,1.2),   // karşı tarafın gücü ilişkiyi nasıl etkiler
+    ideo:   ara(r,0.3,1.4),                   // ideolojik yakınlık çekimi
+    ortakDusman: ara(r,0.2,1.3),              // "düşmanımın düşmanı"
+    ofke:   (r()<0.5?-1:1)*ara(r,0.1,0.9),
+    kutuplasma: ara(r,0.4,1.7),               // düşmanlık düşmanlığı besler (çift kararlılık)
+    sinir:  ara(r,0.2,1.1),                   // komşuluk sürtüşmesi
+    surtunme: ara(r,0.005,0.030)              // ortalamaya dönüş
+  };
+
+  w.kurulumRng = r;
+  // Not: kanun setini denge sabitleriyle kalibre etmeyi denedim (kalibreEt).
+  // 500 dünyada ölçüldü: kabul oranına katkısı yok, maliyeti 3 katı. Dünyayı
+  // raydan çıkmaktan koruyan şey kalibrasyon değil, uygulama adımındaki
+  // yumuşak bariyer ve fraksiyon başına taban/mizaç farkları.
+  if (!w.sabit){ w.sabit = null; w.olcek = null; }
+  return w;
+}
+
+function liderUret(r, ad){
+  return {
+    ad: (ad || sec(r,AD)) + ' ' + sec(r,LAKAP),
+    yas: Math.round(ara(r,29,49)),
+    hirs: Math.round(ara(r,10,95)),
+    kusku: Math.round(ara(r,10,95)),
+    kurnaz: Math.round(ara(r,10,95)),
+    sadakat: Math.round(ara(r,10,95)),
+    zalim: Math.round(ara(r,10,95)),
+    saglik: Math.round(ara(r,60,100)),
+    yil: 0
+  };
+}
+
+function ideolojikMesafe(a,b){
+  let s=0; for(let i=0;i<3;i++){ const d=a.ideoloji[i]-b.ideoloji[i]; s+=d*d; }
+  return Math.sqrt(s)/Math.sqrt(12);   // 0..1
+}
+
+/* ---------- kapsam çözümü ---------- */
+function kapsamDeger(w, i, vr, kapsam){
+  const F = w.fac, f = F[i];
+  if (kapsam === 'oz') return f.v[vr];
+  let top=0, n=0;
+  if (kapsam === 'komsu'){
+    const set = new Set();
+    for (const bi of f.bolgeler) for (const kb of w.bolgeler[bi].komsu){
+      const s = w.bolgeler[kb].sahip; if (s!==i && F[s].canli) set.add(s);
+    }
+    for (const j of set){ top+=F[j].v[vr]; n++; }
+  } else {
+    for (let j=0;j<F.length;j++){
+      if (j===i || !F[j].canli) continue;
+      const rel = w.R[i][j];
+      if (kapsam==='dusman' && rel > -15) continue;
+      if (kapsam==='dost'   && rel <  15) continue;
+      top += F[j].v[vr]; n++;
+    }
+  }
+  if (n===0){  // kapsam boşsa dünyanın ortalaması
+    for (let j=0;j<F.length;j++){ if(j===i||!F[j].canli) continue; top+=F[j].v[vr]; n++; }
+  }
+  return n ? top/n : 50;
+}
+
+/* ---------- TUR ---------- */
+function adim(w, sec_){
+  w.tur++;
+  const F = w.fac, n = F.length;
+  const olaylar = [];
+  const delta = F.map(()=>({guc:0,servet:0,istikrar:0,mesruiyet:0,bilgi:0,ofke:0}));
+
+  // 1) kanunlar
+  for (let i=0;i<n;i++){
+    if (!F[i].canli) continue;
+    for (const k of w.kanunlar){
+      const a = kapsamDeger(w, i, k.kaynak, k.kapsam);
+      const b = k.kaynak2 ? kapsamDeger(w, i, k.kaynak2, k.kapsam) : 0;
+      delta[i][k.hedef] += k.kat * sekilDeger(k, a, b) * F[i].mizac[k.hedef] * (w.olcek ? w.olcek[k.hedef] : 1);
+    }
+    // 2) lider huyları
+    const L = F[i].lider;
+    for (const e of w.liderEtki) delta[i][e.hedef] += e.kat * ((L[e.huy]-50)/50);
+    // 3) bölge geliri ve huzursuzluğu
+    let zen=0, huz=0;
+    for (const bi of F[i].bolgeler){ zen += w.bolgeler[bi].zenginlik; huz += w.bolgeler[bi].huzursuzluk; }
+    const bs = F[i].bolgeler.length || 1;
+    delta[i].servet += (zen/bs - 50)/45 * 1.1;
+    delta[i].ofke   += (huz/bs - 40)/45 * 1.1;
+    // 4) evrensel bedeller — bunlar rastgele değil, bu evrenin değişmez yasaları:
+    //    ordu beslenir, büyük güç kendi ağırlığı altında ezilir, zenginlik göz çıkarır.
+    const gr = F[i].v.guc/100;
+    delta[i].servet -= gr*gr * 1.3;
+    delta[i].guc    -= gr*gr*gr * 1.1;
+    // 4b) ASABİYET (İbn Haldun): refah ve nesiller dayanışmayı çözer,
+    //     dış tehdit onu diriltir. Dört nesilde döngü tamamlanır.
+    {
+      const f2 = F[i];
+      let tehdit = 0;
+      for (let j=0;j<n;j++){
+        if (j===i || !F[j].canli) continue;
+        if (w.R[i][j] < -55 && F[j].v.guc > f2.v.guc + 8) tehdit += 1;
+      }
+      // çözülme dipte yavaşlar; refah ve nesil hızlandırır
+      const cozulme = (0.10 + (f2.v.servet/100)*0.42 + f2.nesil*0.10) * (0.4 + f2.asabiyet/140);
+      const dirilis = Math.min(tehdit, 3) * 0.42;
+      f2.asabiyet = kirp(f2.asabiyet - cozulme + dirilis
+                       + (hsh(w.seed+'|as|'+w.tur+'|'+i)*2-1)*0.12, 0, 100);
+      const a = (f2.asabiyet - 50)/50;
+      delta[i].guc      += a * 1.45;
+      delta[i].istikrar += a * 1.15;
+      delta[i].ofke     -= a * 0.80;
+      delta[i].mesruiyet += a * 0.45;
+    }
+
+    // 5) evrensel çekim + gürültü
+    for (const v of VARS){
+      // kendi doğasına dönüş: dünyanın rastgele çekimine EK olarak sabit bir
+      // pay — yoksa fraksiyonlar fiziğin altında ezilip birbirine benzer.
+      delta[i][v] += (F[i].taban[v] - F[i].v[v]) * (w.cekim + 0.024) + (w.sabit ? w.sabit[v] : 0);
+      delta[i][v] += (hsh(w.seed+'|g|'+w.tur+'|'+i+'|'+v)*2-1) * w.gurultu;
+    }
+  }
+
+  // 5) oyuncu / dış müdahale
+  const tohumOlay = tohumlariIsle(w, delta);
+  if (sec_ && sec_.delta) for (const i in sec_.delta) for (const v in sec_.delta[i]) delta[i][v] += sec_.delta[i][v];
+
+  // 7) uygula — lojistik doyum: uçlara asla yapışma, yoksa küçük farklar yok olur
+  for (let i=0;i<n;i++){
+    if (!F[i].canli) continue;
+    for (const v of VARS){
+      const cur = F[i].v[v];
+      let d = kirp(delta[i][v], -6, 6);
+      d = d > 0 ? d * (1 - cur/100) * 1.7 : d * (cur/100) * 1.7;
+      // yumuşak bariyer: 12-84 arası fiziğe dokunmaz, uçlarda karesel geri iter.
+      // Böylece değişkenler uçlara park edemez ama orta bölgede dünya canlı kalır.
+      if (cur > 80) d -= Math.pow((cur-80)/19.6, 2) * 9;
+      else if (cur < 16) d += Math.pow((16-cur)/15.6, 2) * 9;
+      F[i].v[v] = kirp(cur + d, 0.4, 99.6);
+    }
+  }
+
+  // 8) ilişkiler
+  const IY = w.iliskiYasasi, R2 = w.R.map(row=>row.slice());
+  // komşuluk haritası (bölge sahipliği değiştikçe değişir)
+  const sinir = F.map(()=>({}));
+  for (const b of w.bolgeler) for (const kb of b.komsu){
+    const a1=b.sahip, a2=w.bolgeler[kb].sahip;
+    if (a1!==a2 && F[a1] && F[a2]){ sinir[a1][a2]=1; sinir[a2][a1]=1; }
+  }
+  for (let i=0;i<n;i++) for (let j=0;j<n;j++){
+    if (i===j || !F[i].canli || !F[j].canli) continue;
+    let d = 0;
+    d += IY.guc * ((F[j].v.guc - 50)/50);
+    d += IY.ideo * (0.5 - ideolojikMesafe(F[i],F[j])) * 1.6;
+    d += IY.ofke * ((F[j].v.ofke - 40)/50);
+    // ortak düşman
+    let ort=0; for(let k2=0;k2<n;k2++){ if(k2===i||k2===j||!F[k2].canli) continue; if(w.R[i][k2]<-25 && w.R[j][k2]<-25) ort++; }
+    d += IY.ortakDusman * ort * 0.8;
+    // kutuplaşma: ilişki hangi yöndeyse o yönde derinleşir (dost/düşman çekicileri)
+    const rr0 = w.R[i][j];
+    d += IY.kutuplasma * (rr0/55) * (Math.abs(rr0)/55);
+    if (sinir[i] && sinir[i][j]) d -= IY.sinir * 0.9;
+    d += -IY.surtunme * rr0;
+    d += (hsh(w.seed+'|r|'+w.tur+'|'+i+'|'+j)*2-1) * 0.9;
+    R2[i][j] = kirp(w.R[i][j] + kirp(d,-5,5), -100, 100);
+  }
+  w.R = R2;
+
+  // 9) bölgeler
+  // HARDIN / OSTROM: birden çok gücün sınırında kalan bölge "ortak"tır.
+  // Kural yazan yerel bir kurum yoksa tükenir; varsa korunur.
+  for (const b of w.bolgeler){
+    const sahipler = new Set();
+    for (const kb of b.komsu){ const sh = w.bolgeler[kb].sahip; if (F[sh] && F[sh].canli) sahipler.add(sh); }
+    sahipler.add(b.sahip);
+    b.ortak = sahipler.size >= 3;
+    // OSTROM: yerel kural ya oyuncunun kurumundan doğar ya da kendiliğinden
+    // birikir — ama dışarıdan el değiştirme onu yıkar. Kural kırılgandır.
+    if (b.gelenek === undefined){ b.gelenek = 18; b.sonSahip = b.sahip; }
+    if (b.sonSahip !== b.sahip){ b.gelenek *= 0.32; b.sonSahip = b.sahip; }
+    const sakin = b.huzursuzluk < 42 && F[b.sahip] && F[b.sahip].canli && F[b.sahip].v.istikrar > 40;
+    b.gelenek = kirp(b.gelenek + (sakin ? 0.42 : -0.55), 0, 100);
+    b.kurum = w.tohumlar.some(t=>t.canli && t.kurumsal && t.bolge === b.id);
+    b.yerelKural = b.kurum || b.gelenek > 58;
+  }
+  for (const b of w.bolgeler){
+    const s = F[b.sahip];
+    if (!s || !s.canli) continue;
+    if (b.ortak){
+      // kuralsız ortak tükenir; kural yazılmışsa kendini taşır
+      b.zenginlik = kirp(b.zenginlik + (b.yerelKural ? 0.10 : -0.30), 0, 100);
+      b.huzursuzluk = kirp(b.huzursuzluk + (b.yerelKural ? -0.30 : 0.34), 0, 100);
+    }
+    const bask = (s.v.guc - 50)/50, refah = (s.v.servet - 50)/50;
+    b.huzursuzluk = kirp(b.huzursuzluk + (s.v.ofke-45)/28 - refah*0.9 - bask*0.5 + (hsh(w.seed+'|b|'+w.tur+'|'+b.id)*2-1)*0.7, 0, 100);
+    b.zenginlik   = kirp(b.zenginlik + (b.taban - b.zenginlik)*0.024 + refah*0.35
+                        - b.huzursuzluk/210 + (hsh(w.seed+'|z|'+w.tur+'|'+b.id)*2-1)*0.6, 0, 100);
+  }
+
+  // 10) olaylar
+  olaylar.push(...olaylariCoz(w));
+
+  // 10b) gidişat için 6 mevsimlik anlık görüntü (dinamiği etkilemez)
+  if (w.tur % 6 === 0) for (const f of F){ f.gecmis6 = {}; for (const v of VARS) f.gecmis6[v] = f.v[v]; }
+
+  // 11) liderler
+  olaylar.push(...liderleriIsle(w));
+
+  // 12) akımlar, meseleler, kopuşlar ve gizli el
+  if (w.el) olaylar.push(...eliIsle(w));
+  olaylar.push(...tohumOlay);
+  olaylar.push(...kopuslariIsle(w));
+  olaylar.push(...meseleTaramasi(w));
+  olaylar.push(...meseleleriIsle(w));
+
+  w.olaylar.push(...olaylar);
+  return olaylar;
+}
+
+function skor(f){ return (f.v.guc+f.v.servet+f.v.istikrar+f.v.mesruiyet+f.v.bilgi)/5 - f.v.ofke*0.30; }
+
+function olaylariCoz(w){
+  const F=w.fac, n=F.length, out=[];
+  const E=(t,m,x)=>{ const o={tur:w.tur,tip:t,metin:m}; if(x) Object.assign(o,x); out.push(o); return o; };
+  // Olaylar SÜREKLİ olasılıklarla tetiklenir: durumdaki en küçük fark bile
+  // eşiği geçme ihtimalini kaydırır. Kararların birikmesi buradan doğar.
+  const lo = x => 1/(1+Math.exp(-x));
+
+  for (let i=0;i<n;i++){
+    const f=F[i]; if(!f.canli) continue;
+    const rr=(tag)=>hsh(w.seed+'|e|'+w.tur+'|'+i+'|'+tag);
+
+    const pIsyan = kirp((f.v.ofke-66)/60 + (42-f.v.istikrar)/110, 0, 0.20);
+    if (rr('isyan') < pIsyan){
+      const sid = 5 + (f.v.ofke-60)/6;
+      f.v.istikrar=kirp(f.v.istikrar-sid,0.4,99.6);
+      f.v.guc=kirp(f.v.guc-sid*0.5,0.4,99.6); f.v.ofke=kirp(f.v.ofke-10,0.4,99.6);
+      E('isyan', `${f.ad} topraklarında ayaklanma patladı.`, {fac:i});
+    }
+
+    const pDarbe = kirp((32-f.v.mesruiyet)/85 + (f.v.guc-48)/190 + (f.lider.hirs-55)/400, 0, 0.14);
+    if (rr('darbe') < pDarbe){
+      const eski=f.lider.ad;
+      f.lider=liderUret(mulberry32(Math.floor(rr('yeni')*1e9)));
+      // darbe yeni bir hanedandır: asabiyet tazelenir
+      f.nesil = 0; f.asabiyet = kirp(f.asabiyet + 22, 0, 100);
+      f.v.mesruiyet=kirp(f.v.mesruiyet+14,0.4,99.6); f.v.istikrar=kirp(f.v.istikrar-9,0.4,99.6);
+      E('darbe', `${f.ad}: ${eski} devrildi, yerine ${f.lider.ad} geçti.`, {fac:i});
+    }
+
+    const pKitlik = kirp((19-f.v.servet)/42, 0, 0.09);
+    if (rr('kitlik') < pKitlik){
+      f.v.ofke=kirp(f.v.ofke+11+(19-f.v.servet)/4,0.4,99.6);
+      f.v.istikrar=kirp(f.v.istikrar-5,0.4,99.6);
+      E('kitlik', `${f.ad} kıtlıkla boğuşuyor; halk öfkeli.`, {fac:i});
+    }
+
+    const pAltin = kirp((f.v.servet-74)/70 + (f.v.istikrar-66)/95 - f.v.ofke/300, 0, 0.12);
+    if (rr('altin') < pAltin){
+      f.v.mesruiyet=kirp(f.v.mesruiyet+6,0.4,99.6);
+      E('altin', `${f.ad} için bolluk yılları: meşruiyeti yükseliyor.`, {fac:i});
+    }
+
+    // İBN HALDUN döngüsünün kapanışı: asabiyeti tükenen hanedanın yerini
+    // taşradan gelen taze bir dayanışma alır. Çöküş değil, yenilenmedir.
+    if (f.asabiyet < 14 && rr('yenilenme') < 0.075){
+      const eski = f.lider.ad;
+      f.lider = liderUret(mulberry32(Math.floor(rr('yh')*1e9)));
+      f.nesil = 0;
+      f.asabiyet = 68 + rr('ya')*22;
+      f.v.istikrar  = kirp(f.v.istikrar - 13, 0.4, 99.6);
+      f.v.mesruiyet = kirp(f.v.mesruiyet + 9, 0.4, 99.6);
+      f.v.ofke      = kirp(f.v.ofke - 11, 0.4, 99.6);
+      f.v.servet    = kirp(f.v.servet * 0.78, 0.4, 99.6);
+      E('yenilenme', `${f.ad}: ${eski}'nin hanedanı tükendi. Taşradan gelen taze bir asabiyet düzeni ele geçirdi.`,
+        { fac:i, kavram:'haldun' });
+    }
+
+    if (skor(f)<9 && f.bolgeler.length===0){ f.canli=false; E('cokus', `${f.ad} tarihten silindi.`, {fac:i}); }
+  }
+
+  for (let i=0;i<n;i++) for (let j=0;j<n;j++){
+    if(i===j||!F[i].canli||!F[j].canli) continue;
+    const dusmanlik = (-w.R[i][j]-52)/120;
+    const istek = (F[i].v.guc-42)/140 + (F[i].lider.zalim-50)/380;
+    const pSavas = kirp(dusmanlik*(0.55+kirp(istek,-0.3,0.6)), 0, 0.072);
+    if (hsh(w.seed+'|s|'+w.tur+'|'+i+'|'+j) < pSavas){
+      const gf = (F[i].v.guc + F[i].v.bilgi*0.4) - (F[j].v.guc + F[j].v.istikrar*0.3);
+      F[i].v.servet=kirp(F[i].v.servet-6,0.4,99.6); F[j].v.servet=kirp(F[j].v.servet-8,0.4,99.6);
+      F[i].v.ofke=kirp(F[i].v.ofke+3,0.4,99.6); F[j].v.ofke=kirp(F[j].v.ofke+6,0.4,99.6);
+      w.R[j][i]=kirp(Math.min(w.R[j][i]-26,-55),-100,100); w.R[i][j]=kirp(w.R[i][j]-12,-100,100);
+      const pZafer = lo(gf/11);
+      if (hsh(w.seed+'|sz|'+w.tur+'|'+i+'|'+j) < pZafer && F[j].bolgeler.length>0){
+        const bi = F[j].bolgeler[Math.floor(hsh(w.seed+'|sb|'+w.tur+'|'+i+'|'+j)*F[j].bolgeler.length)];
+        F[j].bolgeler = F[j].bolgeler.filter(x=>x!==bi);
+        F[i].bolgeler.push(bi); w.bolgeler[bi].sahip=i; w.bolgeler[bi].huzursuzluk=kirp(w.bolgeler[bi].huzursuzluk+22,0,100);
+        F[i].v.mesruiyet=kirp(F[i].v.mesruiyet-4,0.4,99.6);
+        w.R[j][i]=kirp(w.R[j][i]-22,-100,100);
+        E('savas', `${F[i].ad}, ${F[j].ad} üzerine yürüdü ve ${ekBelirtme(w.bolgeler[bi].ad)} aldı.`, {fac:i,hedef:j,bolge:bi});
+      } else {
+        E('savas', `${F[i].ad} ile ${F[j].ad} arasında kanlı ve sonuçsuz bir çatışma.`, {fac:i,hedef:j});
+      }
+    }
+  }
+
+  for (const b of w.bolgeler){
+    const pKopus = kirp((b.huzursuzluk-74)/85, 0, 0.12);
+    if (hsh(w.seed+'|ba|'+w.tur+'|'+b.id) < pKopus){
+      const eski=b.sahip;
+      const adaylar=b.komsu.map(k=>w.bolgeler[k].sahip).filter(x=>x!==eski && F[x] && F[x].canli);
+      if (adaylar.length){
+        const yeni = adaylar[Math.floor(hsh(w.seed+'|by|'+w.tur+'|'+b.id)*adaylar.length)];
+        F[eski].bolgeler=F[eski].bolgeler.filter(x=>x!==b.id);
+        F[yeni].bolgeler.push(b.id); b.sahip=yeni; b.huzursuzluk=52;
+        F[eski].v.mesruiyet=kirp(F[eski].v.mesruiyet-7,0.4,99.6);
+        w.R[eski][yeni]=kirp(w.R[eski][yeni]-30,-100,100);
+        E('kopus', `${b.ad} ayaklandı ve ${ekYonelme(F[yeni].ad)} katıldı.`, {fac:yeni,hedef:eski,bolge:b.id});
+      }
+    }
+  }
+  return out;
+}
+
+function liderleriIsle(w){
+  const out=[];
+  for (let i=0;i<w.fac.length;i++){
+    const f=w.fac[i]; if(!f.canli) continue;
+    const L=f.lider; L.yil++;
+    if (w.tur%4===0) L.yas++;
+    // mevsimlik ölüm riski: yaşla üstel + sağlık + suikast (istikrarsızlık)
+    const risk = 0.0022 * Math.exp((L.yas - 45) / 9.0)
+               + (100 - L.saglik) / 9000
+               + Math.max(0, 38 - f.v.istikrar) / 9000 * (L.kusku / 100);
+    if (hsh(w.seed+'|o|'+w.tur+'|'+i) < risk){
+      const eski=L.ad;
+      const varisRng = mulberry32(Math.floor(hsh(w.seed+'|v|'+w.tur+'|'+i)*1e9));
+      f.lider = liderUret(varisRng);
+      f.nesil++;
+      f.asabiyet = kirp(f.asabiyet - 3 - f.nesil*0.8, 0, 100);
+      const sarsinti = 6 + (L.hirs/12);
+      f.v.istikrar = kirp(f.v.istikrar - sarsinti, 0, 100);
+      f.v.mesruiyet = kirp(f.v.mesruiyet - sarsinti*0.7, 0, 100);
+      // veliaht krizi ilişkileri sarsar
+      for (let j=0;j<w.fac.length;j++) if(j!==i) w.R[i][j]=kirp(w.R[i][j]*0.7 + (hsh(w.seed+'|vr|'+w.tur+'|'+i+'|'+j)*40-20),-100,100);
+      out.push({tur:w.tur,tip:'veraset',fac:i,metin:`${f.ad}: ${eski} öldü. ${f.lider.ad} tahta çıktı — veraset sancılı.`});
+    }
+  }
+  return out;
+}
+
+/* ================= KAVRAMLAR =================
+ * Bu oyunun mekanikleri uydurma değil: her biri gerçek bir kuramın
+ * matematiğidir. Oyun mesele kapandıktan sonra yalnızca kavramın adını
+ * ve kaynağını söyler, ASLA açıklamaz. Okuyan oyuncu bir sonrakini
+ * önceden görür — oyunun ekrandan çok kafada dönmesi buradan gelir.
+ */
+const KAVRAMLAR = {
+  michels: {
+    ad: 'Tunç Oligarşi Yasası',
+    tek: 'Her hareket olgunlaştıkça kendi seçkinini üretir ve kuruluş amacından sapar.',
+    kaynak: 'Robert Michels — Siyasal Partiler (1911)'
+  },
+  tocqueville: {
+    ad: 'Tocqueville Paradoksu',
+    tek: 'Kötü bir düzen için en tehlikeli an, kendini düzeltmeye başladığı andır.',
+    kaynak: 'Alexis de Tocqueville — Eski Rejim ve Devrim (1856)'
+  },
+  kuran: {
+    ad: 'Tercih Saklama',
+    tek: 'Baskı altında gerçek destek görünmez; eşik aşıldığında çöküş ani olur.',
+    kaynak: 'Timur Kuran — Yalanla Yaşamak (1995)'
+  },
+  haldun: {
+    ad: 'Asabiyet',
+    tek: 'Dayanışma ruhu hanedanı kurar, refah onu çözer; döngü dört nesil sürer.',
+    kaynak: 'İbn Haldun — Mukaddime (1377)'
+  },
+  goodhart: {
+    ad: 'Goodhart Yasası',
+    tek: 'Bir ölçüt hedefe dönüştüğünde iyi bir ölçüt olmaktan çıkar.',
+    kaynak: 'Charles Goodhart (1975) / Marilyn Strathern (1997)'
+  },
+  olson: {
+    ad: 'Kolektif Eylemin Mantığı',
+    tek: 'Küçük ve yoğun çıkarlar, büyük ve dağınık çoğunluğu düzenli olarak yener.',
+    kaynak: 'Mancur Olson — Kolektif Eylemin Mantığı (1965)'
+  },
+  scott: {
+    ad: 'Okunabilirlik',
+    tek: 'Merkez, görebilmek için basitleştirir; basitleştirdiği şeyi yok eder.',
+    kaynak: 'James C. Scott — Devlet Gibi Görmek (1998)'
+  },
+  vekil: {
+    ad: 'Vekil Sorunu',
+    tek: 'Vekilin çıkarı asilinkiyle aynı değildir ve gözetim her zaman pahalıdır.',
+    kaynak: 'Jensen & Meckling (1976)'
+  },
+  girard: {
+    ad: 'Günah Keçisi',
+    tek: 'Kriz, suçun tek bir kurbanda toplanmasıyla çözülür — ve bir süre işe yarar.',
+    kaynak: 'René Girard — Şiddet ve Kutsal (1972)'
+  },
+  thucydides: {
+    ad: 'Thukydides Tuzağı',
+    tek: 'Savaşı çıkaran güç farkı değil, güç farkının değişme hızıdır.',
+    kaynak: 'Thukydides (MÖ 5. yy); güncel tartışma: Graham Allison — Kaçınılmaz Savaş (2017)'
+  },
+  kantorowicz: {
+    ad: 'Kralın İki Bedeni',
+    tek: 'Makam kişiden ayrıdır; kişi ölür, makam ölmez — ayrılık sağlanamazsa ikisi birden ölür.',
+    kaynak: 'Ernst Kantorowicz — Kralın İki Bedeni (1957)'
+  },
+  hardin: {
+    ad: 'Ortakların Trajedisi',
+    tek: 'Herkesin olan şeyi kimse korumaz — ta ki koruyacak bir kural yazılana kadar.',
+    kaynak: 'Garrett Hardin (1968); itirazı için Ostrom (1990)'
+  },
+  merton: {
+    ad: 'Kendini Gerçekleştiren Kehanet',
+    tek: 'Yanlış bir tanım, ona göre davranıldığı için doğru çıkar.',
+    kaynak: 'Robert K. Merton — Social Theory and Social Structure (1948)'
+  },
+  ostrom: {
+    ad: 'Ortakların Yönetimi',
+    tek: 'Ortak varlık ne devletle ne piyasayla; kendi kurallarını yazan toplulukla korunur.',
+    kaynak: 'Elinor Ostrom — Ortakların Yönetimi (1990)'
+  }
+};
+
+/* ================= TOHUMLAR VE AKIMLAR =================
+ * Oyuncu bir fikri bir toplumsal katmana eker. Tohum olgunlaştıkça
+ * getirisi artar; AMA denetimi aynı olgunlukla erir. Fayda ile risk
+ * tek bir değişkene bağlıdır, ayrılamaz.
+ */
+const KATMANLAR = {
+  seckin: { ad:'seçkinler', hiz:1.25, tehlike:1.60, gorunur:1.4 },
+  ruhban: { ad:'ruhban',    hiz:0.85, tehlike:1.25, gorunur:1.1 },
+  asker:  { ad:'asker',     hiz:1.00, tehlike:2.10, gorunur:1.3 },
+  esnaf:  { ad:'esnaf',     hiz:1.15, tehlike:0.95, gorunur:0.8 },
+  halk:   { ad:'halk',      hiz:0.70, tehlike:1.15, gorunur:0.6 }
+};
+const AMACLAR = {
+  okuryazarlik: { ad:'okuryazarlık', besle:'bilgi',      kavram:'tocqueville' },
+  sadakat:      { ad:'sadakat',      besle:'istikrar',   kavram:'michels' },
+  kuskuculuk:   { ad:'kuşkuculuk',   besle:'bilgi',      kavram:'kuran' },
+  zenginlik:    { ad:'zenginlik',    besle:'servet',     kavram:'olson' },
+  inanc:        { ad:'inanç',        besle:'mesruiyet',  kavram:'girard' },
+  direnc:       { ad:'direnç',       besle:'guc',        kavram:'haldun' }
+};
+const EVRELER = ['fısıltı','çevre','akım','kurum','kopuş'];
+const AKIM_ADI_ON = ['Okuma','Sessiz','Gece','Açık','Dokuzuncu','Yeni','Sabah','Kapalı','Yalın','Uyanık'];
+const AKIM_ADI_SON = ['Halkaları','Kardeşliği','Sofrası','Meclisi','Yemini','Odası','Yolu','Çırakları','Defteri','Kapısı'];
+
+function evreAdi(olgunluk){
+  if (olgunluk < 20) return 'fısıltı';
+  if (olgunluk < 45) return 'çevre';
+  if (olgunluk < 75) return 'akım';
+  return 'kurum';
+}
+
+function tohumEk(w, { fac, katman, amac, bolge }){
+  const r = mulberry32(Math.floor(hsh(w.seed+'|th|'+w.tur+'|'+fac+'|'+(w.tohumlar.length))*1e9));
+  const t = {
+    id: w.tohumlar.length,
+    ad: sec(r, AKIM_ADI_ON) + ' ' + sec(r, AKIM_ADI_SON),
+    fac, katman, amac,
+    bolge: (bolge === undefined ? null : bolge),
+    dogum: w.tur,
+    olgunluk: 3,
+    denetim: 100,
+    // Kuran: görünür destek bastırılabilir, gerçek destek bastırılamaz
+    gercekDestek: 6,
+    gorunurDestek: 6,
+    dogrultu: w.fac[fac].ideoloji.slice(),
+    // katmanın kendi çıkarı — hareket zamanla buraya sürüklenir
+    cekim: [ara(r,-1,1), ara(r,-1,1), ara(r,-1,1)],
+    besleniyor: true,
+    gozetim: false,
+    bastirilma: 0,
+    evre: 'fısıltı',
+    canli: true,
+    kurumsal: false,
+    gecmis: []
+  };
+  w.tohumlar.push(t);
+  return t;
+}
+
+function vekMesafe(a, b){
+  let s=0; for (let i=0;i<3;i++){ const d=a[i]-b[i]; s+=d*d; }
+  return Math.sqrt(s)/Math.sqrt(12);
+}
+
+function tohumlariIsle(w, delta){
+  const out = [];
+  for (const t of w.tohumlar){
+    if (!t.canli) continue;
+    const host = w.fac[t.fac];
+    if (!host || !host.canli){ t.canli = false; t.son = 'konak-coktu'; continue; }
+    const K = KATMANLAR[t.katman], A = AMACLAR[t.amac];
+    const rr = (tag)=>hsh(w.seed+'|tz|'+w.tur+'|'+t.id+'|'+tag);
+
+    /* --- olgunlaşma: zemin uygunsa hızlı büyür --- */
+    const zemin = (host.v.bilgi/100)*0.6 + (host.v.istikrar/100)*0.4;
+    const bask = t.bastirilma > 0 ? 0.35 : 1;
+    const buyume = K.hiz * (0.30 + zemin*0.95) * (t.besleniyor ? 1.55 : 0.75)
+                 * (1 - t.olgunluk/135) * bask;
+    t.olgunluk = kirp(t.olgunluk + buyume, 0, 100);
+
+    /* --- MICHELS: denetim olgunlukla erir, geri gelmez --- */
+    const sapma = vekMesafe(t.dogrultu, host.ideoloji);
+    const erime = Math.pow(t.olgunluk/100, 1.55) * K.tehlike * 1.05
+                + sapma * 1.30
+                + (t.besleniyor ? 0.45 : 0);
+    t.denetim = kirp(t.denetim - erime + (t.gozetim ? 1.25 : 0), 0, 100);
+
+    /* --- kendi doğrultusunu bulur: olgunlaştıkça katmanın çıkarına kayar --- */
+    const kayma = 0.016 * (0.35 + t.olgunluk/100);
+    for (let i=0;i<3;i++){
+      t.dogrultu[i] = kirp(t.dogrultu[i] + (t.cekim[i]-t.dogrultu[i])*kayma
+                          + (rr('d'+i)*2-1)*0.004, -1, 1);
+    }
+
+    /* --- KURAN: baskı görünür desteği kırar, gerçeği büyütür --- */
+    const cekicilik = t.olgunluk/100 * (0.5 + sapma*0.8);
+    t.gercekDestek = kirp(t.gercekDestek + cekicilik*1.4 + t.bastirilma*0.9, 0, 100);
+    const gorunurHedef = t.bastirilma > 0
+      ? t.gercekDestek * kirp(0.25 - t.bastirilma*0.03, 0.05, 0.9)
+      : t.gercekDestek * kirp(0.55 + t.olgunluk/220, 0, 1);
+    t.gorunurDestek += (gorunurHedef - t.gorunurDestek) * 0.30;
+    if (t.bastirilma > 0) t.bastirilma = Math.max(0, t.bastirilma - 1);
+
+    /* --- dünyaya etkisi: getiri denetimle, zarar denetimsizlikle --- */
+    const pay = t.olgunluk/100;
+    const tutulan  = pay * (t.denetim/100);
+    const bagimsiz = pay * (1 - t.denetim/100);
+    delta[t.fac][A.besle] += tutulan * 2.6 + pay * 0.55;
+    // kendini geliştirmiş ama düzeni kabul etmeyen bir topluluk:
+    delta[t.fac].ofke      += bagimsiz * 2.5;
+    delta[t.fac].mesruiyet -= bagimsiz * 1.9;
+    delta[t.fac].istikrar  -= bagimsiz * 1.1 * K.tehlike * 0.6;
+
+    /* --- TOCQUEVILLE: hızlı iyileşme isyanı besler --- */
+    const oncekiRefah = t.sonRefah === undefined ? host.v.servet : t.sonRefah;
+    const ivme = host.v.servet - oncekiRefah;
+    t.sonRefah = host.v.servet;
+    if (ivme > 0.6 && host.v.servet < 62 && t.olgunluk > 25){
+      delta[t.fac].ofke += Math.min(ivme, 3) * 0.75 * pay;
+      if (!t.tocqueville && rr('toc') < 0.25){
+        t.tocqueville = true;
+        out.push({ tur:w.tur, tip:'ivme', tohum:t.id, fac:t.fac, kavram:'tocqueville',
+          metin: `${host.ad} düzeliyor — ve ${t.ad} tam bu yüzden sesini yükseltiyor.` });
+      }
+    }
+
+    /* --- evre geçişleri --- */
+    const yeniEvre = evreAdi(t.olgunluk);
+    if (yeniEvre !== t.evre){
+      const eski = t.evre; t.evre = yeniEvre;
+      t.gecmis.push({ tur:w.tur, evre:yeniEvre, denetim:Math.round(t.denetim) });
+      out.push({ tur:w.tur, tip:'evre', tohum:t.id, fac:t.fac,
+        metin: `${t.ad} artık bir ${yeniEvre} (${eski} değil). Denetimin: %${Math.round(t.denetim)}.` });
+    }
+  }
+  return out;
+}
+
+/* ================= MESELELER =================
+ * Bir mesele açıldığında DURMAZ. Açık kaldığı sürece durum kendi
+ * başına gelişir; beklemek de bir karardır ve bedeli vardır.
+ */
+const MESELE_TANIM = {
+  basibos: {
+    baslik: 'Elinden kayıyor',
+    kavram: 'michels',
+    pencere: 8,
+    secenekler: ['bekle','gozetle','kurumsallastir','yonlendir','terk']
+  },
+  kopusEsigi: {
+    baslik: 'Kopuş eşiği',
+    kavram: 'kuran',
+    pencere: 6,
+    secenekler: ['bekle','bastir','kurumsallastir','yonlendir','terk']
+  },
+  kirilma: {
+    baslik: 'Kırılma',
+    kavram: 'girard',
+    pencere: 4,
+    secenekler: ['bekle','bastir','gunahKecisi','terk']
+  },
+  savasEsigi: {
+    baslik: 'Savaş eşiği',
+    kavram: 'thucydides',
+    pencere: 5,
+    secenekler: ['bekle','arabulucu','sizdirPlan','yonSaptir','kizistir']
+  },
+  verasetKrizi: {
+    baslik: 'Veraset',
+    kavram: 'kantorowicz',
+    pencere: 7,
+    secenekler: ['bekle','veliahtDestekle','rakipDestekle','uzlastir','krizDerinlestir']
+  },
+  ortakAnlasmazligi: {
+    baslik: 'Ortak toprak',
+    kavram: 'ostrom',
+    pencere: 6,
+    secenekler: ['bekle','kuralYaz','bolustur','tekElde','kizistir']
+  }
+};
+
+const ACIK_TAVAN = 2;
+function meseleAc(w, tip, ilgili){
+  // Tavan burada uygulanır: tohum meselesi de dünyanın krizi de aynı
+  // kuyruğa girer, yoksa oyuncu aynı anda dört dosyayla karşılaşır.
+  if (w.meseleler.filter(m=>m.acik).length >= ACIK_TAVAN) return null;
+  const T = MESELE_TANIM[tip];
+  const m = {
+    id: w.meseleler.length, tip, baslik: T.baslik, kavram: T.kavram,
+    acilis: w.tur, pencere: T.pencere, secenekler: T.secenekler.slice(),
+    ilgili, acik: true, karar: null, kapanis: null, gunluk: []
+  };
+  w.meseleler.push(m);
+  return m;
+}
+
+// Dünyayı dallandırmak için (senaryo karşılaştırması, ileride geri alma yok)
+function klonla(w){
+  const rng = w.kurulumRng; delete w.kurulumRng;
+  const k = JSON.parse(JSON.stringify(w));
+  w.kurulumRng = rng;
+  return k;
+}
+
+/* Meselelerin açılışı: tohum dışındaki krizler de dünyanın kendi
+ * hareketinden doğar. Hepsi pencereli ve hepsi açıkken gelişir. */
+function meseleTaramasi(w){
+  const out = [], F = w.fac;
+  if (!w.el || w.el.bitti) return out;
+  // güç geçmişi her turda tazelenir; yoksa mesele kapalıyken ivme şişer
+  const oncekiGuc = w.gucGecmis;
+  w.gucGecmis = F.map(f=>f.v.guc);
+  // Oyuncu boğulmasın: aynı anda en çok iki mesele açık kalır.
+  // Kapalı kalan kriz yok olmaz, dünyanın kendi akışında sürer.
+  if (w.meseleler.filter(m=>m.acik).length >= 2) return out;
+  const acikMi = (tip, kim)=> w.meseleler.some(m=>m.acik && m.tip===tip &&
+    (kim.bolge != null ? m.ilgili.bolge===kim.bolge
+     : (kim.hedefFac != null ? (m.ilgili.fac===kim.fac && m.ilgili.hedefFac===kim.hedefFac)
+        : m.ilgili.fac===kim.fac)));
+
+  // THUKYDIDES: savaşı çıkaran güç farkı değil, farkın değişme hızıdır
+  for (let i=0;i<F.length;i++){
+    if (!F[i].canli) continue;
+    const ivme = F[i].v.guc - ((oncekiGuc && oncekiGuc[i] !== undefined) ? oncekiGuc[i] : F[i].v.guc);
+    for (let j=0;j<F.length;j++){
+      if (i===j || !F[j].canli) continue;
+      if (w.R[i][j] > -60) continue;
+      if (acikMi('savasEsigi', { fac:i, hedefFac:j })) continue;
+      // yükselen güç + derin düşmanlık
+      const p = kirp((ivme*0.10) + ((-w.R[i][j]-60)/220) + (F[i].v.guc-F[j].v.guc)/600, 0, 0.022);
+      if (hsh(w.seed+'|mt1|'+w.tur+'|'+i+'|'+j) < p &&
+          meseleAc(w, 'savasEsigi', { fac:i, hedefFac:j, ivme:+ivme.toFixed(2) })){
+        out.push({ tur:w.tur, tip:'meseleAcildi', fac:i, hedef:j, kavram:'thucydides',
+          metin:`${F[i].ad} ile ${F[j].ad} savaşın eşiğinde.` });
+      }
+    }
+  }
+  // KANTOROWICZ: makam kişiden ayrılamazsa ikisi birden ölür
+  for (let i=0;i<F.length;i++){
+    const f = F[i];
+    if (!f.canli || acikMi('verasetKrizi', { fac:i })) continue;
+    const yaslı = f.lider.yas > 58, hasta = f.lider.saglik < 52;
+    if (!yaslı && !hasta) continue;
+    const p = kirp((f.lider.yas-56)/260 + (60-f.lider.saglik)/900 + (55-f.asabiyet)/900, 0, 0.055);
+    if (hsh(w.seed+'|mt2|'+w.tur+'|'+i) < p && meseleAc(w, 'verasetKrizi', { fac:i })){
+      out.push({ tur:w.tur, tip:'meseleAcildi', fac:i, kavram:'kantorowicz',
+        metin:`${f.ad}: ${f.lider.ad} zayıflıyor, makam sallantıda.` });
+    }
+  }
+
+  // OSTROM: kuralı çökmüş ortak toprak
+  for (const b of w.bolgeler){
+    if (!b.ortak || acikMi('ortakAnlasmazligi', { bolge:b.id })) continue;
+    if (b.gelenek > 28 || b.huzursuzluk < 52) continue;
+    const p = kirp((b.huzursuzluk-50)/300 + (30-b.gelenek)/400, 0, 0.045);
+    if (hsh(w.seed+'|mt3|'+w.tur+'|'+b.id) < p && meseleAc(w, 'ortakAnlasmazligi', { bolge:b.id, fac:b.sahip })){
+      out.push({ tur:w.tur, tip:'meseleAcildi', bolge:b.id, fac:b.sahip, kavram:'ostrom',
+        metin:`${b.ad}'nda kural kalmadı; üç güç birden göz dikti.` });
+    }
+  }
+  return out;
+}
+
+function meselePencere(w, m){ return m.acilis + m.pencere - w.tur; }
+
+function meseleleriIsle(w){
+  const out = [];
+  for (const m of w.meseleler){
+    if (!m.acik) continue;
+    const t = m.ilgili.tohum != null ? w.tohumlar[m.ilgili.tohum] : null;
+    // durum açık kaldıkça gelişir
+    if (t && t.canli){
+      m.gunluk.push({ tur:w.tur, olgunluk:Math.round(t.olgunluk), denetim:Math.round(t.denetim),
+                      gercek:Math.round(t.gercekDestek), gorunur:Math.round(t.gorunurDestek) });
+    }
+    if (meselePencere(w, m) <= 0){
+      // karar vermemek de bir karardır
+      out.push(...meseleKarar(w, m.id, 'bekle', true));
+    }
+  }
+  return out;
+}
+
+function meseleKarar(w, meseleId, karar, sureDoldu){
+  const m = w.meseleler[meseleId];
+  const out = [];
+  if (!m || !m.acik) return out;
+  if (m.secenekler.indexOf(karar) < 0) karar = 'bekle';
+  const t = m.ilgili.tohum != null ? w.tohumlar[m.ilgili.tohum] : null;
+  const f = t ? w.fac[t.fac] : (m.ilgili.fac != null ? w.fac[m.ilgili.fac] : null);
+  m.acik = false; m.karar = karar; m.kapanis = w.tur; m.sureDoldu = !!sureDoldu;
+
+  const K = KAVRAMLAR[m.kavram];
+  kutuphaneEkle(w, m.kavram);
+  const not = (metin, ek) => out.push(Object.assign({ tur:w.tur, tip:'mesele', mesele:m.id,
+    kavram:m.kavram, kavramAd:K.ad, kaynak:K.kaynak, metin }, ek||{}));
+
+  // tohum dışı meseleler
+  if (m.tip === 'savasEsigi' || m.tip === 'verasetKrizi' || m.tip === 'ortakAnlasmazligi'){
+    out.push(...meseleKararDis(w, m, karar, not));
+    return out;
+  }
+
+  if (!t || !t.canli || !f){ not('Mesele kendiliğinden kapandı.'); return out; }
+
+  switch (karar){
+    case 'bekle':
+      // hiçbir şey yapmamak hareketi serbest bırakır
+      t.denetim = kirp(t.denetim - 6, 0, 100);
+      not(sureDoldu
+        ? `${t.ad} meselesinde süre doldu. Karar vermemek de bir karardı.`
+        : `${t.ad} meselesinde beklemeyi seçtin.`);
+      break;
+
+    case 'gozetle':
+      // vekil sorunu: gözetim işe yarar ama pahalıdır ve fark edilir
+      t.gozetim = true;
+      f.v.servet = kirp(f.v.servet - 3, 0.4, 99.6);
+      f.v.bilgi  = kirp(f.v.bilgi + 4, 0.4, 99.6);
+      t.gercekDestek = kirp(t.gercekDestek + 4, 0, 100);
+      not(`${t.ad} üzerine göz koydun. Gözetim pahalı ve görünür.`, { ikincilKavram:'vekil' });
+      break;
+
+    case 'kurumsallastir':
+      // hareketi düzenin parçası yap: kopuş biter, sapma kalıcılaşır
+      t.kurumsal = true;
+      t.denetim = kirp(t.denetim + 26, 0, 100);
+      t.olgunluk = kirp(t.olgunluk - 8, 0, 100);
+      f.v.mesruiyet = kirp(f.v.mesruiyet + 6, 0.4, 99.6);
+      f.v.istikrar  = kirp(f.v.istikrar + 4, 0.4, 99.6);
+      // ama artık sökülemez: kendi doğrultusunu düzene taşır
+      for (let i=0;i<3;i++) f.ideoloji[i] = kirp(f.ideoloji[i]*0.85 + t.dogrultu[i]*0.15, -1, 1);
+      not(`${t.ad} düzenin parçası oldu. Artık sökülemez — ve düzeni kendine benzetecek.`);
+      break;
+
+    case 'yonlendir': {
+      // başka bir hedefe koşmak: denetim yetiyorsa güçlü, yetmiyorsa geri teper
+      const sans = kirp(t.denetim/100 * 1.15 - t.olgunluk/260, 0.05, 0.95);
+      if (hsh(w.seed+'|yn|'+w.tur+'|'+t.id) < sans){
+        const amaclar = Object.keys(AMACLAR).filter(a=>a!==t.amac);
+        t.amac = amaclar[Math.floor(hsh(w.seed+'|ya|'+w.tur+'|'+t.id)*amaclar.length)];
+        t.denetim = kirp(t.denetim + 10, 0, 100);
+        not(`${t.ad} yeni bir hedefe çevrildi: ${AMACLAR[t.amac].ad}. Tuttu.`);
+      } else {
+        t.denetim = kirp(t.denetim - 20, 0, 100);
+        t.gercekDestek = kirp(t.gercekDestek + 9, 0, 100);
+        not(`${t.ad} yönlendirilmeye direndi. Artık senin olmadığını biliyorlar.`);
+      }
+      break;
+    }
+
+    case 'bastir': {
+      // KURAN: görünür destek çöker, gerçek destek büyür — ve saklanır
+      t.bastirilma = 5;
+      t.gorunurDestek = kirp(t.gorunurDestek * 0.25, 0, 100);
+      t.gercekDestek = kirp(t.gercekDestek + 12 + t.olgunluk/8, 0, 100);
+      f.v.guc      = kirp(f.v.guc - 3, 0.4, 99.6);
+      f.v.istikrar = kirp(f.v.istikrar + 7, 0.4, 99.6);
+      f.v.ofke     = kirp(f.v.ofke + 5, 0.4, 99.6);
+      t.denetim = kirp(t.denetim + 12, 0, 100);
+      not(`${t.ad} bastırıldı. Sokak sessiz.`);
+      break;
+    }
+
+    case 'gunahKecisi':
+      // GIRARD: suçu birine yıkmak krizi gerçekten çözer — bir süreliğine
+      f.v.ofke      = kirp(f.v.ofke - 16, 0.4, 99.6);
+      f.v.istikrar  = kirp(f.v.istikrar + 9, 0.4, 99.6);
+      f.v.mesruiyet = kirp(f.v.mesruiyet - 5, 0.4, 99.6);
+      t.gercekDestek = kirp(t.gercekDestek + 7, 0, 100);
+      not(`Suç ${t.ad}'nin üstüne yıkıldı. Öfke dindi.`);
+      break;
+
+    case 'terk':
+      t.besleniyor = false; t.gozetim = false;
+      t.denetim = kirp(t.denetim - 30, 0, 100);
+      not(`${t.ad} ile bağını kopardın. Artık seni suçlayamazlar — ve dinlemezler.`);
+      break;
+  }
+  return out;
+}
+
+function meseleKararDis(w, m, karar, not){
+  const out = [], il = m.ilgili;
+  const A = il.fac != null ? w.fac[il.fac] : null;
+  const B = il.hedefFac != null ? w.fac[il.hedefFac] : null;
+  const bol = il.bolge != null ? w.bolgeler[il.bolge] : null;
+
+  if (m.tip === 'savasEsigi'){
+    if (!A || !B || !A.canli || !B.canli){ not('Taraflardan biri kalmadı; mesele kapandı.'); return out; }
+    switch (karar){
+      case 'arabulucu':
+        w.R[A.id][B.id] = kirp(w.R[A.id][B.id] + 26, -100, 100);
+        w.R[B.id][A.id] = kirp(w.R[B.id][A.id] + 20, -100, 100);
+        A.v.mesruiyet = kirp(A.v.mesruiyet - 3, 0.4, 99.6);
+        B.v.mesruiyet = kirp(B.v.mesruiyet - 3, 0.4, 99.6);
+        not(`${A.ad} ile ${B.ad} geri çekildi. İkisi de neden olduğunu bilmiyor.`);
+        break;
+      case 'sizdirPlan':
+        B.v.bilgi = kirp(B.v.bilgi + 11, 0.4, 99.6);
+        B.v.istikrar = kirp(B.v.istikrar + 5, 0.4, 99.6);
+        A.v.guc = kirp(A.v.guc - 4, 0.4, 99.6);
+        w.R[A.id][B.id] = kirp(w.R[A.id][B.id] - 10, -100, 100);
+        not(`${B.ad} baskına uğramayacak. ${A.ad} bunu henüz bilmiyor.`, { kavram:'scott' });
+        break;
+      case 'yonSaptir': {
+        let ucuncu = -1, enZayif = 999;
+        for (let j=0;j<w.fac.length;j++){
+          if (j===A.id || j===B.id || !w.fac[j].canli) continue;
+          if (skor(w.fac[j]) < enZayif){ enZayif = skor(w.fac[j]); ucuncu = j; }
+        }
+        if (ucuncu >= 0){
+          w.R[A.id][B.id] = kirp(w.R[A.id][B.id] + 22, -100, 100);
+          w.R[A.id][ucuncu] = kirp(w.R[A.id][ucuncu] - 42, -100, 100);
+          w.R[B.id][ucuncu] = kirp(w.R[B.id][ucuncu] - 18, -100, 100);
+          not(`Öfke ${w.fac[ucuncu].ad}'na yöneldi. Bu savaş çıkmayacak.`, { kavram:'girard' });
+        } else not('Yönlendirilecek üçüncü taraf kalmamış.');
+        break;
+      }
+      case 'kizistir':
+        w.R[A.id][B.id] = kirp(w.R[A.id][B.id] - 30, -100, 100);
+        w.R[B.id][A.id] = kirp(w.R[B.id][A.id] - 24, -100, 100);
+        A.v.ofke = kirp(A.v.ofke + 7, 0.4, 99.6);
+        not(`${A.ad} ile ${B.ad} arasında artık geri dönüş yok.`);
+        break;
+      default:
+        w.R[A.id][B.id] = kirp(w.R[A.id][B.id] - 6, -100, 100);
+        not(m.sureDoldu ? 'Savaş eşiğinde beklemeyi seçtin; süre doldu.' : 'Savaş eşiğinde beklemeyi seçtin.');
+    }
+    return out;
+  }
+
+  if (m.tip === 'verasetKrizi'){
+    if (!A || !A.canli){ not('Fraksiyon kalmadı; mesele kapandı.'); return out; }
+    switch (karar){
+      case 'veliahtDestekle':
+        A.v.mesruiyet = kirp(A.v.mesruiyet + 13, 0.4, 99.6);
+        A.v.istikrar  = kirp(A.v.istikrar + 8, 0.4, 99.6);
+        A.asabiyet    = kirp(A.asabiyet - 6, 0, 100);
+        A.nesil++;
+        not(`${A.ad}'nda makam korundu. Kişi zayıf, düzen ayakta.`);
+        break;
+      case 'rakipDestekle': {
+        const eski = A.lider.ad;
+        A.lider = liderUret(mulberry32(Math.floor(hsh(w.seed+'|vk|'+w.tur+'|'+A.id)*1e9)));
+        A.nesil = 0;
+        A.asabiyet = kirp(A.asabiyet + 26, 0, 100);
+        A.v.mesruiyet = kirp(A.v.mesruiyet - 11, 0.4, 99.6);
+        A.v.istikrar  = kirp(A.v.istikrar - 9, 0.4, 99.6);
+        not(`${eski} gitti, ${A.lider.ad} geldi. Taze ve sana borçlu — ikisi de tehlikeli.`, { kavram:'haldun' });
+        break;
+      }
+      case 'uzlastir':
+        A.v.mesruiyet = kirp(A.v.mesruiyet + 7, 0.4, 99.6);
+        A.v.istikrar  = kirp(A.v.istikrar + 12, 0.4, 99.6);
+        A.v.ofke      = kirp(A.v.ofke + 5, 0.4, 99.6);
+        A.asabiyet    = kirp(A.asabiyet - 3, 0, 100);
+        not(`${A.ad}'nda kriz kapandı. İki taraf da tatminsiz, ikisi de sessiz.`);
+        break;
+      case 'krizDerinlestir':
+        A.v.mesruiyet = kirp(A.v.mesruiyet - 17, 0.4, 99.6);
+        A.v.istikrar  = kirp(A.v.istikrar - 15, 0.4, 99.6);
+        A.v.ofke      = kirp(A.v.ofke + 11, 0.4, 99.6);
+        A.asabiyet    = kirp(A.asabiyet - 12, 0, 100);
+        for (let j=0;j<w.fac.length;j++) if (j!==A.id && w.fac[j].canli)
+          w.R[j][A.id] = kirp(w.R[j][A.id] - 9, -100, 100);
+        not(`${A.ad}'nda kimse tahta oturamadı. Komşuları bunu fark etti.`);
+        break;
+      default:
+        A.v.istikrar  = kirp(A.v.istikrar - 5, 0.4, 99.6);
+        A.v.mesruiyet = kirp(A.v.mesruiyet - 4, 0.4, 99.6);
+        not(m.sureDoldu ? 'Veraset kendi hâline bırakıldı; süre doldu.' : 'Verasete karışmamayı seçtin.');
+    }
+    return out;
+  }
+
+  if (m.tip === 'ortakAnlasmazligi'){
+    if (!bol){ not('Toprak meselesi kapandı.'); return out; }
+    const sahip = w.fac[bol.sahip];
+    switch (karar){
+      case 'kuralYaz':
+        bol.gelenek = kirp(bol.gelenek + 46, 0, 100);
+        bol.huzursuzluk = kirp(bol.huzursuzluk - 18, 0, 100);
+        if (sahip) sahip.v.mesruiyet = kirp(sahip.v.mesruiyet + 5, 0.4, 99.6);
+        not(`${bol.ad}'nda kuralı kullananlar yazdı. Yavaş işleyecek ama kalıcı.`, { kavram:'ostrom' });
+        break;
+      case 'bolustur': {
+        bol.zenginlik = kirp(bol.zenginlik * 0.7, 0, 100);
+        bol.huzursuzluk = kirp(bol.huzursuzluk - 10, 0, 100);
+        bol.gelenek = kirp(bol.gelenek * 0.6, 0, 100);
+        for (const kb of bol.komsu){ const sh = w.bolgeler[kb].sahip;
+          if (w.fac[sh] && w.fac[sh].canli) w.R[sh][bol.sahip] = kirp(w.R[sh][bol.sahip] + 9, -100, 100); }
+        not(`${bol.ad} bölüştürüldü. Kavga bitti, toprak küçüldü.`);
+        break;
+      }
+      case 'tekElde': {
+        let en = bol.sahip, enG = -1;
+        for (const kb of bol.komsu){ const sh = w.bolgeler[kb].sahip;
+          if (w.fac[sh] && w.fac[sh].canli && w.fac[sh].v.guc > enG){ enG = w.fac[sh].v.guc; en = sh; } }
+        if (en !== bol.sahip && w.fac[bol.sahip]){
+          w.fac[bol.sahip].bolgeler = w.fac[bol.sahip].bolgeler.filter(x=>x!==bol.id);
+          w.fac[en].bolgeler.push(bol.id);
+          w.R[bol.sahip][en] = kirp(w.R[bol.sahip][en] - 34, -100, 100);
+          bol.sahip = en;
+        }
+        bol.gelenek = kirp(bol.gelenek * 0.25, 0, 100);
+        bol.huzursuzluk = kirp(bol.huzursuzluk - 14, 0, 100);
+        not(`${bol.ad} ${w.fac[bol.sahip].ad}'nın oldu. Düzen geldi, yerel bilgi gitti.`, { kavram:'scott' });
+        break;
+      }
+      case 'kizistir':
+        bol.huzursuzluk = kirp(bol.huzursuzluk + 22, 0, 100);
+        bol.gelenek = kirp(bol.gelenek * 0.5, 0, 100);
+        not(`${bol.ad} alev aldı.`);
+        break;
+      default:
+        bol.huzursuzluk = kirp(bol.huzursuzluk + 9, 0, 100);
+        bol.gelenek = kirp(bol.gelenek * 0.85, 0, 100);
+        not(m.sureDoldu ? 'Toprak kendi hâline bırakıldı; süre doldu.' : 'Toprak meselesine karışmamayı seçtin.');
+    }
+    return out;
+  }
+  return out;
+}
+
+/* --- kopuş: hareket yeni bir fraksiyona dönüşür --- */
+function fraksiyonEkle(w, ad, kaynak, dogrultu, pay){
+  const src = w.fac[kaynak];
+  const r = mulberry32(Math.floor(hsh(w.seed+'|fe|'+w.tur+'|'+kaynak)*1e9));
+  const f = {
+    id: w.fac.length, ad,
+    ideoloji: dogrultu.slice(),
+    v: {}, taban: {}, mizac: {}, bolgeler: [], canli: true,
+    lider: liderUret(r), nufuz:0, ajan:[], sir:[], borc:0, kopukTur: w.tur, anaGovde: kaynak,
+    // yeni hanedan: asabiyet taze, nesil sıfır — kopanlar bu yüzden tehlikelidir
+    asabiyet: 88, nesil: 0
+  };
+  for (const v of VARS){
+    const alinan = src.v[v] * pay;
+    f.v[v] = kirp(v==='ofke' ? Math.max(src.v[v], 55) : Math.max(alinan, 12), 0.4, 99.6);
+    f.taban[v] = kirp(src.taban[v] * (v==='ofke' ? 1.25 : 0.85), 8, 90);
+    f.mizac[v] = src.mizac[v] * ara(r, 0.8, 1.25);
+    if (v !== 'ofke') src.v[v] = kirp(src.v[v] * (1 - pay*0.55), 0.4, 99.6);
+  }
+  w.fac.push(f);
+  // ilişki matrisini büyüt: ana gövdeyle kan davası, gerisi ideolojiden
+  for (let i=0;i<w.R.length;i++) w.R[i].push(0);
+  w.R.push(new Array(w.fac.length).fill(0));
+  const n = w.fac.length - 1;
+  for (let i=0;i<n;i++){
+    const d = ideolojikMesafe(f, w.fac[i]);
+    let taban = Math.round(kirp(72 - d*150, -95, 95));
+    if (i === kaynak) taban = -85;
+    w.R[n][i] = taban;
+    w.R[i][n] = i === kaynak ? -78 : Math.round(kirp(taban*0.8 + (hsh(w.seed+'|fr|'+i)*30-15), -95, 95));
+  }
+  return f;
+}
+
+function kopuslariIsle(w){
+  const out = [];
+  for (const t of w.tohumlar){
+    if (!t.canli || t.kurumsal) continue;
+    const host = w.fac[t.fac];
+    if (!host || !host.canli) continue;
+    const sapma = vekMesafe(t.dogrultu, host.ideoloji);
+
+    /* mesele açılışları */
+    const acikMi = (tip)=> w.meseleler.some(m=>m.acik && m.tip===tip && m.ilgili.tohum===t.id);
+    if (!t.uyari1 && t.olgunluk >= 45 && t.denetim < 58 && !acikMi('basibos')){
+      // mesele açılamadıysa uyarı da harcanmaz: kriz sırasını bekler
+      if (meseleAc(w, 'basibos', { tohum:t.id, fac:t.fac })){
+        t.uyari1 = true;
+        out.push({ tur:w.tur, tip:'meseleAcildi', tohum:t.id, fac:t.fac, kavram:'michels',
+          metin: `${t.ad} kendi seçkinini üretmeye başladı. Denetimin %${Math.round(t.denetim)}.` });
+      }
+    }
+    if (!t.uyari2 && t.olgunluk >= 72 && t.denetim < 32 && !acikMi('kopusEsigi')){
+      if (meseleAc(w, 'kopusEsigi', { tohum:t.id, fac:t.fac })){
+        t.uyari2 = true;
+        out.push({ tur:w.tur, tip:'meseleAcildi', tohum:t.id, fac:t.fac, kavram:'kuran',
+          metin: `${t.ad} artık düzeni açıkça reddediyor. Gerçek destek %${Math.round(t.gercekDestek)}.` });
+      }
+    }
+    // KURAN çağlayanı: saklanan destek eşiği aşarsa bastırma tersine döner
+    if (t.gercekDestek > 62 && t.gercekDestek - t.gorunurDestek > 30 && !acikMi('kirilma')
+        && hsh(w.seed+'|kc|'+w.tur+'|'+t.id) < 0.18
+        && meseleAc(w, 'kirilma', { tohum:t.id, fac:t.fac })){
+      out.push({ tur:w.tur, tip:'meseleAcildi', tohum:t.id, fac:t.fac, kavram:'kuran',
+        metin: `${t.ad} için sessizlik çatladı: görünen %${Math.round(t.gorunurDestek)}, gerçek %${Math.round(t.gercekDestek)}.` });
+    }
+
+    /* KOPUŞ */
+    const olgun = t.olgunluk > 78, kayip = t.denetim < 8, uzak = sapma > 0.30;
+    const guclu = t.gercekDestek > 52;
+    if (olgun && kayip && uzak && guclu && hsh(w.seed+'|kp|'+w.tur+'|'+t.id) < 0.22){
+      const pay = kirp(t.gercekDestek/160, 0.12, 0.45);
+      const yeni = fraksiyonEkle(w, t.ad, t.fac, t.dogrultu, pay);
+      // bölge de götürebilir
+      if (t.bolge != null && w.bolgeler[t.bolge] && w.bolgeler[t.bolge].sahip === t.fac && t.gercekDestek > 66){
+        host.bolgeler = host.bolgeler.filter(x=>x!==t.bolge);
+        yeni.bolgeler.push(t.bolge); w.bolgeler[t.bolge].sahip = yeni.id;
+      }
+      host.v.mesruiyet = kirp(host.v.mesruiyet - 12, 0.4, 99.6);
+      host.v.istikrar  = kirp(host.v.istikrar - 10, 0.4, 99.6);
+      t.canli = false; t.son = 'kopus'; t.evre = 'kopuş'; t.kopanFac = yeni.id;
+      out.push({ tur:w.tur, tip:'kopus', tohum:t.id, fac:t.fac, yeniFac:yeni.id, kavram:'michels',
+        metin: `${t.ad} koptu ve kendi başına bir güç oldu. Senin eserindi.` });
+    }
+  }
+  return out;
+}
+
+/* ================= OYUNCU: GİZLİ EL =================
+ * Oyuncu hiçbir fraksiyonu yönetmez. İki kaynağı vardır:
+ *   nüfuz — harcanır, yavaş dolar
+ *   ifşa  — birikir, silinmez; 100'e varırsa oyun biter
+ * Her fiil ikisini de tüketir. Asıl kısıt nüfuz değil, ifşadır.
+ */
+const FIILLER = {
+  incele:   { ad:'İncele',          nufuz:3, ifsa:0.4, kavram:null },
+  fisilda:  { ad:'Fısılda',         nufuz:2, ifsa:1.0, kavram:'vekil' },
+  ajan:     { ad:'Ajan yerleştir',  nufuz:4, ifsa:1.5, kavram:'vekil' },
+  koru:     { ad:'Koru',            nufuz:3, ifsa:0.8, kavram:null },
+  finanse:  { ad:'Finanse et',      nufuz:4, ifsa:1.5, kavram:'tocqueville' },
+  sizdir:   { ad:'Sızdır',          nufuz:2, ifsa:1.7, kavram:'scott' },
+  kiskirt:  { ad:'Kışkırt',         nufuz:3, ifsa:2.4, kavram:'olson' },
+  tohum:    { ad:'Tohum ek',        nufuz:5, ifsa:1.0, kavram:'michels' },
+  kehanet:  { ad:'Kehanet',         nufuz:4, ifsa:2.0, kavram:'merton' },
+  ifsaEt:   { ad:'İfşa et',         nufuz:3, ifsa:2.9, kavram:'girard' }
+};
+
+/* ================= DOKTRİN =================
+ * Oyuncunun amacı. Hangi dünya durumunun "iyi" olduğunu doktrin tanımlar
+ * ve aynı doktrin nüfuzunu besler: dünya sana benzedikçe güçlenirsin.
+ * Bu yüzden doktrinine aykırı her hamle iki kez pahalıdır.
+ */
+function _canli(w){ return w.fac.filter(f=>f.canli); }
+function _sapma(xs){
+  if (!xs.length) return 0;
+  const m = xs.reduce((a,b)=>a+b,0)/xs.length;
+  return Math.sqrt(xs.reduce((a,b)=>a+(b-m)*(b-m),0)/xs.length);
+}
+const DOKTRINLER = {
+  denge: {
+    ad: 'Denge', tarif: 'Hiçbir güç ötekini ezmesin.',
+    puan(w){ const F=_canli(w); if(F.length<2) return 0;
+      return kirp(100 - _sapma(F.map(f=>f.v.guc))*3.2 - Math.max(0, F.length<4 ? (4-F.length)*15 : 0), 0, 100); }
+  },
+  bilgelik: {
+    ad: 'Bilgelik', tarif: 'Dünya bilsin ve öfkelenmesin.',
+    puan(w){ const F=_canli(w); if(!F.length) return 0;
+      const b=F.reduce((a,f)=>a+f.v.bilgi,0)/F.length, o=F.reduce((a,f)=>a+f.v.ofke,0)/F.length;
+      return kirp(b*1.15 - o*0.85, 0, 100); }
+  },
+  dirlik: {
+    ad: 'Dirlik', tarif: 'Kimin elinde olduğu önemli değil; halk rahat etsin.',
+    puan(w){ const F=_canli(w); if(!F.length) return 0;
+      const sv=F.reduce((a,f)=>a+f.v.servet,0)/F.length, is=F.reduce((a,f)=>a+f.v.istikrar,0)/F.length;
+      const hz=w.bolgeler.reduce((a,b)=>a+b.huzursuzluk,0)/(w.bolgeler.length||1);
+      return kirp(sv*0.55 + is*0.55 - hz*0.35, 0, 100); }
+  },
+  cozulme: {
+    ad: 'Çözülme', tarif: 'Büyük olan hiçbir şey ayakta kalmasın.',
+    puan(w){ const F=_canli(w); if(!F.length) return 0;
+      const enBuyuk = Math.max(...F.map(f=>f.bolgeler.length));
+      const ort = w.bolgeler.length / F.length;
+      return kirp(F.length*9 - (enBuyuk-ort)*11, 0, 100); }
+  },
+  arilik: {
+    ad: 'Arılık', tarif: 'Tek bir fikir dünyaya sinsin.',
+    puan(w){ const F=_canli(w); if(F.length<2) return 0;
+      let top=0, n=0;
+      for(let i=0;i<F.length;i++) for(let j=i+1;j<F.length;j++){ top+=ideolojikMesafe(F[i],F[j]); n++; }
+      return kirp(100 - (top/(n||1))*190, 0, 100); }
+  },
+  sureklilik: {
+    ad: 'Süreklilik', tarif: 'Aynı el hep üstte kalsın — kim olduğu fark etmez.',
+    puan(w){ const F=_canli(w); if(!F.length) return 0;
+      const s2 = F.map((f)=>({f,s:skor(f)})).sort((a,b)=>b.s-a.s);
+      const E = w.el;
+      if (!E) return 0;
+      if (E.sonUst === s2[0].f.id) E.ustSure = (E.ustSure||0)+1; else { E.sonUst = s2[0].f.id; E.ustSure = 0; }
+      // sallantılı üstünlük süreklilik sayılmaz
+      const fark = s2.length>1 ? s2[0].s - s2[1].s : 30;
+      return kirp((E.ustSure||0)*1.0 - (fark < 6 ? 25 : 0), 0, 100); }
+  }
+};
+
+function hizalanma(w){
+  if (!w.el || !w.el.doktrin) return 50;
+  return DOKTRINLER[w.el.doktrin].puan(w);
+}
+
+function oyuncuKur(w, ayar){
+  w.el = {
+    doktrin: (ayar && ayar.doktrin) || 'denge',
+    nufuz: 10, ifsa: 0, hiz: 50, hizGecmis: [],
+    ajanlar: [], sirlar: [], kehanetler: [],
+    asinma: {},            // GOODHART: (fiil|hedef) → yıpranma
+    bilinen: [],           // keşfedilmiş kanunların id'leri
+    bilinenDoga: [],       // doğası (taban + mizaç) çözülmüş fraksiyonlar
+    gunluk: [], av: 0,     // av: seni arayan fraksiyonların toplam dikkati
+    bitti: false, bitisSebebi: null
+  };
+  return w.el;
+}
+
+/* --- GOODHART: aynı kaldıraca basmak onu kaldıraç olmaktan çıkarır --- */
+function asinmaAnahtar(fiil, hedef){ return fiil + '|' + (hedef == null ? '-' : hedef); }
+// İfşa riski dünyaya bağlıdır: bilgisi yüksek bir fraksiyona dokunmak
+// seni ele verir; orada olgun bir ajanın varsa iz örtülür.
+function ifsaCarpani(w, fac){
+  if (fac == null || !w.fac[fac]) return 1;
+  const f = w.fac[fac];
+  const ajan = w.el && w.el.ajanlar.some(a=>a.fac===fac && a.olgun && !a.yakalandi);
+  return (0.5 + f.v.bilgi/115) * (ajan ? 0.72 : 1) * (f.korunma > 0 ? 1.15 : 1);
+}
+
+function etkinlik(w, fiil, hedef){
+  const a = w.el.asinma[asinmaAnahtar(fiil, hedef)] || 0;
+  return 1 / (1 + Math.pow(a, 1.3) * 0.38);
+}
+function asindir(w, fiil, hedef){
+  const k = asinmaAnahtar(fiil, hedef);
+  w.el.asinma[k] = (w.el.asinma[k] || 0) + 1;
+}
+
+/* Bir kanunun şu an o fraksiyona ne yaptığı. Yalnızca İNCELENMİŞ kanunlar
+ * için anlamlıdır: bilgi, gözle görülür bir güce dönüşür. */
+function kanunKatkisi(w, i, k){
+  const a = kapsamDeger(w, i, k.kaynak, k.kapsam);
+  const b = k.kaynak2 ? kapsamDeger(w, i, k.kaynak2, k.kapsam) : 0;
+  const olc = w.olcek ? w.olcek[k.hedef] : 1;
+  return k.kat * sekilDeger(k, a, b) * w.fac[i].mizac[k.hedef] * olc;
+}
+
+/* Bir fraksiyonun bir değişkende geri döndüğü kuvvet. Yalnızca doğası
+ * çözülmüşse hesaplanabilir — kanunları bilmek tek başına yetmez. */
+function dogaKuvveti(w, i, vr){
+  if (!w.el || w.el.bilinenDoga.indexOf(i) < 0) return null;
+  return (w.fac[i].taban[vr] - w.fac[i].v[vr]) * (w.cekim + 0.024);
+}
+
+/* Kehanetin DAYANAĞI: o değişkeni besleyen kaç kanunu incelemişsin ve
+ * orada gözün var mı? Dayanaksız kehanet ucuz ve tehlikelidir. */
+function kehanetDayanak(w, fac, vr){
+  if (!w.el) return { kanunlar: [], ajan: false, guc: 0 };
+  const kanunlar = w.kanunlar.filter(k => k.hedef === vr && w.el.bilinen.indexOf(k.id) >= 0);
+  const ajan = w.el.ajanlar.some(a => a.fac === fac && a.olgun && !a.yakalandi);
+  const toplam = w.kanunlar.filter(k => k.hedef === vr).length || 1;
+  const doga = w.el.bilinenDoga.indexOf(fac) >= 0;
+  const guc = kirp(kanunlar.length / toplam * 0.55 + (doga ? 0.25 : 0) + (ajan ? 0.20 : 0), 0, 1);
+  return { kanunlar, ajan, doga, guc: +guc.toFixed(2) };
+}
+
+/* --- meşru hamlelerin tamamı --- */
+function hamleler(w){
+  const L = [], E = w.el;
+  const canli = w.fac.map((f,i)=>({f,i})).filter(x=>x.f.canli);
+  const ajanli = (i)=> E.ajanlar.some(a=>a.fac===i && a.olgun);
+  const ek = (fiil, hedef, etiket, ayrinti)=>{
+    const F = FIILLER[fiil];
+    const et = etkinlik(w, fiil, hedef);
+    const ic = ifsaCarpani(w, (ayrinti && ayrinti.fac != null) ? ayrinti.fac : null);
+    L.push(Object.assign({ fiil, hedef, etiket, nufuz:F.nufuz, ifsa:+(F.ifsa*(2-et)*ic).toFixed(2),
+                           etkinlik:+et.toFixed(2), karsilanir: E.nufuz >= F.nufuz }, ayrinti||{}));
+  };
+
+  // İNCELE — dünyanın gizli kanunlarını öğren (araştırma döngüsü)
+  for (const k of w.kanunlar) if (E.bilinen.indexOf(k.id) < 0)
+    ek('incele', 'k'+k.id, `${VAD[k.hedef]} kanunlarından birini incele`, { kanun:k.id });
+  // Kanunlar dünyanın fiziği; doğa ise fraksiyonun nereye geri döneceği.
+  // İkisini bilmeden hiçbir şey öngörülemez.
+  for (const {f,i} of canli) if (E.bilinenDoga.indexOf(i) < 0)
+    ek('incele', 'd'+i, `${f.ad}'nın doğasını çöz`, { fac:i, doga:true });
+
+  for (const {f,i} of canli){
+    ek('ajan',    i, `${f.ad} içine ajan yerleştir`, { fac:i });
+    ek('finanse', i, `${f.ad} gizlice finanse edilsin`, { fac:i });
+    ek('kiskirt', i, `${f.ad} kışkırtılsın`, { fac:i });
+    ek('koru',    i, `${f.ad} korunsun`, { fac:i });
+    if (ajanli(i)) ek('fisilda', i, `${f.lider.ad} kulağına fısılda`, { fac:i });
+    // KEHANET — geleceğe dair bir iddia; tutarsa nüfuz, tutmazsa ifşa
+    for (const v of VARS){
+      const dy = kehanetDayanak(w, i, v);
+      for (const yon of ['yukselecek','dusecek'])
+        ek('kehanet', i+'|'+v+'|'+yon,
+           `Kehanet: ${f.ad} — ${VAD[v]} ${yon}` +
+           `  [dayanak: ${dy.kanunlar.length} kanun${dy.doga ? ' + doğa' : ''}` +
+           (dy.guc >= 0.5 ? ', sağlam]' : (dy.guc > 0 ? ']' : 'sız]')),
+           { fac:i, vr:v, yon, dayanak:dy.kanunlar.length, dayanakGucu:dy.guc });
+    }
+    // TOHUM — katman × amaç
+    for (const kat in KATMANLAR) for (const am in AMACLAR)
+      ek('tohum', i+'|'+kat+'|'+am,
+         `${f.ad} · ${KATMANLAR[kat].ad} katmanına ${AMACLAR[am].ad} ek`,
+         { fac:i, katman:kat, amac:am });
+  }
+
+  // SIZDIR / İFŞA ET — çiftler
+  for (const {f:a,i} of canli) for (const {f:b,i:j} of canli){
+    if (i===j) continue;
+    if (ajanli(i)) ek('sizdir', i+'>'+j, `${a.ad}'nın bildiğini ${b.ad} da öğrensin`, { fac:i, hedefFac:j });
+  }
+  for (const sir of E.sirlar){
+    if (sir.kullanildi) continue;
+    for (const {f:b,i:j} of canli){
+      if (j===sir.fac) continue;
+      ek('ifsaEt', sir.id+'>'+j, `${w.fac[sir.fac].ad} hakkındaki sırrı ${b.ad}'na ver`,
+         { sir:sir.id, fac:sir.fac, hedefFac:j });
+    }
+  }
+  return L;
+}
+
+function hamleYap(w, h){
+  const E = w.el, out = [];
+  const F = FIILLER[h.fiil];
+  if (!F) return out;
+  if (E.nufuz < F.nufuz) return [{ tur:w.tur, tip:'ret', metin:'Nüfuzun yetmiyor.' }];
+  const et = etkinlik(w, h.fiil, h.hedef);
+  E.nufuz -= F.nufuz;
+  E.ifsa   = kirp(E.ifsa + F.ifsa * (2 - et) * ifsaCarpani(w, h.fac), 0, 100);
+  asindir(w, h.fiil, h.hedef);
+  const not = (metin, ek)=> out.push(Object.assign({ tur:w.tur, tip:'el', fiil:h.fiil, metin }, ek||{}));
+  const f = h.fac != null ? w.fac[h.fac] : null;
+
+  switch (h.fiil){
+    case 'incele': {
+      if (h.doga){
+        if (E.bilinenDoga.indexOf(h.fac) < 0) E.bilinenDoga.push(h.fac);
+        const tb = VARS.map(v=>`${VAD[v]} ${Math.round(f.taban[v])}`).join(' · ');
+        not(`${f.ad}'nın doğası çözüldü — geri döndüğü noktalar: ${tb}`, { fac:h.fac });
+      } else {
+        const k = w.kanunlar[h.kanun];
+        if (k && E.bilinen.indexOf(k.id) < 0) E.bilinen.push(k.id);
+        not(`Bir kanun açığa çıktı: ${kanunMetni(k)}`, { kanun:k.id });
+      }
+      break;
+    }
+    case 'ajan':
+      E.ajanlar.push({ id:E.ajanlar.length, fac:h.fac, dikildi:w.tur, olgun:false, yakalandi:false });
+      not(`${f.ad} içine bir ajan yerleştirildi. Olgunlaşması zaman alır.`, { kavram:'vekil' });
+      break;
+    case 'fisilda':
+      f.lider.kusku = kirp(f.lider.kusku + 9*et, 0, 100);
+      f.v.istikrar  = kirp(f.v.istikrar - 3*et, 0.4, 99.6);
+      not(`${f.lider.ad} artık çevresine daha az güveniyor.`);
+      break;
+    case 'koru':
+      f.korunma = (f.korunma || 0) + 6*et;
+      not(`${f.ad} bir süre korunuyor.`);
+      break;
+    case 'finanse':
+      f.v.servet = kirp(f.v.servet + 7*et, 0.4, 99.6);
+      not(`${f.ad} kasasına sessizce para aktı.`, { kavram:'tocqueville' });
+      break;
+    case 'kiskirt': {
+      // OLSON: küçük ve yoğun gruplar örgütlenir, geniş kalabalık örgütlenmez
+      const akim = w.tohumlar.find(t=>t.canli && t.fac===h.fac);
+      const yogunluk = akim ? (1.45 - (akim.katman==='halk' ? 0.75 : 0)) : 0.7;
+      f.v.ofke = kirp(f.v.ofke + 9*et*yogunluk, 0.4, 99.6);
+      f.v.istikrar = kirp(f.v.istikrar - 4*et*yogunluk, 0.4, 99.6);
+      not(`${f.ad} kışkırtıldı.` + (yogunluk < 0.8 ? ' Kalabalık dağınık; öfke dağılıyor.' : ''),
+          { kavram:'olson' });
+      break;
+    }
+    case 'tohum': {
+      const t = tohumEk(w, { fac:h.fac, katman:h.katman, amac:h.amac, bolge:f.bolgeler[0] });
+      not(`${f.ad} içinde ${KATMANLAR[h.katman].ad} katmanına ${AMACLAR[h.amac].ad} ekildi: ${t.ad}.`,
+          { tohum:t.id, kavram:'michels' });
+      break;
+    }
+    case 'sizdir': {
+      // SCOTT: merkez görebilmek için basitleştirir; gördüğü şey artık o şey değildir
+      const b = w.fac[h.hedefFac];
+      b.v.bilgi = kirp(b.v.bilgi + 6*et, 0.4, 99.6);
+      f.v.bilgi = kirp(f.v.bilgi - 2*et, 0.4, 99.6);
+      w.R[h.fac][h.hedefFac] = kirp(w.R[h.fac][h.hedefFac] - 8*et, -100, 100);
+      not(`${f.ad}'nın bildiği ${b.ad}'na ulaştı.`, { kavram:'scott' });
+      break;
+    }
+    case 'ifsaEt': {
+      const sir = E.sirlar.find(x=>x.id===h.sir);
+      const b = w.fac[h.hedefFac];
+      if (sir) sir.kullanildi = true;
+      const agirlik = sir ? sir.agirlik : 6;
+      f.v.mesruiyet = kirp(f.v.mesruiyet - agirlik*et, 0.4, 99.6);
+      w.R[h.hedefFac][h.fac] = kirp(w.R[h.hedefFac][h.fac] - agirlik*2.2*et, -100, 100);
+      b.v.bilgi = kirp(b.v.bilgi + 4*et, 0.4, 99.6);
+      not(`${b.ad}, ${f.ad} hakkındaki sırrı öğrendi.`, { kavram:'girard' });
+      break;
+    }
+    case 'kehanet': {
+      const baslangic = f.v[h.vr];
+      const dy = kehanetDayanak(w, h.fac, h.vr);
+      E.kehanetler.push({ id:E.kehanetler.length, fac:h.fac, vr:h.vr, yon:h.yon,
+                          baslangic, acilis:w.tur, vade:w.tur+12, cozuldu:false,
+                          dayanak:dy.kanunlar.length, dayanakGucu:dy.guc });
+      // MERTON: ilan edilmiş kehanet, ona göre davranıldığı için kendini besler.
+      // Kanunu bilen, hangi kaldıraca bastığını da bilir: itişi daha isabetli olur.
+      const itis = (h.yon==='yukselecek' ? 1 : -1) * 1.6 * et * (1 + dy.guc*0.8);
+      f.v[h.vr] = kirp(f.v[h.vr] + itis, 0.4, 99.6);
+      not(`Kehanet ilan edildi: ${f.ad} — ${VAD[h.vr]} ${h.yon}. Vade 12 mevsim.` +
+          (dy.kanunlar.length ? ` ${dy.kanunlar.length} kanuna dayanıyor.` : ' Dayanaksız.'),
+          { kavram:'merton' });
+      break;
+    }
+  }
+  E.gunluk.push({ tur:w.tur, fiil:h.fiil, hedef:h.hedef, etkinlik:+et.toFixed(2) });
+  return out;
+}
+
+/* --- oyuncunun turu: kaynak, ajanlar, kehanetler, av --- */
+function eliIsle(w){
+  const E = w.el, out = [];
+  if (!E || E.bitti) return out;
+
+  // nüfuz: kurumsallaşmış akımlar ve olgun ajanlar besler
+  const kurumsal = w.tohumlar.filter(t=>t.canli && t.kurumsal).length;
+  const olgunAjan = E.ajanlar.filter(a=>a.olgun && !a.yakalandi).length;
+  // Dünya doktrinine benzedikçe güçlenirsin: amaç ve motor aynı şeydir
+  E.hiz = hizalanma(w);
+  E.hizGecmis.push(Math.round(E.hiz));
+  if (E.hizGecmis.length > 400) E.hizGecmis.shift();
+  // hizalanma keskin: doktrinine aykırı giden dünya seni aç bırakır
+  const besin = 0.5 + Math.pow(E.hiz/100, 1.4) * 3.4;
+  E.nufuz = Math.min(24, E.nufuz + besin + kurumsal*0.85 + olgunAjan*0.45 - E.ifsa/70);
+
+  // ifşa yavaş söner ama sıfırlanmaz
+  E.ifsa = kirp(E.ifsa - (1.15 + (E.ifsa>60 ? 0.5 : 0)), 0, 100);
+
+  // GOODHART yıpranması çok yavaş iyileşir
+  for (const k in E.asinma) E.asinma[k] = Math.max(0, E.asinma[k] - 0.035);
+
+  // ajanlar olgunlaşır, sır üretir, yakalanabilir
+  for (const a of E.ajanlar){
+    if (a.yakalandi) continue;
+    const f = w.fac[a.fac];
+    if (!f || !f.canli){ a.yakalandi = true; continue; }
+    const yas = w.tur - a.dikildi;
+    if (!a.olgun && yas >= 6){
+      a.olgun = true;
+      out.push({ tur:w.tur, tip:'el', metin:`${f.ad} içindeki ajanın artık işe yarar.` });
+    }
+    if (a.olgun && hsh(w.seed+'|sr|'+w.tur+'|'+a.id) < 0.09){
+      const sir = { id:E.sirlar.length, fac:a.fac, agirlik:Math.round(ara(()=>hsh(w.seed+'|sa|'+w.tur+'|'+a.id),4,11)),
+                    bulundu:w.tur, kullanildi:false };
+      E.sirlar.push(sir);
+      out.push({ tur:w.tur, tip:'el', sir:sir.id,
+        metin:`${f.ad} hakkında bir sır elinde: ağırlık ${sir.agirlik}.` });
+    }
+    // yakalanma: fraksiyonun bilgisi ve senin ifşan yükseldikçe
+    const risk = (f.v.bilgi/100)*0.022 + E.ifsa/2600;
+    if (a.olgun && hsh(w.seed+'|ay|'+w.tur+'|'+a.id) < risk){
+      a.yakalandi = true;
+      E.ifsa = kirp(E.ifsa + 9, 0, 100);
+      out.push({ tur:w.tur, tip:'el', metin:`${f.ad} ajanını yakaladı. İzin daha da belirginleşti.` });
+    }
+  }
+
+  // kehanetler vadesinde çözülür
+  for (const kh of E.kehanetler){
+    if (kh.cozuldu || w.tur < kh.vade) continue;
+    kh.cozuldu = true;
+    const f = w.fac[kh.fac];
+    const simdi = f && f.canli ? f.v[kh.vr] : 0;
+    const fark = simdi - kh.baslangic;
+    const tuttu = (kh.yon==='yukselecek' && fark > 3) || (kh.yon==='dusecek' && fark < -3);
+    kh.tuttu = tuttu; kh.fark = +fark.toFixed(1);
+    const dg = kh.dayanakGucu || 0;
+    if (tuttu){
+      // dayanaklı kehanet daha çok kazandırır; dayanaksız tutarsa şans sayılır
+      E.nufuz = Math.min(24, E.nufuz + 5 + 11*dg);
+      E.ifsa  = kirp(E.ifsa - (2 + 4*dg), 0, 100);
+      out.push({ tur:w.tur, tip:'el', kavram:'merton',
+        metin:`Kehanet tuttu: ${f.ad} — ${VAD[kh.vr]} ${kh.yon} (${fark>0?'+':''}${fark.toFixed(1)}). Görünmez el güçlendi.` });
+    } else {
+      // dayanaksız yanlış kehanet daha çok yakar
+      E.ifsa = kirp(E.ifsa + 9 - 4*dg, 0, 100);
+      out.push({ tur:w.tur, tip:'el', kavram:'merton',
+        metin:`Kehanet tutmadı: ${f && f.canli ? f.ad : 'fraksiyon'} — ${VAD[kh.vr]} ${kh.yon} (${fark>0?'+':''}${fark.toFixed(1)}). Yalancı peygamber fark edilir.` });
+    }
+  }
+
+  // korunma söner
+  for (const f of w.fac) if (f.korunma) f.korunma = Math.max(0, f.korunma - 1.5);
+
+  // AV: bilgisi yüksek fraksiyonlar izi sürer
+  let dikkat = 0;
+  for (const f of w.fac) if (f.canli) dikkat += Math.max(0, f.v.bilgi - 58) / 100;
+  E.av = kirp(E.av + dikkat * (E.ifsa/55) - 0.25, 0, 100);
+
+  if (E.ifsa >= 100 || E.av >= 100){
+    E.bitti = true;
+    E.bitisSebebi = E.ifsa >= 100 ? 'ifsa' : 'av';
+    out.push({ tur:w.tur, tip:'son',
+      metin: E.bitisSebebi === 'ifsa'
+        ? 'Artık görünüyorsun. Gizli el kalmadı.'
+        : 'İzini sürdüler ve buldular.' });
+  }
+  return out;
+}
+
+/* ================= DOSYA =================
+ * Bir mesele açıldığında oyuncuya rakam verilmez; DOSYA verilir.
+ * Dosyanın kalitesi oyuncunun önceden yaptığı yatırıma bağlıdır:
+ * yerinde olgun bir ajanın varsa tanıklıklar isabetli, yoksa dosya
+ * kulaktan dolma söylentiyle dolar. Kararın zorluğu buradan gelir.
+ */
+// erisim: bu kaynak ne kadar gizli şeyi görebilir (0-1). Sokak, sarayın
+// içini göremez; kronik yalnızca olup bitmiş görünür şeyleri anlatır.
+const KAYNAKLAR = {
+  yerinde: { ad:'Yerinde', etiket:'içeriden, olgun ajan',   hata:4,  yalan:0.04, agirlik:5, erisim:1.00 },
+  kurum:   { ad:'Kurum',   etiket:'kurumsallaşmış akımdan', hata:9,  yalan:0.12, agirlik:4, erisim:0.72 },
+  rakip:   { ad:'Rakip',   etiket:'düşmanının anlattığı',   hata:15, yalan:0.36, agirlik:2, erisim:0.55 },
+  sokak:   { ad:'Sokak',   etiket:'kulaktan dolma',         hata:25, yalan:0.32, agirlik:1, erisim:0.45 },
+  kronik:  { ad:'Kronik',  etiket:'kendi gözlemin',         hata:3,  yalan:0.00, agirlik:5, erisim:0.32 }
+};
+
+function _kaynaklar(w, fac){
+  const E = w.el, out = ['sokak', 'kronik'];
+  if (E){
+    if (E.ajanlar.some(a=>a.fac===fac && a.olgun && !a.yakalandi)) out.unshift('yerinde');
+    if (w.tohumlar.some(t=>t.canli && t.kurumsal && t.fac===fac)) out.push('kurum');
+  }
+  for (let j=0;j<w.fac.length;j++)
+    if (j!==fac && w.fac[j].canli && w.R[j][fac] < -30){ out.push('rakip'); break; }
+  return out;
+}
+
+// Bir olguyu hangi kaynaklar görebilir? Gizlilik arttıkça liste kısalır;
+// en gizli olgu (halkın gerçek desteği) yalnızca içerideki ajanla bilinir.
+function _yetkin(kaynaklar, gizlilik){
+  return kaynaklar.filter(k => KAYNAKLAR[k].erisim >= gizlilik);
+}
+
+function _bozulmus(w, kaynak, gercek, tuz){
+  const K = KAYNAKLAR[kaynak];
+  const z1 = hsh(w.seed+'|dz|'+w.tur+'|'+tuz+'|a');
+  const z2 = hsh(w.seed+'|dz|'+w.tur+'|'+tuz+'|b');
+  const yalanMi = z2 < K.yalan;
+  let v = gercek + (z1*2-1) * K.hata;
+  if (yalanMi) v = gercek + (gercek > 50 ? -1 : 1) * (18 + z1*26);
+  return { deger: kirp(v, 0, 100), dogru: !yalanMi && Math.abs(v-gercek) <= K.hata };
+}
+
+const _IDDIA = {
+  destek: {
+    yuksek: ['Halkın çoğu artık onlardan yana.', 'Kapılar onlara açılıyor; kimse şaşırmıyor.'],
+    orta:   ['Destek var ama dağınık.', 'Kimi mahalle onlarla, kimi uzak duruyor.'],
+    dusuk:  ['Arkalarında kimse yok, gürültü çok.', 'Sesleri yüksek, sayıları az.']
+  },
+  olgunluk: {
+    yuksek: ['Artık kendi kuralları, kendi yazıcıları var.', 'Bu bir çevre değil, bir düzen.'],
+    orta:   ['Toplanıyorlar, ama henüz bir çatı yok.', 'Düzenli buluşuyorlar.'],
+    dusuk:  ['Birkaç masa, birkaç defter.', 'Henüz fısıltıdan ibaret.']
+  },
+  kusku: {
+    yuksek: ['Lider biliyor. Bekliyor.', 'Saraya çoktan ulaştı; sessizlik kasıtlı.'],
+    orta:   ['Duyduklarına inanmadı ama not aldı.', 'Şüphe var, kanıt yok.'],
+    dusuk:  ['Lider bundan habersiz.', 'Sarayda kimse bu adı duymadı.']
+  },
+  ofke: {
+    yuksek: ['Sokak zaten kızgın; kıvılcım yetiyor.', 'Ekmek pahalı, dil sivri.'],
+    orta:   ['Homurdanma var, isyan yok.', 'Şikâyet çok, hareket az.'],
+    dusuk:  ['Sokak sakin.', 'Kimsenin hâli kavgaya yetmiyor.']
+  },
+  sapma: {
+    yuksek: ['Artık senin öğrettiğini değil, kendi bulduklarını konuşuyorlar.', 'Amaç değişti; adı aynı kaldı.'],
+    orta:   ['Yer yer kendi yorumlarını katıyorlar.', 'Sapma var ama gövde duruyor.'],
+    dusuk:  ['Hâlâ ilk günkü sözü tekrarlıyorlar.', 'Yolundan çıkmış değiller.']
+  },
+  dis: {
+    yuksek: ['Dışarıdan para giriyor; kimden belli değil.', 'Sınırın ötesinden destek görüyorlar.'],
+    orta:   ['Bir iki yabancı yüz görüldü.', 'Dışarıyla teması var ama zayıf.'],
+    dusuk:  ['Tamamen kendi imkânlarıyla ayaktalar.', 'Dışarıyla hiçbir bağ yok.']
+  },
+  guc: {
+    yuksek: ['Ambarlar dolu, atlar taze. Hazırlar.', 'Sayıca üstünler ve bunu biliyorlar.'],
+    orta:   ['Güçleri yeter ama fazlası yok.', 'Denk sayılırlar.'],
+    dusuk:  ['Kalabalık görünüyorlar; yakından bakınca değiller.', 'Bu orduyla sefere çıkılmaz.']
+  },
+  hazirlik: {
+    yuksek: ['Sınır boyunca nöbet iki katına çıktı.', 'Bekliyorlar; şaşırmayacaklar.'],
+    orta:   ['Tedbir aldılar ama gevşek.', 'Haberleri var, hazırlıkları yarım.'],
+    dusuk:  ['Hiçbir şeyden haberleri yok.', 'Kapılar açık, nöbetçiler uykuda.']
+  },
+  niyet: {
+    yuksek: ['Kararını vermiş. Bahane arıyor.', 'Savaşı istiyor; barışı bozacak.'],
+    orta:   ['İstiyor ama korkuyor.', 'Kararsız; birinin itmesini bekliyor.'],
+    dusuk:  ['Savaş istemiyor, sadece bağırıyor.', 'Blöf yapıyor.']
+  },
+  destekci: {
+    yuksek: ['Arkasında başka bir güç var; savaşı o istiyor.', 'Yalnız değil ve bunu saklamıyor.'],
+    orta:   ['Birileriyle konuşuyor ama söz alamamış.', 'Destek sözü var, teminatı yok.'],
+    dusuk:  ['Tamamen yalnız.', 'Kimse arkasında durmuyor.']
+  },
+  saglik: {
+    yuksek: ['Ayakta duruyor; yıllar var önünde.', 'Hasta değil, yorgun.'],
+    orta:   ['İyi günleri ve kötü günleri var.', 'Hekimler susuyor — iyi işaret değil.'],
+    dusuk:  ['Bu kışı çıkarmaz.', 'Yataktan kalkamıyor, perdeler kapalı.']
+  },
+  iddiaci: {
+    yuksek: ['Karşı iddiacının ordusu ve parası var.', 'Beklemiyor; hazırlanıyor.'],
+    orta:   ['Bir iddiacı var ama gücü belirsiz.', 'Adı geçiyor, eli zayıf.'],
+    dusuk:  ['Rakip yok; veliaht rahat.', 'Kimse itiraz etmiyor.']
+  },
+  gelenek: {
+    yuksek: ['O toprağın kendi kuralı var; herkes uyuyor.', 'Yaşlılar hâlâ dinleniyor.'],
+    orta:   ['Eski âdet var ama gevşedi.', 'Kural var, uygulayan yok.'],
+    dusuk:  ['Kimse kimseyi dinlemiyor.', 'Kural kalmamış; herkes kendi başına.']
+  },
+  zenginlik: {
+    yuksek: ['Toprak hâlâ veriyor; kavganın sebebi bu.', 'Zengin bir parça.'],
+    orta:   ['Eski bolluğu yok ama işe yarar.', 'Ne zengin ne fakir.'],
+    dusuk:  ['Kavga ettikleri şey çoktan tükenmiş.', 'Geriye taş kalmış.']
+  }
+};
+
+function _iddiaMetni(tur, deger, tuz, w){
+  const kova = deger >= 62 ? 'yuksek' : (deger >= 34 ? 'orta' : 'dusuk');
+  const liste = _IDDIA[tur][kova];
+  return liste[Math.floor(hsh(w.seed+'|im|'+tuz)*liste.length)];
+}
+
+function _aralik(deger, hata){
+  const a = Math.max(0, Math.round(deger - hata)), b = Math.min(100, Math.round(deger + hata));
+  return '%' + a + '–%' + b;
+}
+
+const SECENEK_TARIF = {
+  bekle:           { ad:'Bekle',                    tarif:'Hiçbir şey yapma. Durum kendi başına gelişsin — ama beklemek de bir karardır.' },
+  gozetle:         { ad:'Gözetle',                  tarif:'Üstüne göz koy. Daha iyi görürsün; görüldüğünü de bilirler.' },
+  kurumsallastir:  { ad:'Kurumsallaştır',           tarif:'Düzenin parçası yap. Kopmaz — ama artık sökülemez ve düzeni kendine benzetir.' },
+  yonlendir:       { ad:'Başka hedefe yönlendir',   tarif:'Enerjiyi başka yöne çevir. Denetimin yetiyorsa güçlü; yetmiyorsa geri teper.' },
+  bastir:          { ad:'Bastır',                   tarif:'Sokağı sustur. Görünen biter; görünmeyen için bir şey söylenemez.' },
+  terk:            { ad:'Terk et',                  tarif:'Bağını kopar. Seni suçlayamazlar — dinlemezler de.' },
+  gunahKecisi:     { ad:'Günah keçisi yap',         tarif:'Suçu onların üstüne yık. Öfke diner; bedelini sonra ödersin.' },
+  arabulucu:       { ad:'Araya gir',                tarif:'İki tarafı da geri çek. Savaş ertelenir; iki taraf da sana borçlanmaz, şüphelenir.' },
+  sizdirPlan:      { ad:'Planı sızdır',             tarif:'Saldıranın niyetini karşı tarafa ulaştır. Baskın olmaz; kimin kazanacağı değişir.' },
+  yonSaptir:       { ad:'Düşmanlığı başka yöne çevir', tarif:'Öfkeyi üçüncü bir tarafa yönelt. Bu savaş çıkmaz; bir başkası çıkar.' },
+  kizistir:        { ad:'Kızıştır',                 tarif:'Ateşe üfle. Ne çıkacağını sen de bilmiyorsun.' },
+  veliahtDestekle: { ad:'Veliahdı destekle',        tarif:'Makamın sürekliliğini koru. Düzen ayakta kalır, kişi zayıf kalır.' },
+  rakipDestekle:   { ad:'Rakip iddiacıyı destekle', tarif:'Taze bir dayanışma gelsin. Güçlü olur; sana borcu kadar tehlikeli olur.' },
+  uzlastir:        { ad:'Uzlaştır',                 tarif:'İki iddiayı da makamın altında topla. Kriz biter; ikisi de tatminsiz kalır.' },
+  krizDerinlestir: { ad:'Krizi derinleştir',        tarif:'Hiç kimse tahta oturamasın. Fraksiyon zayıflar — komşuları güçlenir.' },
+  kuralYaz:        { ad:'Yerel kural yazdır',       tarif:'Toprağı kullananlar kendi kuralını koysun. Yavaş, ucuz değil, kalıcı.' },
+  bolustur:        { ad:'Bölüştür',                 tarif:'Herkese bir pay. Kavga biter, kimse memnun olmaz, toprak küçülür.' },
+  tekElde:         { ad:'Tek ele bırak',            tarif:'Güçlü olan alsın. Düzen hızlı gelir; yerel bilgi yok olur.' }
+};
+
+function _dosyaOlgular(w, m, t, f, sapmaGercek, disGercek){
+  const il = m.ilgili;
+  if (m.tip === 'savasEsigi'){
+    const a = w.fac[il.fac], b = w.fac[il.hedefFac];
+    let arka = 0;
+    for (let j=0;j<w.fac.length;j++) if (j!==a.id && j!==b.id && w.fac[j].canli && w.R[j][a.id] > 50) arka += 45;
+    return [
+      { tur:'guc',      ad:`${a.ad} gücü`,            gizlilik:0.45, gercek:a.v.guc },
+      { tur:'hazirlik', ad:`${b.ad} hazırlığı`,       gizlilik:0.68, gercek:(b.v.guc*0.5 + b.v.istikrar*0.5) },
+      { tur:'niyet',    ad:`${a.lider.ad} kararlılığı`, gizlilik:0.76, gercek:kirp(a.lider.zalim*0.6 + (-w.R[a.id][b.id])*0.5, 0, 100) },
+      { tur:'destekci', ad:'Üçüncü tarafın desteği',  gizlilik:0.85, gercek:kirp(arka,0,100) },
+      { tur:'ofke',     ad:'Savaş iştahı',            gizlilik:0.12, gercek:a.v.ofke },
+      { tur:'dis',      ad:`${b.ad} müttefikleri`,    gizlilik:0.62, gercek:kirp(disGercek,0,100) }
+    ];
+  }
+  if (m.tip === 'verasetKrizi'){
+    const a = w.fac[il.fac];
+    return [
+      { tur:'saglik',   ad:`${a.lider.ad} sağlığı`,   gizlilik:0.86, gercek:a.lider.saglik },
+      { tur:'iddiaci',  ad:'Karşı iddiacının gücü',   gizlilik:0.72, gercek:kirp(100-a.asabiyet+a.lider.hirs*0.3, 0, 100) },
+      { tur:'destek',   ad:'Seçkinlerin desteği',     gizlilik:0.80, gercek:kirp(a.v.mesruiyet*0.7 + a.asabiyet*0.3, 0, 100) },
+      { tur:'guc',      ad:'Hanedanın asabiyeti',     gizlilik:0.52, gercek:a.asabiyet },
+      { tur:'ofke',     ad:'Sokağın hâli',            gizlilik:0.10, gercek:a.v.ofke },
+      { tur:'destekci', ad:'Dışarıdan kayırma',       gizlilik:0.82, gercek:kirp(disGercek,0,100) }
+    ];
+  }
+  if (m.tip === 'ortakAnlasmazligi'){
+    const b = w.bolgeler[il.bolge];
+    let talip = 0;
+    for (const kb of b.komsu){ const sh = w.bolgeler[kb].sahip; if (sh !== b.sahip && w.fac[sh] && w.fac[sh].canli) talip += 28; }
+    return [
+      { tur:'gelenek',   ad:'Yerel kuralın gücü',     gizlilik:0.38, gercek:b.gelenek },
+      { tur:'zenginlik', ad:'Toprağın gerçek değeri', gizlilik:0.30, gercek:b.zenginlik },
+      { tur:'ofke',      ad:'Huzursuzluk',            gizlilik:0.12, gercek:b.huzursuzluk },
+      { tur:'niyet',     ad:'Taliplerin kararlılığı', gizlilik:0.70, gercek:kirp(talip,0,100) },
+      { tur:'destekci',  ad:'Dışarıdan kışkırtma',    gizlilik:0.84, gercek:kirp(disGercek,0,100) },
+      { tur:'guc',       ad:`${w.fac[b.sahip].ad} eli`, gizlilik:0.48, gercek:w.fac[b.sahip].v.guc }
+    ];
+  }
+  // tohum meseleleri
+  return [
+    { tur:'destek',   ad:'Halkın gerçek desteği',   gizlilik:0.92, gercek: t ? t.gercekDestek : 0 },
+    { tur:'olgunluk', ad:'Örgütlenme olgunluğu',    gizlilik:0.30, gercek: t ? t.olgunluk : 0 },
+    { tur:'kusku',    ad:'Liderin şüphesi',         gizlilik:0.70, gercek: f.lider.kusku },
+    { tur:'ofke',     ad:'Sokağın öfkesi',          gizlilik:0.10, gercek: f.v.ofke },
+    { tur:'sapma',    ad:'Amaçtan sapma',           gizlilik:0.60, gercek: kirp(sapmaGercek, 0, 100) },
+    { tur:'dis',      ad:'Dış destek',              gizlilik:0.80, gercek: kirp(disGercek, 0, 100) }
+  ];
+}
+
+function _girizgah(w, m, t, f){
+  const il = m.ilgili;
+  if (m.tip === 'savasEsigi'){
+    const a = w.fac[il.fac], b = w.fac[il.hedefFac];
+    return `${a.ad} ile ${b.ad} arasındaki ilişki ${Math.round(-w.R[a.id][b.id])} noktasına indi. ` +
+           `${a.ad}'nın gücü son mevsimlerde ${il.ivme > 0 ? 'hızla artıyor' : 'geriliyor'}. Sınırda hareket var.`;
+  }
+  if (m.tip === 'verasetKrizi'){
+    const a = w.fac[il.fac];
+    return `${a.ad}'nda ${a.lider.ad} ${a.lider.yas} yaşında ve makam sallantıda. ` +
+           `Hanedan ${a.nesil}. nesil. Kimin oturacağı belli değil.`;
+  }
+  if (m.tip === 'ortakAnlasmazligi'){
+    const b = w.bolgeler[il.bolge];
+    return `${b.ad} üç gücün sınırında kalıyor ve kimsenin kuralı geçmiyor. ` +
+           `Şu an ${w.fac[b.sahip].ad}'nın elinde ama bu uzun sürmeyecek.`;
+  }
+  return t
+    ? `${f.ad} içinde ${KATMANLAR[t.katman].ad} katmanına ektiğin ${AMACLAR[t.amac].ad}, ` +
+      `${w.tur - t.dogum} mevsimdir büyüyor. Artık bir ${t.evre}.`
+    : `${f.ad} hakkında karar vermen gerekiyor.`;
+}
+
+function dosyaUret(w, meseleId){
+  const m = w.meseleler[meseleId];
+  if (!m) return null;
+  const t = m.ilgili.tohum != null ? w.tohumlar[m.ilgili.tohum] : null;
+  const f = t ? w.fac[t.fac]
+            : (m.ilgili.fac != null ? w.fac[m.ilgili.fac]
+               : (m.ilgili.bolge != null ? w.fac[w.bolgeler[m.ilgili.bolge].sahip] : null));
+  if (!f) return null;
+  const kaynaklar = _kaynaklar(w, f.id);
+  const sapmaGercek = t ? vekMesafe(t.dogrultu, f.ideoloji) * 100 / 0.6 : 0;
+  let disGercek = 0;
+  for (let j=0;j<w.fac.length;j++) if (j!==f.id && w.fac[j].canli && w.R[j][f.id] > 45) disGercek += 30;
+
+  const gercekler = _dosyaOlgular(w, m, t, f, sapmaGercek, disGercek);
+
+
+  const tanikliklar = [], olcumler = [], karanlik = [];
+  gercekler.forEach((g, i) => {
+    const uygun = _yetkin(kaynaklar, g.gizlilik);
+    if (!uygun.length){
+      karanlik.push(g.ad);
+      olcumler.push({ ad:g.ad, aralik:'bilinmiyor', kaynak:'—', agirlik:0 });
+      return;
+    }
+    // oyuncu doğal olarak en iyi kaynağına kulak verir
+    const enIyi = uygun.slice().sort((a,b)=>KAYNAKLAR[b].agirlik-KAYNAKLAR[a].agirlik);
+    const kn = hsh(w.seed+'|dk|'+w.tur+'|'+meseleId+'|'+i) < 0.7
+      ? enIyi[0]
+      : enIyi[Math.floor(hsh(w.seed+'|dk2|'+w.tur+'|'+meseleId+'|'+i)*enIyi.length)];
+    const K = KAYNAKLAR[kn];
+    const b = _bozulmus(w, kn, g.gercek, meseleId+'|'+i);
+    tanikliklar.push({ konu:g.tur, baslik:g.ad, kaynak:kn, kaynakAd:K.ad, etiket:K.etiket,
+                       agirlik:K.agirlik, metin:_iddiaMetni(g.tur, b.deger, meseleId+'|'+i, w),
+                       _dogru:b.dogru });
+    olcumler.push({ ad:g.ad, aralik:_aralik(b.deger, K.hata), kaynak:K.ad, agirlik:K.agirlik });
+  });
+
+  // ÇELİŞKİ: aynı konuda iki kaynak, biri yanılıyor
+  const celiskiler = [];
+  for (let i=0;i<tanikliklar.length;i++){
+    if (hsh(w.seed+'|dc|'+w.tur+'|'+meseleId+'|'+i) > 0.34) continue;
+    const g = gercekler.find(x=>x.tur === tanikliklar[i].konu);
+    if (!g) continue;
+    const k2 = _yetkin(kaynaklar, g.gizlilik).filter(k=>k!==tanikliklar[i].kaynak);
+    if (!k2.length) continue;
+    const kn = k2[Math.floor(hsh(w.seed+'|dc2|'+w.tur+'|'+meseleId+'|'+i)*k2.length)];
+    const b = _bozulmus(w, kn, g.gercek, meseleId+'|c'+i);
+    // çelişki ancak farklı kovaya düşerse anlamlı
+    const kova = x => x>=62?2:(x>=34?1:0);
+    const ilk = tanikliklar[i];
+    if (kova(b.deger) === kova(g.gercek) && ilk._dogru) continue;
+    celiskiler.push({ konu:g.tur, baslik:g.ad,
+      a:{ kaynakAd:KAYNAKLAR[ilk.kaynak].ad, etiket:ilk.etiket, metin:ilk.metin, agirlik:ilk.agirlik },
+      b:{ kaynakAd:KAYNAKLAR[kn].ad, etiket:KAYNAKLAR[kn].etiket,
+          metin:_iddiaMetni(g.tur, b.deger, meseleId+'|c'+i, w), agirlik:KAYNAKLAR[kn].agirlik } });
+  }
+
+  return {
+    meseleId, baslik: m.baslik, kalanMevsim: meselePencere(w, m),
+    konu: t ? t.ad : f.ad, fraksiyon: f.ad,
+    katman: t ? KATMANLAR[t.katman].ad : null,
+    amac: t ? AMACLAR[t.amac].ad : null,
+    girizgah: _girizgah(w, m, t, f),
+    kaynakDurumu: kaynaklar.map(k=>({ ad:KAYNAKLAR[k].ad, etiket:KAYNAKLAR[k].etiket, agirlik:KAYNAKLAR[k].agirlik })),
+    yerindeVar: kaynaklar.indexOf('yerinde') >= 0,
+    tanikliklar, olcumler, celiskiler, karanlik,
+    secenekler: m.secenekler.map(k=>Object.assign({ anahtar:k }, SECENEK_TARIF[k]))
+  };
+}
+
+// Dosya kapandıktan sonra okunacaklar
+function kutuphaneEkle(w, kavram){
+  if (!w.el) return null;
+  if (!w.el.kutuphane) w.el.kutuphane = [];
+  if (!KAVRAMLAR[kavram]) return null;
+  if (w.el.kutuphane.indexOf(kavram) < 0) w.el.kutuphane.push(kavram);
+  return KAVRAMLAR[kavram];
+}
+
+/* ================= GÖRÜNÜRLÜK =================
+ * Oyuncu hak etmediği rakamı görmez. Aynı fraksiyon, istihbarat konumuna
+ * göre üç ayrı şekilde görünür:
+ *   0 — kaynak yok   : yalnızca dışarıdan görüleni, kelimeyle
+ *   1 — doğası çözülmüş ya da kurumun var : hepsi kelimeyle + gidişat
+ *   2 — olgun ajan   : kesin rakam + gidişat
+ */
+const SOZ = {
+  guc:       ['çok zayıf','zayıf','orta','güçlü','çok güçlü'],
+  servet:    ['yoksul','dar','idare eder','varlıklı','zengin'],
+  istikrar:  ['dağılıyor','sarsak','durağan','sağlam','çok sağlam'],
+  mesruiyet: ['tanınmıyor','tartışmalı','kabul görüyor','saygın','sorgulanmaz'],
+  bilgi:     ['karanlıkta','az bilir','vasat','bilgili','çok bilgili'],
+  ofke:      ['sakin','homurdanıyor','gergin','öfkeli','kaynıyor']
+};
+// dışarıdan çıplak gözle görülebilenler
+const ACIK_VARS = ['guc','servet','ofke'];
+
+function _sozBandi(vr, x){
+  const i = x < 20 ? 0 : (x < 40 ? 1 : (x < 62 ? 2 : (x < 82 ? 3 : 4)));
+  return SOZ[vr][i];
+}
+
+function bilgiSeviyesi(w, fac){
+  const E = w.el;
+  if (!E) return 0;
+  if (E.ajanlar.some(a=>a.fac===fac && a.olgun && !a.yakalandi)) return 2;
+  if (E.bilinenDoga.indexOf(fac) >= 0) return 1;
+  if (w.tohumlar.some(t=>t.canli && t.kurumsal && t.fac===fac)) return 1;
+  return 0;
+}
+
+function gidisat(w, fac, vr){
+  const f = w.fac[fac];
+  if (!f || !f.gecmis6 || f.gecmis6[vr] === undefined) return null;
+  const d = f.v[vr] - f.gecmis6[vr];
+  if (d > 2.5) return 'artıyor';
+  if (d < -2.5) return 'azalıyor';
+  return 'duruyor';
+}
+
+function gorunum(w, fac, vr){
+  const sv = bilgiSeviyesi(w, fac);
+  const f = w.fac[fac];
+  if (!f) return { seviye:0, bilinmiyor:true };
+  if (sv === 0 && ACIK_VARS.indexOf(vr) < 0) return { seviye:0, bilinmiyor:true };
+  const o = { seviye:sv, soz:_sozBandi(vr, f.v[vr]) };
+  if (sv >= 1) o.gidisat = gidisat(w, fac, vr);
+  if (sv >= 2) o.tam = Math.round(f.v[vr]);
+  return o;
+}
+
+function bolgeGorunum(w, bolgeId){
+  const b = w.bolgeler[bolgeId];
+  if (!b) return null;
+  // coğrafya ve sahiplik herkesçe bilinir; içerisi bilinmez
+  const o = { id:b.id, ad:b.ad, sahip:b.sahip, sahipAd: w.fac[b.sahip] ? w.fac[b.sahip].ad : '—',
+              ortak: !!b.ortak, komsu: b.komsu.slice(), seviye: bilgiSeviyesi(w, b.sahip) };
+  if (o.seviye >= 1){
+    o.zenginlikSoz   = _sozBandi('servet', b.zenginlik);
+    o.huzursuzlukSoz = _sozBandi('ofke', b.huzursuzluk);
+    o.kuralVar = !!b.yerelKural;
+  }
+  if (o.seviye >= 2){
+    o.zenginlik = Math.round(b.zenginlik);
+    o.huzursuzluk = Math.round(b.huzursuzluk);
+    o.gelenek = Math.round(b.gelenek);
+  }
+  return o;
+}
+
+// İfşa rakamla değil kelimeyle: oyuncu optimize etmesin, tartsın
+const IZ_SOZ = [[8,'iz yok'],[22,'silik'],[42,'seçiliyor'],[62,'belirgin'],[82,'tehlikeli'],[101,'açıkta']];
+function izSozu(ifsa){ for (const [u,s] of IZ_SOZ) if (ifsa < u) return s; return 'açıkta'; }
+function hizSozu(h){
+  if (h >= 78) return 'dünya sana benziyor';
+  if (h >= 58) return 'dünya sana yaklaşıyor';
+  if (h >= 38) return 'dünya kayıtsız';
+  if (h >= 20) return 'dünya sana yabancı';
+  return 'dünya sana karşı';
+}
+
+/* ---------- DOĞRULAMA ---------- */
+// Üretilen fizik oyuna layık mı? Donuk, çığ gibi, ölü veya kaderi yazılmış
+// dünyalar elenir. En kritik sınav: tek bir küçük müdahale, 100 tur sonra
+// dünyayı yapısal olarak değiştirebiliyor mu? (kararlar birikmeli)
+function durumVektoru(w){
+  const o=[];
+  for (const f of w.fac) for (const v of VARS) o.push(f.canli ? f.v[v] : 0);
+  return o;
+}
+function yapisalImza(w){
+  return { sahip: w.bolgeler.map(b=>b.sahip), lider: w.fac.map(f=>f.lider.ad), canli: w.fac.map(f=>f.canli) };
+}
+function yapisalFark(a,b){
+  let n=0;
+  for (let i=0;i<a.sahip.length;i++) if(a.sahip[i]!==b.sahip[i]) n++;
+  for (let i=0;i<a.lider.length;i++) if(a.lider[i]!==b.lider[i]) n++;
+  for (let i=0;i<a.canli.length;i++) if(a.canli[i]!==b.canli[i]) n++;
+  return n;
+}
+
+function dogrula(seed, ayar){
+  const T = 200, DT = 120;
+  const w = dunyaKur(seed, ayar);
+  let hareket=0, ornek=0, sabit=0;
+  let dv=null, yi=null;
+  // ERKEN ELEME: adayların büyük çoğunluğu 60-80. turda zaten belli oluyor.
+  // 200 tur koşturmak boşa gidiyordu; bu kapı aramayı belirgin hızlandırır.
+  const erkenRet = (sebep)=>({ seed, gecti:false, erken:true, erkenRet:sebep,
+    canlilik:0, sabitOran:0, hayatta:0, cesitlilik:0, olay:0, olayTip:0, tekel:1,
+    ayrisan:0, cokmus:0, erkenSayi:0, erkenTip:0, sapma:0, enSapma:0, yayilim:0, yapisal:0 });
+
+  for (let t=0;t<T;t++){
+    const onc = w.fac.map(f=>VARS.map(v=>f.v[v]));
+    adim(w);
+    for (let i=0;i<w.fac.length;i++){
+      if(!w.fac[i].canli) continue;
+      for (let vi=0;vi<VARS.length;vi++){
+        const yeni=w.fac[i].v[VARS[vi]];
+        if (t>40){ hareket += Math.abs(yeni-onc[i][vi]); ornek++; if (yeni<=2||yeni>=98) sabit++; }
+      }
+    }
+    if (t === 60){
+      const e = w.olaylar.filter(o=>o.tur<=60);
+      if (e.length < 8 || new Set(e.map(o=>o.tip)).size < 4) return erkenRet('soguk-acilis');
+      if (w.olaylar.length > 90) return erkenRet('gurultu');
+    }
+    if (t === 85){
+      if (w.fac.filter(f=>f.canli && skor(f)>12).length < 4) return erkenRet('kirim');
+      if (w.olaylar.length > 125) return erkenRet('gurultu');
+    }
+    if (t===DT-1){ dv=durumVektoru(w); yi=yapisalImza(w); }
+  }
+  const canlilik = ornek? hareket/ornek : 0;
+  const sabitOran = ornek? sabit/ornek : 1;
+  const hayatta = w.fac.filter(f=>f.canli && skor(f)>12).length;
+  const skorlar = w.fac.filter(f=>f.canli).map(skor);
+  const ort = skorlar.reduce((a,b)=>a+b,0)/(skorlar.length||1);
+  const cesitlilik = Math.sqrt(skorlar.reduce((a,b)=>a+(b-ort)*(b-ort),0)/(skorlar.length||1));
+  const olay = w.olaylar.length;
+  const sayac = {};
+  for (const o of w.olaylar) sayac[o.tip] = (sayac[o.tip]||0)+1;
+  const olayTip = Object.keys(sayac).length;
+  // tek bir olay tipi kroniği ele geçirmesin
+  const tekel = olay ? Math.max(...Object.values(sayac)) / olay : 1;
+  // değişken bazında tekdüzelik: kaç değişkende fraksiyonlar birbirinden ayrışmış?
+  const canliF = w.fac.filter(f=>f.canli);
+  let ayrisan = 0, cokmus = 0;
+  for (const v of VARS){
+    const xs = canliF.map(f=>f.v[v]);
+    const m = xs.reduce((a,b)=>a+b,0)/(xs.length||1);
+    const sd = Math.sqrt(xs.reduce((a,b)=>a+(b-m)*(b-m),0)/(xs.length||1));
+    if (sd >= 8) ayrisan++;
+    // bir değişkende herkes aynı uçta toplanmışsa o boyut ölmüştür
+    if (m <= 12 || m >= 88) cokmus++;
+  }
+
+  // Açılış canlı mı? Oyuncu ilk 60 turu oynar; dramanın orada başlaması gerek.
+  const erken = w.olaylar.filter(o=>o.tur<=60);
+  const erkenSayi = erken.length, erkenTip = new Set(erken.map(o=>o.tip)).size;
+
+  // Ucuz sınavlar önce: kelebek sınavı pahalı, boşa harcama
+  const ucuzGecti = canlilik>=0.30 && canlilik<=2.2 && sabitOran<=0.18 && hayatta>=4 &&
+                    cesitlilik>=7 && olay>=15 && olay<=260 && olayTip>=4 &&
+                    tekel<=0.55 && ayrisan>=4 && cokmus===0 &&
+                    erkenSayi>=8 && erkenTip>=4;
+  if (!ucuzGecti && !(ayar && ayar.tamRapor)){
+    return { seed, gecti:false, canlilik:+canlilik.toFixed(3), sabitOran:+sabitOran.toFixed(3), hayatta,
+             cesitlilik:+cesitlilik.toFixed(2), olay, olayTip, tekel:+tekel.toFixed(2), ayrisan, cokmus, erkenSayi, erkenTip,
+             sapma:0, enSapma:0, yayilim:0, yapisal:0, erken:true };
+  }
+
+  // KELEBEK SINAVI — iki ayrı oyuncu hamlesi denenir; ikisi de dünyayı
+  // yüz tur sonra yeniden yazabilmeli. Tek şanslı kaldıraç yetmez.
+  function dokunus(hedefFac, hedefVar, miktar){
+    const u = dunyaKur(seed, ayar);
+    for (let t=0;t<DT;t++){
+      if (t===20 && u.fac[hedefFac]) u.fac[hedefFac].v[hedefVar] = kirp(u.fac[hedefFac].v[hedefVar] + miktar, 0.4, 99.6);
+      adim(u);
+    }
+    const a=dv||[], b=durumVektoru(u);
+    let top=0, en=0, yay=0;
+    for (let i=0;i<a.length;i++){ const d=Math.abs(a[i]-(b[i]||0)); top+=d; if(d>en) en=d; if(d>3) yay++; }
+    return { ort:top/(a.length||1), en, yay: yay/(a.length||1), yapisal: yi?yapisalFark(yi,yapisalImza(u)):0 };
+  }
+  const d1 = dokunus(0, 'servet', 8);
+  const d2 = dokunus(Math.min(2, w.fac.length-1), 'mesruiyet', -8);
+
+  const enSapma   = Math.min(d1.en, d2.en);
+  const yayilim   = Math.min(d1.yay, d2.yay);
+  const yapisal   = Math.min(d1.yapisal, d2.yapisal);
+  const sapma     = Math.min(d1.ort, d2.ort);
+
+  const gecti =
+    canlilik   >= 0.30 && canlilik <= 2.2 &&
+    sabitOran  <= 0.18 &&
+    hayatta    >= 4    &&
+    cesitlilik >= 7    &&
+    olay       >= 15   && olay <= 260 &&
+    olayTip    >= 4    && tekel <= 0.55 &&
+    ayrisan    >= 4    && cokmus === 0 &&
+    erkenSayi  >= 8    && erkenTip >= 4 &&
+    enSapma    >= 12   &&
+    yayilim    >= 0.15 &&
+    yapisal    >= 1;
+
+  return { seed, gecti, canlilik:+canlilik.toFixed(3), sabitOran:+sabitOran.toFixed(3), hayatta,
+           cesitlilik:+cesitlilik.toFixed(2), olay, olayTip, tekel:+tekel.toFixed(2), ayrisan, cokmus, erkenSayi, erkenTip,
+           sapma:+sapma.toFixed(2), enSapma:+enSapma.toFixed(1), yayilim:+yayilim.toFixed(2), yapisal };
+}
+
+// Sınavı geçen ilk tohumu bul
+function iyiTohum(baslangic, ayar, limit){
+  limit = limit || 400;
+  for (let s=baslangic>>>0; s<(baslangic>>>0)+limit; s++){
+    const d = dogrula(s, ayar);
+    if (d.gecti) return { seed:s, rapor:d };
+  }
+  return null;
+}
+
+return { VARS, VAD, SEKIL, KAPSAM, KAVRAMLAR, KATMANLAR, AMACLAR, EVRELER,
+           SOZ, bilgiSeviyesi, gorunum, bolgeGorunum, gidisat, izSozu, hizSozu,
+           KAYNAKLAR, dosyaUret, meseleTaramasi, MESELE_TANIM, kutuphaneEkle, SECENEK_TARIF,
+           FIILLER, DOKTRINLER, hizalanma, ifsaCarpani, kanunKatkisi, kehanetDayanak, dogaKuvveti,
+           oyuncuKur, hamleler, hamleYap, eliIsle, etkinlik,
+           klonla, tohumEk, tohumlariIsle, meseleAc, meseleKarar, meselePencere, fraksiyonEkle, evreAdi,
+           kanunSetiUret, kalibreEt, ekBelirtme, ekYonelme, durumVektoru, yapisalImza, dunyaKur, adim, skor, dogrula, iyiTohum, kanunMetni, ideolojikMesafe, mulberry32, hsh };
+});
+
+</script>
+<script>
+/* GİZLİ EL — arayüz. Masa, gösterge paneli değil.
+ * Kural: oyuncu hak etmediği rakamı görmez. */
+'use strict';
+const $ = s => document.querySelector(s);
+const el = (t, c, x) => { const n = document.createElement(t); if (c) n.className = c;
+  if (x !== undefined) n.textContent = x; return n; };
+const KAYIT = 'gizliel_kayit_v1';
+
+let W = null, aktifCekmece = 'masa', seciliBolge = null;
+
+/* fraksiyon renkleri: soluk, mürekkep gibi */
+const RENK = ['#8a9a8e','#a8896b','#8792a6','#a37f8a','#96a06e','#7f9698','#ab9464','#8f8299'];
+const renk = i => RENK[i % RENK.length];
+
+/* ---------- kayıt ---------- */
+function kaydet(){
+  if (!W) return;
+  try {
+    const rng = W.kurulumRng; delete W.kurulumRng;
+    localStorage.setItem(KAYIT, JSON.stringify(W));
+    W.kurulumRng = rng;
+  } catch(e){}
+}
+function kayitVar(){ try { return !!localStorage.getItem(KAYIT); } catch(e){ return false; } }
+function yukle(){
+  try { const s = localStorage.getItem(KAYIT); if (!s) return null; return JSON.parse(s); }
+  catch(e){ return null; }
+}
+
+/* ---------- dünya arama ----------
+ * Sınavı geçen dünyalar önceden bulunup listelendi (23.726 aday elenerek).
+ * Böylece açılış anlık. Liste tükenirse canlı aramaya düşer. */
+const OYNANAN = 'gizliel_oynanan_v1';
+function oynananlar(){
+  try { return JSON.parse(localStorage.getItem(OYNANAN) || '[]'); } catch(e){ return []; }
+}
+function oynandiIsaretle(t){
+  try { const l = oynananlar(); l.push(t);
+        localStorage.setItem(OYNANAN, JSON.stringify(l.slice(-400))); } catch(e){}
+}
+
+function dunyaAra(doktrin){
+  $('#doktrinler').hidden = true;
+  const durum = $('#arama');
+  const liste = (window.TOHUMLAR || []).filter(t => oynananlar().indexOf(t) < 0);
+  if (liste.length){
+    const t = liste[Math.floor(Math.random()*liste.length)];
+    W = GE.dunyaKur(t);
+    GE.oyuncuKur(W, { doktrin });
+    oynandiIsaretle(t);
+    durum.textContent = 'Dünya #' + t + ' ayakta.';
+    setTimeout(basla, 260);
+    return;
+  }
+  // liste tükendi: canlı ara
+  let tohum = (Date.now() ^ (Math.random()*1e9)) >>> 0, elenen = 0;
+  const parti = () => {
+    const t0 = performance.now();
+    while (performance.now() - t0 < 26){
+      const d = GE.dogrula(tohum);
+      elenen++;
+      if (d.gecti){
+        W = GE.dunyaKur(tohum);
+        GE.oyuncuKur(W, { doktrin });
+        oynandiIsaretle(tohum);
+        durum.textContent = elenen + ' aday elendi. Dünya ayakta.';
+        setTimeout(basla, 420);
+        return;
+      }
+      tohum = (tohum + 1) >>> 0;
+    }
+    durum.textContent = 'Dünya dokunuyor… ' + elenen + ' aday elendi';
+    requestAnimationFrame(parti);
+  };
+  parti();
+}
+
+function basla(){
+  $('#giris').hidden = true;
+  kaydet();
+  ciz();
+}
+
+/* ---------- durum satırı ---------- */
+function durumCiz(){
+  const E = W.el, s = $('#durumSatir');
+  s.innerHTML = '';
+  const par = (metin, uyari) => { const d = el('span', uyari ? 'uyari' : '');
+    d.innerHTML = metin; s.appendChild(d); };
+  par(W.tur + '. mevsim');
+  par('nüfuz <b>' + Math.floor(E.nufuz) + '</b>');
+  const iz = GE.izSozu(E.ifsa);
+  par('iz: <b>' + iz + '</b>', E.ifsa >= 62);
+  par('<b>' + GE.hizSozu(E.hiz) + '</b>');
+}
+
+/* ---------- çekmeceler ---------- */
+function cekmeceCiz(){
+  const n = $('#cekmeceler');
+  n.innerHTML = '';
+  const acikDosya = W.meseleler.filter(m => m.acik).length;
+  const sek = [['masa','Masa' + (acikDosya ? ' ('+acikDosya+')' : '')],
+               ['harita','Harita'], ['kronik','Kronik'],
+               ['kutuphane','Kütüphane' + ((W.el.kutuphane||[]).length ? ' ('+W.el.kutuphane.length+')' : '')]];
+  for (const [k, ad] of sek){
+    const b = el('button', '', ad);
+    b.setAttribute('aria-current', aktifCekmece === k ? 'true' : 'false');
+    b.onclick = () => { aktifCekmece = k; ciz(); window.scrollTo(0,0); };
+    n.appendChild(b);
+  }
+}
+
+/* ---------- masa ---------- */
+function masaCiz(){
+  const m = $('#masa');
+  m.innerHTML = '';
+  const acik = W.meseleler.filter(x => x.acik);
+  if (acik.length){
+    m.appendChild(el('div','kucuk','Masanda bekleyen'));
+    for (const mes of acik){
+      const d = GE.dosyaUret(W, mes.id);
+      if (!d) continue;
+      const k = el('button','kart');
+      const ust = el('div','ust');
+      ust.appendChild(el('h3','', d.baslik));
+      ust.appendChild(el('div','sure', d.kalanMevsim + ' mevsim'));
+      k.appendChild(ust);
+      k.appendChild(el('p','', d.girizgah));
+      k.onclick = () => dosyaAc(mes.id);
+      m.appendChild(k);
+    }
+    m.appendChild(el('div','ayrac'));
+  }
+
+  m.appendChild(el('div','kucuk','Bu mevsim'));
+  const bu = W.olaylar.filter(o => o.tur === W.tur && o.tip !== 'el');
+  if (!bu.length) m.appendChild(el('p','soluk','Sessiz geçti.'));
+  for (const o of bu.slice(-12)) m.appendChild(olaySatiri(o, false));
+
+  m.appendChild(el('div','ayrac'));
+  m.appendChild(el('div','kucuk','Güçler'));
+  for (let i=0;i<W.fac.length;i++) if (W.fac[i].canli) m.appendChild(fraksiyonSatiri(i));
+}
+
+function olaySatiri(o, turGoster){
+  const d = el('div','olay' + (o.kavram ? ' vurgu' : ''));
+  d.appendChild(el('div','t', turGoster ? String(o.tur) : ''));
+  const mm = el('div','m');
+  mm.appendChild(document.createTextNode(o.metin));
+  if (o.kavramAd){
+    const k = el('div','kucuk', o.kavramAd + ' — ' + (o.kaynak||''));
+    k.style.marginTop = '4px'; k.style.textTransform = 'none';
+    mm.appendChild(k);
+  }
+  d.appendChild(mm);
+  return d;
+}
+
+function fraksiyonSatiri(i){
+  const f = W.fac[i], sv = GE.bilgiSeviyesi(W, i);
+  const d = el('div','frak');
+  const ad = el('div','ad');
+  const sol = el('div');
+  const nk = el('span','nokta'); nk.style.background = renk(i);
+  sol.appendChild(nk); sol.appendChild(document.createTextNode(f.ad));
+  ad.appendChild(sol);
+  ad.appendChild(el('div','rozet', sv === 2 ? 'ajanın var' : (sv === 1 ? 'doğasını biliyorsun' : 'kaynağın yok')));
+  d.appendChild(ad);
+
+  const parcalar = [];
+  for (const v of GE.VARS){
+    const g = GE.gorunum(W, i, v);
+    if (g.bilinmiyor) continue;
+    parcalar.push(g.soz);
+  }
+  d.appendChild(el('div','ozet', parcalar.join(' · ')));
+
+  if (sv >= 1){
+    const r = el('div','rakam');
+    for (const v of GE.VARS){
+      const g = GE.gorunum(W, i, v);
+      if (g.bilinmiyor) continue;
+      const s = el('span');
+      s.innerHTML = GE.VAD[v] + ' <b>' + (g.tam !== undefined ? g.tam : g.soz) + '</b>' +
+        (g.gidisat && g.gidisat !== 'duruyor' ? ' ' + (g.gidisat === 'artıyor' ? '↑' : '↓') : '');
+      r.appendChild(s);
+    }
+    d.appendChild(r);
+  }
+  return d;
+}
+
+/* ---------- harita ---------- */
+function haritaCiz(){
+  const h = $('#harita');
+  h.innerHTML = '';
+  h.appendChild(el('div','kucuk','Şema — yalnızca bildiğin kadarı'));
+
+  const n = W.bolgeler.length, R = 98, CX = 190, CY = 150;
+  const ns = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(ns,'svg');
+  svg.setAttribute('viewBox','0 0 380 300');
+  svg.id = 'sema';
+  const poz = i => { const a = -Math.PI/2 + i/n*Math.PI*2;
+    return [CX + Math.cos(a)*R, CY + Math.sin(a)*R]; };
+  const kisalt = ad => ad.length > 15 ? ad.split(' ')[0] : ad;
+
+  const cizilen = new Set();
+  for (const b of W.bolgeler) for (const k of b.komsu){
+    const anahtar = Math.min(b.id,k) + '-' + Math.max(b.id,k);
+    if (cizilen.has(anahtar)) continue;
+    cizilen.add(anahtar);
+    const [x1,y1] = poz(b.id), [x2,y2] = poz(k);
+    const l = document.createElementNS(ns,'line');
+    l.setAttribute('x1',x1); l.setAttribute('y1',y1);
+    l.setAttribute('x2',x2); l.setAttribute('y2',y2);
+    l.setAttribute('stroke', '#2e2822');
+    l.setAttribute('stroke-width', Math.abs(b.id-k)===1||Math.abs(b.id-k)===n-1 ? 1.2 : .7);
+    svg.appendChild(l);
+  }
+
+  for (const b of W.bolgeler){
+    const g = GE.bolgeGorunum(W, b.id);
+    const [x,y] = poz(b.id);
+    if (seciliBolge === b.id){
+      const halka = document.createElementNS(ns,'circle');
+      halka.setAttribute('cx',x); halka.setAttribute('cy',y); halka.setAttribute('r',13);
+      halka.setAttribute('fill','none'); halka.setAttribute('stroke','#c9a227');
+      halka.setAttribute('stroke-width','1');
+      svg.appendChild(halka);
+    }
+    // ortak toprak: ikinci ince halka. Kesik çizgi gürültü yapıyordu.
+    if (g.ortak){
+      const dis = document.createElementNS(ns,'circle');
+      dis.setAttribute('cx',x); dis.setAttribute('cy',y); dis.setAttribute('r',9.5);
+      dis.setAttribute('fill','none'); dis.setAttribute('stroke', renk(g.sahip));
+      dis.setAttribute('stroke-width','.6'); dis.setAttribute('opacity','.75');
+      dis.style.pointerEvents = 'none';
+      svg.appendChild(dis);
+    }
+    const c = document.createElementNS(ns,'circle');
+    c.setAttribute('cx',x); c.setAttribute('cy',y); c.setAttribute('r',6);
+    // içi dolu = içerisini görebiliyorsun
+    c.setAttribute('fill', g.seviye >= 1 ? renk(g.sahip) : '#14110f');
+    c.setAttribute('stroke', renk(g.sahip));
+    c.setAttribute('stroke-width','1.5');
+    c.style.pointerEvents = 'none';
+    svg.appendChild(c);
+
+    const hit = document.createElementNS(ns,'circle');
+    hit.setAttribute('cx',x); hit.setAttribute('cy',y); hit.setAttribute('r',17);
+    hit.setAttribute('fill','transparent');
+    hit.style.cursor = 'pointer';
+    hit.onclick = () => { seciliBolge = b.id; haritaCiz(); };
+    svg.appendChild(hit);
+
+    const t = document.createElementNS(ns,'text');
+    const ca = Math.cos(-Math.PI/2 + b.id/n*Math.PI*2);
+    const sa = Math.sin(-Math.PI/2 + b.id/n*Math.PI*2);
+    const sag = ca > .18, sol = ca < -.18;
+    t.setAttribute('x', x + (sag ? 14 : (sol ? -14 : 0)));
+    t.setAttribute('y', y + (sag||sol ? 3 : (sa < 0 ? -14 : 17)));
+    t.setAttribute('text-anchor', sag ? 'start' : (sol ? 'end' : 'middle'));
+    t.textContent = kisalt(b.ad);
+    svg.appendChild(t);
+  }
+  h.appendChild(svg);
+
+  const bilgi = el('div','bolgeBilgi');
+  if (seciliBolge === null) bilgi.innerHTML = 'Bir düğüme dokun.<br>İçi dolu düğüm: içerisini görebiliyorsun. Çift halka: ortak toprak.';
+  else {
+    const g = GE.bolgeGorunum(W, seciliBolge);
+    const p = [];
+    p.push(g.ad + ' — ' + g.sahipAd + (g.ortak ? ' · ortak toprak' : ''));
+    if (g.seviye === 0) p.push('İçerisi hakkında kaynağın yok.');
+    else {
+      p.push('zenginlik: ' + (g.zenginlik !== undefined ? g.zenginlik + ' (' + g.zenginlikSoz + ')' : g.zenginlikSoz));
+      p.push('huzursuzluk: ' + (g.huzursuzluk !== undefined ? g.huzursuzluk + ' (' + g.huzursuzlukSoz + ')' : g.huzursuzlukSoz));
+      p.push('yerel kural: ' + (g.kuralVar ? 'var' : 'yok') + (g.gelenek !== undefined ? ' (gelenek ' + g.gelenek + ')' : ''));
+    }
+    bilgi.innerHTML = p.join('<br>');
+  }
+  h.appendChild(bilgi);
+
+  // renk anahtarı: düğüm rengi sahibi gösterir
+  const anahtar = el('div');
+  anahtar.style.marginTop = '20px';
+  anahtar.appendChild(el('div','kucuk','Kim nerede'));
+  for (let i=0;i<W.fac.length;i++){
+    if (!W.fac[i].canli) continue;
+    const say = W.bolgeler.filter(b => b.sahip === i).length;
+    const r = el('div','olcum');
+    const sol = el('span');
+    const nk = el('span','nokta'); nk.style.background = renk(i);
+    sol.appendChild(nk); sol.appendChild(document.createTextNode(W.fac[i].ad));
+    r.appendChild(sol);
+    r.appendChild(el('b','', say + ' bölge'));
+    anahtar.appendChild(r);
+  }
+  h.appendChild(anahtar);
+}
+
+/* ---------- kronik ---------- */
+function kronikCiz(){
+  const k = $('#kronik');
+  k.innerHTML = '';
+  k.appendChild(el('div','kucuk','Olup bitenler'));
+  const ol = W.olaylar.filter(o => o.tip !== 'ret').slice(-90).reverse();
+  if (!ol.length) k.appendChild(el('p','soluk','Henüz bir şey olmadı.'));
+  for (const o of ol) k.appendChild(olaySatiri(o, true));
+}
+
+/* ---------- kütüphane ---------- */
+function kutuphaneCiz(){
+  const k = $('#kutuphane');
+  k.innerHTML = '';
+  const liste = W.el.kutuphane || [];
+  k.appendChild(el('div','kucuk','Kütüphane'));
+  k.appendChild(el('p','soluk','Oyun bunları açıklamaz. Okursan bir sonrakini önceden görürsün.'));
+  if (!liste.length) k.appendChild(el('p','soluk','Henüz bir mesele kapanmadı.'));
+  for (const kk of liste){
+    const K = GE.KAVRAMLAR[kk]; if (!K) continue;
+    const d = el('div','kuram');
+    d.appendChild(el('h3','', K.ad));
+    d.appendChild(el('div','tek', K.tek));
+    d.appendChild(el('div','kaynak', K.kaynak));
+    k.appendChild(d);
+  }
+  k.appendChild(el('div','ayrac'));
+  k.appendChild(el('div','kucuk','Çözdüğün kanunlar'));
+  if (!W.el.bilinen.length) k.appendChild(el('p','soluk','Hiçbir kanunu incelemedin.'));
+  for (const id of W.el.bilinen){
+    const d = el('div','kuram');
+    d.appendChild(el('div','tek', GE.kanunMetni(W.kanunlar[id])));
+    k.appendChild(d);
+  }
+  k.appendChild(el('div','ayrac'));
+  const disa = el('button','dugme','Kaydı metin olarak dışa aktar');
+  disa.onclick = disaAktar;
+  k.appendChild(disa);
+}
+
+function disaAktar(){
+  const rng = W.kurulumRng; delete W.kurulumRng;
+  const metin = JSON.stringify(W);
+  W.kurulumRng = rng;
+  const ta = el('textarea'); ta.value = metin;
+  ortuAc(ic => {
+    ic.appendChild(el('h2','dosyaBaslik','Kayıt'));
+    ic.appendChild(el('p','soluk','Bu metni bir yere kopyala. Telefon verisi silinirse buradan geri dönersin.'));
+    ta.style.height = '240px';
+    ic.appendChild(ta);
+    ta.select();
+  });
+}
+
+/* ---------- örtü ---------- */
+function ortuAc(doldur){
+  const o = $('#ortu'), ic = $('#ortuIc');
+  ic.innerHTML = '';
+  const kap = el('button','kapat','← Kapat');
+  kap.onclick = ortuKapat;
+  ic.appendChild(kap);
+  doldur(ic);
+  o.hidden = false;
+  o.scrollTop = 0;
+  document.body.style.overflow = 'hidden';
+}
+function ortuKapat(){ $('#ortu').hidden = true; document.body.style.overflow = ''; }
+
+/* ---------- dosya ---------- */
+function dosyaAc(meseleId){
+  const d = GE.dosyaUret(W, meseleId);
+  if (!d) return;
+  ortuAc(ic => {
+    ic.appendChild(el('h2','dosyaBaslik', d.baslik));
+    ic.appendChild(el('div','kucuk','karar için ' + d.kalanMevsim + ' mevsim'));
+    ic.appendChild(el('p','', d.girizgah));
+
+    ic.appendChild(el('div','ayrac'));
+    ic.appendChild(el('div','kucuk','Tanıklıklar'));
+    if (!d.tanikliklar.length) ic.appendChild(el('p','soluk','Hiçbir kaynağın konuşmuyor.'));
+    for (const t of d.tanikliklar){
+      const n = el('div','taniklik');
+      n.appendChild(el('div','kaynak', t.kaynakAd + ' · ' + t.etiket));
+      n.appendChild(el('div','iddia', '“' + t.metin + '”'));
+      ic.appendChild(n);
+    }
+
+    ic.appendChild(el('div','ayrac'));
+    ic.appendChild(el('div','kucuk','Tahminler'));
+    for (const o of d.olcumler){
+      const n = el('div','olcum' + (o.aralik === 'bilinmiyor' ? ' yok' : ''));
+      n.appendChild(el('span','', o.ad));
+      const b = el('b','', o.aralik); n.appendChild(b);
+      ic.appendChild(n);
+    }
+
+    if (d.celiskiler.length){
+      ic.appendChild(el('div','ayrac'));
+      ic.appendChild(el('div','kucuk','Çelişkiler — biri yanılıyor'));
+      for (const c of d.celiskiler){
+        const n = el('div','celiski');
+        n.appendChild(el('div','kucuk', c.baslik));
+        for (const y of [c.a, c.b]){
+          const q = el('div','yan');
+          q.appendChild(el('span','', y.kaynakAd + ' · ' + y.etiket));
+          q.appendChild(document.createTextNode('“' + y.metin + '”'));
+          n.appendChild(q);
+        }
+        ic.appendChild(n);
+      }
+    }
+
+    ic.appendChild(el('div','ayrac'));
+    ic.appendChild(el('div','kucuk','Kararın'));
+    for (const s of d.secenekler){
+      const b = el('button','secenek');
+      b.appendChild(el('b','', s.ad));
+      b.appendChild(el('span','', s.tarif));
+      b.onclick = () => {
+        const olay = GE.meseleKarar(W, meseleId, s.anahtar);
+        W.olaylar.push(...olay);
+        ortuKapat(); kaydet(); ciz();
+      };
+      ic.appendChild(b);
+    }
+  });
+}
+
+/* ---------- emir ---------- */
+const FIIL_CUMLE = {
+  incele:  h => h.doga ? ['', h.fac, 'fraksiyonunun doğasını çöz'] : ['', h.kanun, 'kanununu incele'],
+  ajan:    () => ['', '', 'içine ajan yerleştir'],
+  fisilda: () => ['', '', 'liderinin kulağına fısılda'],
+  koru:    () => ['', '', 'korunsun'],
+  finanse: () => ['', '', 'gizlice finanse edilsin'],
+  kiskirt: () => ['', '', 'kışkırtılsın']
+};
+
+function emirAc(){
+  const hepsi = GE.hamleler(W);
+  const gruplar = {};
+  for (const h of hepsi) (gruplar[h.fiil] = gruplar[h.fiil] || []).push(h);
+  ortuAc(ic => {
+    ic.appendChild(el('h2','dosyaBaslik','Emir yaz'));
+    ic.appendChild(el('div','kucuk','nüfuz ' + Math.floor(W.el.nufuz) + ' · iz: ' + GE.izSozu(W.el.ifsa)));
+    ic.appendChild(el('div','ayrac'));
+    const liste = el('div','sec-liste');
+    for (const f in GE.FIILLER){
+      const g = gruplar[f];
+      if (!g || !g.length) continue;
+      const F = GE.FIILLER[f];
+      const b = el('button');
+      const yan = el('span','yan', 'nüfuz ' + F.nufuz + ' · ' + g.length + ' hedef');
+      b.appendChild(yan);
+      b.appendChild(document.createTextNode(F.ad));
+      if (W.el.nufuz < F.nufuz){ b.disabled = true; b.style.opacity = .3; }
+      else b.onclick = () => hedefSec(f, g);
+      liste.appendChild(b);
+    }
+    ic.appendChild(liste);
+  });
+}
+
+function ifsaSozu(x){ return x < 1.2 ? 'az' : (x < 2.6 ? 'orta' : (x < 4 ? 'çok' : 'pervasız')); }
+
+function hedefSec(fiil, hamleler){
+  ortuAc(ic => {
+    ic.appendChild(el('h2','dosyaBaslik', GE.FIILLER[fiil].ad));
+    ic.appendChild(el('div','kucuk','hedefi seç'));
+    ic.appendChild(el('div','ayrac'));
+    const liste = el('div','sec-liste');
+    const sirali = hamleler.slice().sort((a,b)=> (b.etkinlik - a.etkinlik));
+    for (const h of sirali.slice(0, 120)){
+      const b = el('button');
+      const nt = [];
+      if (h.etkinlik < 0.92) nt.push('yıpranmış ×' + h.etkinlik.toFixed(2));
+      nt.push('iz ' + ifsaSozu(h.ifsa));
+      b.appendChild(el('span','yan', nt.join(' · ')));
+      b.appendChild(document.createTextNode(h.etiket));
+      b.onclick = () => onayla(h);
+      liste.appendChild(b);
+    }
+    ic.appendChild(liste);
+  });
+}
+
+function onayla(h){
+  ortuAc(ic => {
+    ic.appendChild(el('h2','dosyaBaslik','Onay'));
+    ic.appendChild(el('p','', h.etiket));
+    const bd = el('div','bedel');
+    bd.innerHTML = 'nüfuz <b>−' + h.nufuz + '</b> &nbsp; · &nbsp; bırakacağı iz <b>' + ifsaSozu(h.ifsa) + '</b>' +
+      (h.etkinlik < 0.92 ? ' &nbsp; · &nbsp; etkinlik <b>×' + h.etkinlik.toFixed(2) + '</b> (aynı kaldıraca çok bastın)' : '');
+    ic.appendChild(bd);
+    const ver = el('button','dugme vurgu','Emri ver');
+    ver.onclick = () => {
+      const olay = GE.hamleYap(W, h);
+      W.olaylar.push(...olay);
+      ortuKapat(); kaydet(); ciz();
+    };
+    ic.appendChild(ver);
+  });
+}
+
+/* ---------- tur ---------- */
+function mevsimGec(){
+  if (W.el.bitti) return;
+  // Açık dosyanın üstünden sessizce geçilmez: son mevsimde onay ister.
+  const son = W.meseleler.filter(m => m.acik && GE.meselePencere(W, m) <= 1);
+  if (son.length && !mevsimGec._onaylandi){
+    ortuAc(ic => {
+      ic.appendChild(el('h2','dosyaBaslik','Son mevsim'));
+      ic.appendChild(el('p','', son.length === 1
+        ? '“' + son[0].baslik + '” dosyası bu mevsim kapanıyor. Karar vermezsen karar senin yerine verilir.'
+        : son.length + ' dosya bu mevsim kapanıyor. Karar vermezsen kararlar senin yerine verilir.'));
+      ic.appendChild(el('p','soluk','Beklemek de bir karardır — ama bilerek bekle.'));
+      const oku = el('button','dugme','Dosyayı aç');
+      oku.onclick = () => { ortuKapat(); dosyaAc(son[0].id); };
+      ic.appendChild(oku);
+      const gec = el('button','dugme vurgu','Yine de geç');
+      gec.style.marginTop = '10px';
+      gec.onclick = () => { ortuKapat(); mevsimGec._onaylandi = true; mevsimGec();
+                            mevsimGec._onaylandi = false; };
+      ic.appendChild(gec);
+    });
+    return;
+  }
+  const oncekiAcik = W.meseleler.filter(m => m.acik).length;
+  GE.adim(W);
+  if (W.olaylar.length > 400) W.olaylar = W.olaylar.slice(-400);
+  // yeni dosya geldiyse oyuncuyu masaya çek
+  if (W.meseleler.filter(m => m.acik).length > oncekiAcik) aktifCekmece = 'masa';
+  kaydet();
+  ciz();
+  if (W.el.bitti) sonEkrani();
+}
+
+function sonEkrani(){
+  ortuAc(ic => {
+    ic.appendChild(el('h2','dosyaBaslik','Görünüyorsun'));
+    ic.appendChild(el('p','', W.el.bitisSebebi === 'ifsa'
+      ? 'İzlerin birikti ve artık gizli değilsin. Gizli el kalmadı.'
+      : 'İzini sürdüler ve buldular.'));
+    ic.appendChild(el('p','soluk', W.tur + ' mevsim dayandın. Doktrinin ' +
+      GE.DOKTRINLER[W.el.doktrin].ad + '; dünya sonunda ' +
+      Math.round(W.el.hiz) + ' puanla ' + GE.hizSozu(W.el.hiz).toLowerCase() + '.'));
+    const yeni = el('button','dugme vurgu','Yeni dünya');
+    yeni.onclick = () => { try{ localStorage.removeItem(KAYIT); }catch(e){} location.reload(); };
+    ic.appendChild(yeni);
+  });
+}
+
+/* ---------- çizim ---------- */
+function ciz(){
+  durumCiz(); cekmeceCiz();
+  for (const k of ['masa','harita','kronik','kutuphane']) $('#'+k).hidden = (k !== aktifCekmece);
+  if (aktifCekmece === 'masa') masaCiz();
+  else if (aktifCekmece === 'harita') haritaCiz();
+  else if (aktifCekmece === 'kronik') kronikCiz();
+  else kutuphaneCiz();
+  const acik = W.meseleler.filter(m => m.acik).length;
+  const g = $('#gecBtn');
+  g.textContent = acik ? 'Bekle · ' + acik + ' dosya açık' : 'Mevsimi geçir';
+  g.classList.toggle('vurgu', !acik);
+  g.disabled = !!W.el.bitti;
+  $('#emirBtn').disabled = !!W.el.bitti;
+}
+
+/* ---------- açılış ---------- */
+function girisKur(){
+  const d = $('#doktrinler');
+  for (const k in GE.DOKTRINLER){
+    const D = GE.DOKTRINLER[k];
+    const b = el('button','dok');
+    b.appendChild(el('b','', D.ad));
+    b.appendChild(el('span','', D.tarif));
+    b.onclick = () => dunyaAra(k);
+    d.appendChild(b);
+  }
+  if (kayitVar()){
+    const y = $('#yukleBtn');
+    y.style.display = 'block';
+    y.onclick = () => { const k = yukle(); if (k){ W = k; basla(); } };
+  }
+  $('#iceriAlBtn').onclick = () => {
+    try { const k = JSON.parse($('#iceriAl').value); if (k && k.fac){ W = k; basla(); } }
+    catch(e){ $('#arama').textContent = 'Metin okunamadı.'; }
+  };
+}
+
+$('#gecBtn').onclick = mevsimGec;
+$('#emirBtn').onclick = emirAc;
+girisKur();
+
+</script>
+</body>
+</html>
