@@ -6,10 +6,28 @@ const el = (t, c, x) => { const n = document.createElement(t); if (c) n.classNam
   if (x !== undefined) n.textContent = x; return n; };
 const KAYIT = 'gizliel_kayit_v1';
 
+/* Bilinmeyen yazıyla değil karalamayla gösterilir: basılmamış bir satır.
+   Genişlik içeriğe göre değil, tohuma göre sabit — her açılışta aynı görünür. */
+function kara(anahtar, en){
+  const n = el('span','kara');
+  let h = 0; for (let i=0;i<anahtar.length;i++) h = (h*31 + anahtar.charCodeAt(i)) | 0;
+  const g = (en || 62) + (Math.abs(h) % 34);
+  n.style.width = g + 'px';
+  return n;
+}
+function blok(kenarMetni, doldur){
+  const b = el('div','blok');
+  b.appendChild(el('div','kenar', kenarMetni));
+  const g = el('div','govde');
+  doldur(g);
+  b.appendChild(g);
+  return b;
+}
+
 let W = null, aktifCekmece = 'masa', seciliBolge = null;
 
 /* fraksiyon renkleri: soluk, mürekkep gibi */
-const RENK = ['#8a9a8e','#a8896b','#8792a6','#a37f8a','#96a06e','#7f9698','#ab9464','#8f8299'];
+const RENK = ['#4c5d4f','#8a5a3c','#46566e','#6f4552','#5f6b39','#3d5f60','#8a6a2c','#553f63'];
 const renk = i => RENK[i % RENK.length];
 
 /* ---------- kayıt ---------- */
@@ -89,8 +107,7 @@ function durumCiz(){
     d.innerHTML = metin; s.appendChild(d); };
   par(W.tur + '. mevsim');
   par('nüfuz <b>' + Math.floor(E.nufuz) + '</b>');
-  const iz = GE.izSozu(E.ifsa);
-  par('iz: <b>' + iz + '</b>', E.ifsa >= 62);
+  par('iz <b>' + GE.izSozu(E.ifsa) + '</b>', E.ifsa >= 62);
   par('<b>' + GE.hizSozu(E.hiz) + '</b>');
 }
 
@@ -116,30 +133,32 @@ function masaCiz(){
   m.innerHTML = '';
   const acik = W.meseleler.filter(x => x.acik);
   if (acik.length){
-    m.appendChild(el('div','kucuk','Masanda bekleyen'));
-    for (const mes of acik){
-      const d = GE.dosyaUret(W, mes.id);
-      if (!d) continue;
-      const k = el('button','kart');
-      const ust = el('div','ust');
-      ust.appendChild(el('h3','', d.baslik));
-      ust.appendChild(el('div','sure', d.kalanMevsim + ' mevsim'));
-      k.appendChild(ust);
-      k.appendChild(el('p','', d.girizgah));
-      k.onclick = () => dosyaAc(mes.id);
-      m.appendChild(k);
-    }
-    m.appendChild(el('div','ayrac'));
+    m.appendChild(blok('masanda bekleyen', g => {
+      for (const mes of acik){
+        const d = GE.dosyaUret(W, mes.id);
+        if (!d) continue;
+        const k = el('button','cagri');
+        const ust = el('div','ust');
+        ust.appendChild(el('h3','', d.baslik));
+        ust.appendChild(el('div','sure', d.kalanMevsim + ' mevsim'));
+        k.appendChild(ust);
+        k.appendChild(el('p','', d.girizgah));
+        k.onclick = () => dosyaAc(mes.id);
+        g.appendChild(k);
+      }
+    }));
   }
 
-  m.appendChild(el('div','kucuk','Bu mevsim'));
   const bu = W.olaylar.filter(o => o.tur === W.tur && o.tip !== 'el');
-  if (!bu.length) m.appendChild(el('p','soluk','Sessiz geçti.'));
-  for (const o of bu.slice(-12)) m.appendChild(olaySatiri(o, false));
+  m.appendChild(blok('bu mevsim', g => {
+    if (!bu.length) g.appendChild(el('p','soluk','Sessiz geçti.'));
+    for (const o of bu.slice(-12)) g.appendChild(olaySatiri(o, false));
+  }));
 
-  m.appendChild(el('div','ayrac'));
-  m.appendChild(el('div','kucuk','Güçler'));
-  for (let i=0;i<W.fac.length;i++) if (W.fac[i].canli) m.appendChild(fraksiyonSatiri(i));
+  m.appendChild(el('hr'));
+  m.appendChild(blok('güçler', g => {
+    for (let i=0;i<W.fac.length;i++) if (W.fac[i].canli) g.appendChild(fraksiyonSatiri(i));
+  }));
 }
 
 function olaySatiri(o, turGoster){
@@ -148,7 +167,7 @@ function olaySatiri(o, turGoster){
   const mm = el('div','m');
   mm.appendChild(document.createTextNode(o.metin));
   if (o.kavramAd){
-    const k = el('div','kucuk', o.kavramAd + ' — ' + (o.kaynak||''));
+    const k = el('div','not', o.kavramAd + ' — ' + (o.kaynak||''));
     k.style.marginTop = '4px'; k.style.textTransform = 'none';
     mm.appendChild(k);
   }
@@ -160,33 +179,29 @@ function fraksiyonSatiri(i){
   const f = W.fac[i], sv = GE.bilgiSeviyesi(W, i);
   const d = el('div','frak');
   const ad = el('div','ad');
-  const sol = el('div');
+  const sol = el('div','isim');
   const nk = el('span','nokta'); nk.style.background = renk(i);
   sol.appendChild(nk); sol.appendChild(document.createTextNode(f.ad));
   ad.appendChild(sol);
   ad.appendChild(el('div','rozet', sv === 2 ? 'ajanın var' : (sv === 1 ? 'doğasını biliyorsun' : 'kaynağın yok')));
   d.appendChild(ad);
 
-  const parcalar = [];
+  // Altı değişken de listelenir. Göremediklerin BOŞ değil, KARALI:
+  // neyi bilmediğini de bilirsin.
+  const iz = el('div','izgara');
   for (const v of GE.VARS){
     const g = GE.gorunum(W, i, v);
-    if (g.bilinmiyor) continue;
-    parcalar.push(g.soz);
-  }
-  d.appendChild(el('div','ozet', parcalar.join(' · ')));
-
-  if (sv >= 1){
-    const r = el('div','rakam');
-    for (const v of GE.VARS){
-      const g = GE.gorunum(W, i, v);
-      if (g.bilinmiyor) continue;
-      const s = el('span');
-      s.innerHTML = GE.VAD[v] + ' <b>' + (g.tam !== undefined ? g.tam : g.soz) + '</b>' +
-        (g.gidisat && g.gidisat !== 'duruyor' ? ' ' + (g.gidisat === 'artıyor' ? '↑' : '↓') : '');
-      r.appendChild(s);
+    const sat = el('div','sat');
+    sat.appendChild(el('span','et', GE.VAD[v].toLowerCase()));
+    if (g.bilinmiyor) sat.appendChild(kara(f.ad + v, 40));
+    else {
+      const t = (g.tam !== undefined ? g.tam + ' · ' : '') + g.soz +
+        (g.gidisat && g.gidisat !== 'duruyor' ? (g.gidisat === 'artıyor' ? ' ↑' : ' ↓') : '');
+      sat.appendChild(el('span','dg', t));
     }
-    d.appendChild(r);
+    iz.appendChild(sat);
   }
+  d.appendChild(iz);
   return d;
 }
 
@@ -194,7 +209,7 @@ function fraksiyonSatiri(i){
 function haritaCiz(){
   const h = $('#harita');
   h.innerHTML = '';
-  h.appendChild(el('div','kucuk','Şema — yalnızca bildiğin kadarı'));
+  h.appendChild(el('div','not','Şema — yalnızca bildiğin kadarı. İçi dolu düğüm: içerisini görebiliyorsun.'));
 
   const n = W.bolgeler.length, R = 98, CX = 190, CY = 150;
   const ns = 'http://www.w3.org/2000/svg';
@@ -214,7 +229,7 @@ function haritaCiz(){
     const l = document.createElementNS(ns,'line');
     l.setAttribute('x1',x1); l.setAttribute('y1',y1);
     l.setAttribute('x2',x2); l.setAttribute('y2',y2);
-    l.setAttribute('stroke', '#2e2822');
+    l.setAttribute('stroke', '#9c9082');
     l.setAttribute('stroke-width', Math.abs(b.id-k)===1||Math.abs(b.id-k)===n-1 ? 1.2 : .7);
     svg.appendChild(l);
   }
@@ -225,7 +240,7 @@ function haritaCiz(){
     if (seciliBolge === b.id){
       const halka = document.createElementNS(ns,'circle');
       halka.setAttribute('cx',x); halka.setAttribute('cy',y); halka.setAttribute('r',13);
-      halka.setAttribute('fill','none'); halka.setAttribute('stroke','#c9a227');
+      halka.setAttribute('fill','none'); halka.setAttribute('stroke','#8c3a2b');
       halka.setAttribute('stroke-width','1');
       svg.appendChild(halka);
     }
@@ -241,7 +256,7 @@ function haritaCiz(){
     const c = document.createElementNS(ns,'circle');
     c.setAttribute('cx',x); c.setAttribute('cy',y); c.setAttribute('r',6);
     // içi dolu = içerisini görebiliyorsun
-    c.setAttribute('fill', g.seviye >= 1 ? renk(g.sahip) : '#14110f');
+    c.setAttribute('fill', g.seviye >= 1 ? renk(g.sahip) : '#e9e2d3');
     c.setAttribute('stroke', renk(g.sahip));
     c.setAttribute('stroke-width','1.5');
     c.style.pointerEvents = 'none';
@@ -283,31 +298,32 @@ function haritaCiz(){
   h.appendChild(bilgi);
 
   // renk anahtarı: düğüm rengi sahibi gösterir
-  const anahtar = el('div');
-  anahtar.style.marginTop = '20px';
-  anahtar.appendChild(el('div','kucuk','Kim nerede'));
-  for (let i=0;i<W.fac.length;i++){
-    if (!W.fac[i].canli) continue;
-    const say = W.bolgeler.filter(b => b.sahip === i).length;
-    const r = el('div','olcum');
-    const sol = el('span');
-    const nk = el('span','nokta'); nk.style.background = renk(i);
-    sol.appendChild(nk); sol.appendChild(document.createTextNode(W.fac[i].ad));
-    r.appendChild(sol);
-    r.appendChild(el('b','', say + ' bölge'));
-    anahtar.appendChild(r);
-  }
-  h.appendChild(anahtar);
+  h.appendChild(el('hr'));
+  h.appendChild(blok('kim nerede', g => {
+    for (let i=0;i<W.fac.length;i++){
+      if (!W.fac[i].canli) continue;
+      const say = W.bolgeler.filter(b => b.sahip === i).length;
+      const r = el('div','olcum');
+      const sol = el('span','ad');
+      const nk = el('span','nokta'); nk.style.background = renk(i);
+      sol.appendChild(nk); sol.appendChild(document.createTextNode(W.fac[i].ad));
+      r.appendChild(sol);
+      r.appendChild(el('span','nokta-sirasi'));
+      r.appendChild(el('span','dg', say + ' bölge'));
+      g.appendChild(r);
+    }
+  }));
 }
 
 /* ---------- kronik ---------- */
 function kronikCiz(){
   const k = $('#kronik');
   k.innerHTML = '';
-  k.appendChild(el('div','kucuk','Olup bitenler'));
-  const ol = W.olaylar.filter(o => o.tip !== 'ret').slice(-90).reverse();
-  if (!ol.length) k.appendChild(el('p','soluk','Henüz bir şey olmadı.'));
-  for (const o of ol) k.appendChild(olaySatiri(o, true));
+  k.appendChild(blok('olup bitenler', g => {
+    const ol = W.olaylar.filter(o => o.tip !== 'ret').slice(-90).reverse();
+    if (!ol.length) g.appendChild(el('p','soluk','Henüz bir şey olmadı.'));
+    for (const o of ol) g.appendChild(olaySatiri(o, true));
+  }));
 }
 
 /* ---------- kütüphane ---------- */
@@ -315,26 +331,50 @@ function kutuphaneCiz(){
   const k = $('#kutuphane');
   k.innerHTML = '';
   const liste = W.el.kutuphane || [];
-  k.appendChild(el('div','kucuk','Kütüphane'));
-  k.appendChild(el('p','soluk','Oyun bunları açıklamaz. Okursan bir sonrakini önceden görürsün.'));
-  if (!liste.length) k.appendChild(el('p','soluk','Henüz bir mesele kapanmadı.'));
-  for (const kk of liste){
-    const K = GE.KAVRAMLAR[kk]; if (!K) continue;
-    const d = el('div','kuram');
-    d.appendChild(el('h3','', K.ad));
-    d.appendChild(el('div','tek', K.tek));
-    d.appendChild(el('div','kaynak', K.kaynak));
-    k.appendChild(d);
-  }
-  k.appendChild(el('div','ayrac'));
-  k.appendChild(el('div','kucuk','Çözdüğün kanunlar'));
-  if (!W.el.bilinen.length) k.appendChild(el('p','soluk','Hiçbir kanunu incelemedin.'));
-  for (const id of W.el.bilinen){
-    const d = el('div','kuram');
-    d.appendChild(el('div','tek', GE.kanunMetni(W.kanunlar[id])));
-    k.appendChild(d);
-  }
-  k.appendChild(el('div','ayrac'));
+  k.appendChild(blok('kütüphane', g => {
+    g.appendChild(el('p','not','Oyun bunları açıklamaz. Okursan bir sonrakini önceden görürsün.'));
+    if (!liste.length) g.appendChild(el('p','soluk','Henüz bir mesele kapanmadı.'));
+    for (const kk of liste){
+      const K = GE.KAVRAMLAR[kk]; if (!K) continue;
+      const d = el('div','kuram');
+      d.appendChild(el('h3','', K.ad));
+      d.appendChild(el('div','tek', K.tek));
+      d.appendChild(el('div','kaynak', K.kaynak));
+      g.appendChild(d);
+    }
+  }));
+  k.appendChild(el('hr'));
+  k.appendChild(blok('çözdüğün kanunlar', g => {
+    if (!W.el.bilinen.length){
+      g.appendChild(el('p','soluk','Hiçbir kanunu incelemedin. Bu dünyanın fiziği senin için kapalı:'));
+      const d = el('div');
+      d.style.margin = '10px 0';
+      for (let i=0;i<W.kanunlar.length;i++){
+        const r = el('div'); r.style.padding = '4px 0';
+        r.appendChild(kara('kanun'+i, 150));
+        d.appendChild(r);
+      }
+      g.appendChild(d);
+    }
+    for (const id of W.el.bilinen){
+      const d = el('div','kuram');
+      d.appendChild(el('div','tek', GE.kanunMetni(W.kanunlar[id])));
+      g.appendChild(d);
+    }
+    // henüz çözülmemişler karalı durur
+    const kalan = W.kanunlar.length - W.el.bilinen.length;
+    if (W.el.bilinen.length && kalan > 0){
+      const d = el('div'); d.style.marginTop = '8px';
+      for (let i=0;i<kalan;i++){
+        const r = el('div'); r.style.padding = '4px 0';
+        r.appendChild(kara('kalan'+i, 150));
+        d.appendChild(r);
+      }
+      g.appendChild(d);
+      g.appendChild(el('div','not', kalan + ' kanun hâlâ karanlıkta.'));
+    }
+  }));
+  k.appendChild(el('hr'));
   const disa = el('button','dugme','Kaydı metin olarak dışa aktar');
   disa.onclick = disaAktar;
   k.appendChild(disa);
@@ -374,57 +414,72 @@ function dosyaAc(meseleId){
   if (!d) return;
   ortuAc(ic => {
     ic.appendChild(el('h2','dosyaBaslik', d.baslik));
-    ic.appendChild(el('div','kucuk','karar için ' + d.kalanMevsim + ' mevsim'));
+    ic.appendChild(el('div','not','karar için ' + d.kalanMevsim + ' mevsim'));
     ic.appendChild(el('p','', d.girizgah));
+    ic.appendChild(el('hr'));
 
-    ic.appendChild(el('div','ayrac'));
-    ic.appendChild(el('div','kucuk','Tanıklıklar'));
-    if (!d.tanikliklar.length) ic.appendChild(el('p','soluk','Hiçbir kaynağın konuşmuyor.'));
-    for (const t of d.tanikliklar){
-      const n = el('div','taniklik');
-      n.appendChild(el('div','kaynak', t.kaynakAd + ' · ' + t.etiket));
-      n.appendChild(el('div','iddia', '“' + t.metin + '”'));
-      ic.appendChild(n);
-    }
+    ic.appendChild(blok('tanıklıklar', g => {
+      if (!d.tanikliklar.length) g.appendChild(el('p','soluk','Hiçbir kaynağın konuşmuyor.'));
+      for (const t of d.tanikliklar){
+        const n = el('div','taniklik');
+        n.appendChild(el('div','kaynak', t.etiket));
+        n.appendChild(el('div','iddia', '“' + t.metin + '”'));
+        g.appendChild(n);
+      }
+    }));
 
-    ic.appendChild(el('div','ayrac'));
-    ic.appendChild(el('div','kucuk','Tahminler'));
-    for (const o of d.olcumler){
-      const n = el('div','olcum' + (o.aralik === 'bilinmiyor' ? ' yok' : ''));
-      n.appendChild(el('span','', o.ad));
-      const b = el('b','', o.aralik); n.appendChild(b);
-      ic.appendChild(n);
-    }
+    ic.appendChild(blok('tahminler', g => {
+      for (const o of d.olcumler){
+        const n = el('div','olcum');
+        n.appendChild(el('span','ad', o.ad));
+        n.appendChild(el('span','nokta-sirasi'));
+        if (o.aralik === 'bilinmiyor'){
+          const kutu = el('span','dg');
+          kutu.appendChild(kara(d.baslik + o.ad, 58));
+          n.appendChild(kutu);
+        } else n.appendChild(el('span','dg', o.aralik));
+        g.appendChild(n);
+      }
+      const karanlik = d.olcumler.filter(o => o.aralik === 'bilinmiyor').length;
+      if (karanlik) g.appendChild(el('div','not',
+        karanlik === 1 ? 'Bir satır basılmamış: kaynağın görmüyor.'
+                       : karanlik + ' satır basılmamış: kaynağın oraya ulaşmıyor.'));
+    }));
 
     if (d.celiskiler.length){
-      ic.appendChild(el('div','ayrac'));
-      ic.appendChild(el('div','kucuk','Çelişkiler — biri yanılıyor'));
-      for (const c of d.celiskiler){
-        const n = el('div','celiski');
-        n.appendChild(el('div','kucuk', c.baslik));
-        for (const y of [c.a, c.b]){
-          const q = el('div','yan');
-          q.appendChild(el('span','', y.kaynakAd + ' · ' + y.etiket));
-          q.appendChild(document.createTextNode('“' + y.metin + '”'));
-          n.appendChild(q);
+      ic.appendChild(blok('çelişki', g => {
+        g.appendChild(el('p','not','İkisi aynı anda doğru olamaz.'));
+        for (const c of d.celiskiler){
+          const n = el('div','celiski');
+          n.appendChild(el('div','not', c.baslik));
+          for (const y of [c.a, c.b]){
+            const q = el('div','yan');
+            q.appendChild(el('div','kaynak', y.etiket));
+            q.appendChild(el('div','', '“' + y.metin + '”'));
+            n.appendChild(q);
+          }
+          g.appendChild(n);
         }
-        ic.appendChild(n);
-      }
+      }));
     }
 
-    ic.appendChild(el('div','ayrac'));
-    ic.appendChild(el('div','kucuk','Kararın'));
-    for (const s of d.secenekler){
-      const b = el('button','secenek');
-      b.appendChild(el('b','', s.ad));
-      b.appendChild(el('span','', s.tarif));
-      b.onclick = () => {
-        const olay = GE.meseleKarar(W, meseleId, s.anahtar);
-        W.olaylar.push(...olay);
-        ortuKapat(); kaydet(); ciz();
-      };
-      ic.appendChild(b);
-    }
+    ic.appendChild(el('hr'));
+    ic.appendChild(blok('kararın', g => {
+      d.secenekler.forEach((sc, i) => {
+        const b = el('button','secenek');
+        b.appendChild(el('div','no', (i+1) + '.'));
+        const sag = el('div');
+        sag.appendChild(el('b','', sc.ad));
+        sag.appendChild(el('span','', sc.tarif));
+        b.appendChild(sag);
+        b.onclick = () => {
+          const olay = GE.meseleKarar(W, meseleId, sc.anahtar);
+          W.olaylar.push(...olay);
+          ortuKapat(); kaydet(); ciz();
+        };
+        g.appendChild(b);
+      });
+    }));
   });
 }
 
@@ -444,17 +499,16 @@ function emirAc(){
   for (const h of hepsi) (gruplar[h.fiil] = gruplar[h.fiil] || []).push(h);
   ortuAc(ic => {
     ic.appendChild(el('h2','dosyaBaslik','Emir yaz'));
-    ic.appendChild(el('div','kucuk','nüfuz ' + Math.floor(W.el.nufuz) + ' · iz: ' + GE.izSozu(W.el.ifsa)));
-    ic.appendChild(el('div','ayrac'));
+    ic.appendChild(el('div','not','nüfuz ' + Math.floor(W.el.nufuz) + ' · iz ' + GE.izSozu(W.el.ifsa)));
+    ic.appendChild(el('hr'));
     const liste = el('div','sec-liste');
     for (const f in GE.FIILLER){
       const g = gruplar[f];
       if (!g || !g.length) continue;
       const F = GE.FIILLER[f];
       const b = el('button');
-      const yan = el('span','yan', 'nüfuz ' + F.nufuz + ' · ' + g.length + ' hedef');
-      b.appendChild(yan);
-      b.appendChild(document.createTextNode(F.ad));
+      b.appendChild(el('span','', F.ad));
+      b.appendChild(el('span','yan', 'nüfuz ' + F.nufuz + ' · ' + g.length + ' hedef'));
       if (W.el.nufuz < F.nufuz){ b.disabled = true; b.style.opacity = .3; }
       else b.onclick = () => hedefSec(f, g);
       liste.appendChild(b);
@@ -468,8 +522,8 @@ function ifsaSozu(x){ return x < 1.2 ? 'az' : (x < 2.6 ? 'orta' : (x < 4 ? 'çok
 function hedefSec(fiil, hamleler){
   ortuAc(ic => {
     ic.appendChild(el('h2','dosyaBaslik', GE.FIILLER[fiil].ad));
-    ic.appendChild(el('div','kucuk','hedefi seç'));
-    ic.appendChild(el('div','ayrac'));
+    ic.appendChild(el('div','not','hedefi seç'));
+    ic.appendChild(el('hr'));
     const liste = el('div','sec-liste');
     const sirali = hamleler.slice().sort((a,b)=> (b.etkinlik - a.etkinlik));
     for (const h of sirali.slice(0, 120)){
@@ -477,8 +531,8 @@ function hedefSec(fiil, hamleler){
       const nt = [];
       if (h.etkinlik < 0.92) nt.push('yıpranmış ×' + h.etkinlik.toFixed(2));
       nt.push('iz ' + ifsaSozu(h.ifsa));
+      b.appendChild(el('span','', h.etiket));
       b.appendChild(el('span','yan', nt.join(' · ')));
-      b.appendChild(document.createTextNode(h.etiket));
       b.onclick = () => onayla(h);
       liste.appendChild(b);
     }

@@ -632,3 +632,43 @@ Yayına almak için: GitHub → Settings → Pages → branch
 `claude/simple-addictive-game-design-q8yeyq`, klasör `/ (root)`. Adres
 `https://yusufkenanyaldz.github.io/money_game/gizli-el/` olur; telefonda
 Paylaş → Ana Ekrana Ekle.
+
+---
+
+# Aşama 3b: Arayüz yeniden — kâğıt dosya
+
+İlk arayüz reddedildi ve haklı olarak: sadelik değil **karaktersizlik**
+olmuştu. Koyu antrasit + tek kehribar vurgu, büyük harf harf-aralıklı
+etiketler, ince çerçeveli kartlar, ortalanmış sütun — "zevkli minimal"in
+varsayılan ayarı. Oyunun kendi fikri arayüze hiç yansımamıştı: bu oyun
+dosya, kronik ve kütüphane üzerine kurulu, yani **kâğıt** üzerine; ben onu
+ekrana çizmiştim.
+
+## Ne değişti
+
+**Kâğıt.** Sıcak kemik rengi zemin (`#e9e2d3`), sepya mürekkep. Belgeler
+belge gibi görünüyor. Tek vurgu rengi damga kırmızısı ve yalnızca süre
+dolmak üzereyken kullanılıyor.
+
+**Karalama.** Bilinmeyen değerler artık "bilinmiyor" yazmıyor —
+**basılmamış, karalanmış blok** olarak çıkıyor. Fraksiyon listesinde altı
+değişkenin hepsi listeleniyor; göremediklerin boş değil karalı, yani neyi
+bilmediğini de görüyorsun. Kütüphanede incelemediğin kanunlar da karalı
+satırlar hâlinde duruyor: "9 kanun hâlâ karanlıkta."
+
+**Kenar notları.** Büyük harfli başlık şeridi yok. Bölüm adları sol kenar
+boşluğunda küçük italik notlar: *bu mevsim · güçler · tanıklıklar ·
+tahminler · çelişki · kararın*. Basılı bir raporun düzeni.
+
+**Kart yok.** Çerçeveli kutular gitti; yerine boşluk, ince cetvel çizgisi
+ve girinti. Tahminler noktalı sıra (dot leader) ile hizalanıyor, defter
+gibi. Rakamlar eski tarz (oldstyle) rakam.
+
+**Sekme şeridi yok.** Çekmeceler küçük italik bir satır: *Masa · Harita ·
+Kronik · Kütüphane*, açık olanı düz yazı ve altı çizili.
+
+**Şema mürekkeple.** Sahip renkleri kuru boya gibi soluk tonlar. İçi boş
+düğüm "kaynağın yok", içi dolu düğüm görebildiğin yer.
+
+Ölçüldü: 82/82 çekirdek testi, uçtan uca tarayıcı testi, 0 dış istek,
+0 hata. Tek dosyalık sürüm 136 KB.
