@@ -84,3 +84,39 @@ tüm vaadi modelin gerçek olması.
 - **Bıçak sırtı model:** `lp` 0.90'da %72, 1.15'te %4.7 hayatta kalan
   veriyordu. Temas doygunluğu eklendi; parametre iki katına çıksa bile
   sonuç %31-35 bandında kalıyor.
+
+## Arayüz
+
+Tek ekran. Üstte iki büyük sayı: **yaşayan** ve **ölen**. Altında hazine,
+tahıl, kapıların durumu ve halkın hâlini gösteren bir çubuk. Sonra bu
+haftanın raporu, sonra altı mahalle.
+
+Altta iki buton: **Karar ver** ve **Haftayı geçir**. Haftada bir karar.
+
+**Sana rakam verilmez.** Bir yönetici mahallesindeki hasta sayısını bilemez;
+gördüğü şeyleri bilir:
+
+| Ne | Nasıl görünür |
+|---|---|
+| hasta | görülmedi · birkaç · çok · her sokakta |
+| fareler | seyrek · var · çok · her yerde |
+| ambar | boşaltılmış · dolu · ağzına kadar |
+| halk | sakin · tedirgin · öfkeli · ayağa kalkmak üzere |
+
+**Kayıtlar** ekranı her haftanın belirti raporunu saklar. Mevsimsel örüntüyü
+— yazın şişlikler, kışın kan — ancak oraya bakarak fark edersin.
+
+### Arayüzde düzeltilen hata
+
+İlk halinde yedi eylem sürekli ekranın altındaydı ve **şehri tamamen
+gizliyordu** — oysa okuyup karar vermen gereken şey şehrin kendisi.
+Eylemler "Karar ver" butonunun arkasına alındı.
+
+Dört telefon genişliğinde (320/360/390/430) taşma yok, 0 dış istek, 0 hata.
+
+### Yayın
+
+`veba/` klasörü GitHub Pages'te:
+`https://yusufkenanyaldz.github.io/money_game/veba/`
+
+Tek parça sürüm: `veba.html` (33 KB).
