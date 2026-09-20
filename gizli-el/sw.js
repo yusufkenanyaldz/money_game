@@ -3,7 +3,7 @@
  * önbelleğe alınınca güncellemeler kullanıcıya HİÇ ulaşmıyordu.
  * Artık ağ önce, önbellek yedek: çevrimiçiyken hep güncel, çevrimdışıyken
  * çalışmaya devam eder. */
-const SURUM = '2026-09-20-2';
+const SURUM = '2026-09-20-3';
 const AD = 'gizliel-' + SURUM;
 const DOSYALAR = ['./', './index.html', './sim.js', './ui.js', './tohumlar.js', './manifest.webmanifest'];
 

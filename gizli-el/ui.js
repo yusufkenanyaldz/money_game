@@ -103,11 +103,14 @@ function basla(){
 function durumCiz(){
   const E = W.el, s = $('#durumSatir');
   s.innerHTML = '';
-  const par = (metin, uyari) => { const d = el('span', uyari ? 'uyari' : '');
-    d.innerHTML = metin; s.appendChild(d); };
+  const par = (metin, sinif) => { const d = el('span', sinif || '');
+    d.innerHTML = metin; s.appendChild(d); return d; };
   par(W.tur + '. mevsim');
   par('nüfuz <b>' + Math.floor(E.nufuz) + '</b>');
-  par('iz <b>' + GE.izSozu(E.ifsa) + '</b>', E.ifsa >= 62);
+  // iz bir sayı değil, dosyaya vurulmuş bir damgadır
+  const dm = el('span','damga' + (E.ifsa >= 42 ? ' sicak' : ''), 'iz ' + GE.izSozu(E.ifsa));
+  const sar = el('span'); sar.appendChild(dm);
+  s.appendChild(sar);
   par('<b>' + GE.hizSozu(E.hiz) + '</b>');
 }
 
@@ -116,11 +119,12 @@ function cekmeceCiz(){
   const n = $('#cekmeceler');
   n.innerHTML = '';
   const acikDosya = W.meseleler.filter(m => m.acik).length;
-  const sek = [['masa','Masa' + (acikDosya ? ' ('+acikDosya+')' : '')],
-               ['harita','Harita'], ['kronik','Kronik'],
-               ['kutuphane','Kütüphane' + ((W.el.kutuphane||[]).length ? ' ('+W.el.kutuphane.length+')' : '')]];
-  for (const [k, ad] of sek){
-    const b = el('button', '', ad);
+  const sek = [['masa','Masa', acikDosya > 0], ['harita','Harita', false],
+               ['kronik','Kronik', false], ['kutuphane','Kütüphane', false]];
+  for (const [k, ad, im] of sek){
+    const b = el('button');
+    b.appendChild(document.createTextNode(ad));
+    if (im) b.appendChild(el('span','im'));
     b.setAttribute('aria-current', aktifCekmece === k ? 'true' : 'false');
     b.onclick = () => { aktifCekmece = k; ciz(); window.scrollTo(0,0); };
     n.appendChild(b);
@@ -209,7 +213,7 @@ function fraksiyonSatiri(i){
 function haritaCiz(){
   const h = $('#harita');
   h.innerHTML = '';
-  h.appendChild(el('div','not','Şema — yalnızca bildiğin kadarı. İçi dolu düğüm: içerisini görebiliyorsun.'));
+  h.appendChild(el('div','not','Şema — yalnızca bildiğin kadarı.'));
 
   const n = W.bolgeler.length, R = 98, CX = 190, CY = 150;
   const ns = 'http://www.w3.org/2000/svg';
@@ -398,6 +402,8 @@ function disaAktar(){
 function ortuAc(doldur){
   const o = $('#ortu'), ic = $('#ortuIc');
   ic.innerHTML = '';
+  ic.appendChild(el('div','kose sol-ust'));
+  ic.appendChild(el('div','kose sag-ust'));
   const kap = el('button','kapat','← Kapat');
   kap.onclick = ortuKapat;
   ic.appendChild(kap);
@@ -414,7 +420,12 @@ function dosyaAc(meseleId){
   if (!d) return;
   ortuAc(ic => {
     ic.appendChild(el('h2','dosyaBaslik', d.baslik));
-    ic.appendChild(el('div','not','karar için ' + d.kalanMevsim + ' mevsim'));
+    const ust = el('div','not');
+    ust.appendChild(document.createTextNode('dosya ' + String(meseleId+1).padStart(3,'0') +
+      ' · ' + W.tur + '. mevsim · karar için '));
+    const kalan = el('span','damga' + (d.kalanMevsim <= 2 ? ' sicak' : ''), d.kalanMevsim + ' mevsim');
+    ust.appendChild(kalan);
+    ic.appendChild(ust);
     ic.appendChild(el('p','', d.girizgah));
     ic.appendChild(el('hr'));
 
@@ -623,10 +634,13 @@ function ciz(){
 }
 
 /* ---------- açılış ---------- */
-const SURUM = '2026-09-20-2';
+const SURUM = '2026-09-20-3';
 
 function girisKur(){
   const sv = $('#surum'); if (sv) sv.textContent = 'sürüm ' + SURUM;
+  const gs = document.querySelector('#giris .sar');
+  gs.insertBefore(el('div','kose sol-ust'), gs.firstChild);
+  gs.insertBefore(el('div','kose sag-ust'), gs.firstChild);
   const d = $('#doktrinler');
   for (const k in GE.DOKTRINLER){
     const D = GE.DOKTRINLER[k];

@@ -731,3 +731,36 @@ denmişti. Kullanıcı **Android**'de; o kısıt WebKit'e özgü. Android'de
 Chrome/Brave `localStorage`'ı süresiz tutar, yalnızca ağır depolama
 baskısında ve site yüklü değilse temizleyebilir — `storage.persist()` onu
 da kapatır.
+
+---
+
+# Aşama 3c: Dosya fiziği
+
+Kullanıcı dokuz arayüz referansı gönderdi. Ortak dilleri **yumuşak,
+dokunulabilir, katmanlı yüzeyler**di: neumorfizm, kil ikonlar, yumuşak 3B
+kartlar, teknik mavikopya.
+
+Tuzak şuydu: neumorfizmi doğrudan almak oyunu akıllı ev uygulamasına
+benzetirdi — kabartılmış plastik, gizli el dosyasının tam zıddı. Bunun
+yerine aynı içgüdü **doğru malzemeye** uygulandı: plastik değil **kâğıt**.
+
+| Referanstan alınan | Nasıl uygulandı |
+|---|---|
+| Yumuşak dokulu yüzey | Kâğıt lifi (SVG `feTurbulence`, sabit kaplama, %5.5 opaklık) |
+| Katmanlı derinlik | Masaya yeni düşmüş kâğıt: üstte ince ışık çizgisi, altta kısa sıcak gölge |
+| Basılı/kabartmalı öğeler | Karalama artık mürekkep gibi: kenarda yayılma, ortada koyuluk |
+| Teknik mavikopya (#6) | Şemanın altında soluk ızgara, dosyada köşe hizalama işaretleri, `dosya 001` künyesi |
+| Sekmeli bileşenler | **Çekmeceler klasörün ayraç dilleri oldu** — açık olan sayfayla birleşiyor |
+
+**Damga.** İz göstergesi artık bir kutu içinde, hafif eğik, büyük harf:
+`İZ YOK` → `İZ BELİRGİN` → `İZ AÇIKTA`. 42'yi geçince damga kırmızıya
+dönüyor. (Büyük harf + harf aralığı daha önce eleştirilmişti; damgada
+doğrudur — damgalar büyük harftir.)
+
+Dosya başlığı da teknik belge künyesi aldı:
+`dosya 001 · 23. mevsim · karar için [5 MEVSİM]`
+
+Layout ve tipografi değişmedi — taşma testinden geçmiş düzen korundu.
+
+Üç test takımı da geçiyor: 82/82 çekirdek, dört genişlikte taşma yok,
+servis işçisi güncellemesi ulaşıyor ve çevrimdışı çalışıyor.
