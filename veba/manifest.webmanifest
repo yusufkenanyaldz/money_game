@@ -1,3 +1,0 @@
-{ "name":"Veba", "short_name":"Veba", "start_url":"./", "scope":"./",
-  "display":"standalone", "orientation":"portrait",
-  "background_color":"#e9e2d3", "theme_color":"#e9e2d3", "lang":"tr" }
