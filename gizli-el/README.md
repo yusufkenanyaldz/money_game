@@ -672,3 +672,25 @@ düğüm "kaynağın yok", içi dolu düğüm görebildiğin yer.
 
 Ölçüldü: 82/82 çekirdek testi, uçtan uca tarayıcı testi, 0 dış istek,
 0 hata. Tek dosyalık sürüm 136 KB.
+
+## Düzeltilen düzen hatası
+
+Telefonda arayüz kayık ve taşkın görünüyordu. İki sebebi vardı:
+
+1. **İki sütunlu değer ızgarası.** Dikey yer kazanmak için fraksiyon
+   değerlerini iki sütuna almıştım; her sütuna ~127 piksel düşüyordu ve
+   Türkçe değerler ("çok güçlü", "idare eder", "homurdanıyor") sığmıyordu.
+   Kelimeler bölünüyor, satırlar hizasını kaybediyor, uzun değerler ekranın
+   dışına taşıyordu. Tek sütuna geri alındı (`78px` etiket + kalan).
+2. **Android metin büyütmesi.** Chrome/Brave bazı metin bloklarını
+   kendiliğinden büyütüyor; `-webkit-text-size-adjust:100%` ile kapatıldı.
+
+Ayrıca bütün ızgara sütunları `1fr` yerine `minmax(0,1fr)` yapıldı (CSS
+ızgarada `1fr` içeriğin altına inmez, bu da sessiz taşmaların klasik
+sebebidir) ve dar ekran için ayrı bir düzen eklendi (`max-width:370px`).
+
+`iz iz yok` gibi görünen kelime tekrarı da düzeltildi.
+
+**`arayuz-test.js`** eklendi: 320 / 360 / 390 / 430 piksel genişliklerde
+beş ekranı gezip ekrandan taşan her öğeyi listeler. Bu sınıf hata bir daha
+sessizce geçmesin diye.

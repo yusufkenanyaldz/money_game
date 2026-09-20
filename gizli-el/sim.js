@@ -2083,7 +2083,7 @@ function bolgeGorunum(w, bolgeId){
 }
 
 // İfşa rakamla değil kelimeyle: oyuncu optimize etmesin, tartsın
-const IZ_SOZ = [[8,'iz yok'],[22,'silik'],[42,'seçiliyor'],[62,'belirgin'],[82,'tehlikeli'],[101,'açıkta']];
+const IZ_SOZ = [[8,'yok'],[22,'silik'],[42,'seçiliyor'],[62,'belirgin'],[82,'tehlikeli'],[101,'açıkta']];
 function izSozu(ifsa){ for (const [u,s] of IZ_SOZ) if (ifsa < u) return s; return 'açıkta'; }
 function hizSozu(h){
   if (h >= 78) return 'dünya sana benziyor';
