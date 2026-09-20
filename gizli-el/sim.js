@@ -479,6 +479,9 @@ function adim(w, sec_){
   // 10) olaylar
   olaylar.push(...olaylariCoz(w));
 
+  // 10b) gidişat için 6 mevsimlik anlık görüntü (dinamiği etkilemez)
+  if (w.tur % 6 === 0) for (const f of F){ f.gecmis6 = {}; for (const v of VARS) f.gecmis6[v] = f.v[v]; }
+
   // 11) liderler
   olaylar.push(...liderleriIsle(w));
 
@@ -2008,6 +2011,88 @@ function kutuphaneEkle(w, kavram){
   return KAVRAMLAR[kavram];
 }
 
+/* ================= GÖRÜNÜRLÜK =================
+ * Oyuncu hak etmediği rakamı görmez. Aynı fraksiyon, istihbarat konumuna
+ * göre üç ayrı şekilde görünür:
+ *   0 — kaynak yok   : yalnızca dışarıdan görüleni, kelimeyle
+ *   1 — doğası çözülmüş ya da kurumun var : hepsi kelimeyle + gidişat
+ *   2 — olgun ajan   : kesin rakam + gidişat
+ */
+const SOZ = {
+  guc:       ['çok zayıf','zayıf','orta','güçlü','çok güçlü'],
+  servet:    ['yoksul','dar','idare eder','varlıklı','zengin'],
+  istikrar:  ['dağılıyor','sarsak','durağan','sağlam','çok sağlam'],
+  mesruiyet: ['tanınmıyor','tartışmalı','kabul görüyor','saygın','sorgulanmaz'],
+  bilgi:     ['karanlıkta','az bilir','vasat','bilgili','çok bilgili'],
+  ofke:      ['sakin','homurdanıyor','gergin','öfkeli','kaynıyor']
+};
+// dışarıdan çıplak gözle görülebilenler
+const ACIK_VARS = ['guc','servet','ofke'];
+
+function _sozBandi(vr, x){
+  const i = x < 20 ? 0 : (x < 40 ? 1 : (x < 62 ? 2 : (x < 82 ? 3 : 4)));
+  return SOZ[vr][i];
+}
+
+function bilgiSeviyesi(w, fac){
+  const E = w.el;
+  if (!E) return 0;
+  if (E.ajanlar.some(a=>a.fac===fac && a.olgun && !a.yakalandi)) return 2;
+  if (E.bilinenDoga.indexOf(fac) >= 0) return 1;
+  if (w.tohumlar.some(t=>t.canli && t.kurumsal && t.fac===fac)) return 1;
+  return 0;
+}
+
+function gidisat(w, fac, vr){
+  const f = w.fac[fac];
+  if (!f || !f.gecmis6 || f.gecmis6[vr] === undefined) return null;
+  const d = f.v[vr] - f.gecmis6[vr];
+  if (d > 2.5) return 'artıyor';
+  if (d < -2.5) return 'azalıyor';
+  return 'duruyor';
+}
+
+function gorunum(w, fac, vr){
+  const sv = bilgiSeviyesi(w, fac);
+  const f = w.fac[fac];
+  if (!f) return { seviye:0, bilinmiyor:true };
+  if (sv === 0 && ACIK_VARS.indexOf(vr) < 0) return { seviye:0, bilinmiyor:true };
+  const o = { seviye:sv, soz:_sozBandi(vr, f.v[vr]) };
+  if (sv >= 1) o.gidisat = gidisat(w, fac, vr);
+  if (sv >= 2) o.tam = Math.round(f.v[vr]);
+  return o;
+}
+
+function bolgeGorunum(w, bolgeId){
+  const b = w.bolgeler[bolgeId];
+  if (!b) return null;
+  // coğrafya ve sahiplik herkesçe bilinir; içerisi bilinmez
+  const o = { id:b.id, ad:b.ad, sahip:b.sahip, sahipAd: w.fac[b.sahip] ? w.fac[b.sahip].ad : '—',
+              ortak: !!b.ortak, komsu: b.komsu.slice(), seviye: bilgiSeviyesi(w, b.sahip) };
+  if (o.seviye >= 1){
+    o.zenginlikSoz   = _sozBandi('servet', b.zenginlik);
+    o.huzursuzlukSoz = _sozBandi('ofke', b.huzursuzluk);
+    o.kuralVar = !!b.yerelKural;
+  }
+  if (o.seviye >= 2){
+    o.zenginlik = Math.round(b.zenginlik);
+    o.huzursuzluk = Math.round(b.huzursuzluk);
+    o.gelenek = Math.round(b.gelenek);
+  }
+  return o;
+}
+
+// İfşa rakamla değil kelimeyle: oyuncu optimize etmesin, tartsın
+const IZ_SOZ = [[8,'iz yok'],[22,'silik'],[42,'seçiliyor'],[62,'belirgin'],[82,'tehlikeli'],[101,'açıkta']];
+function izSozu(ifsa){ for (const [u,s] of IZ_SOZ) if (ifsa < u) return s; return 'açıkta'; }
+function hizSozu(h){
+  if (h >= 78) return 'dünya sana benziyor';
+  if (h >= 58) return 'dünya sana yaklaşıyor';
+  if (h >= 38) return 'dünya kayıtsız';
+  if (h >= 20) return 'dünya sana yabancı';
+  return 'dünya sana karşı';
+}
+
 /* ---------- DOĞRULAMA ---------- */
 // Üretilen fizik oyuna layık mı? Donuk, çığ gibi, ölü veya kaderi yazılmış
 // dünyalar elenir. En kritik sınav: tek bir küçük müdahale, 100 tur sonra
@@ -2033,6 +2118,12 @@ function dogrula(seed, ayar){
   const w = dunyaKur(seed, ayar);
   let hareket=0, ornek=0, sabit=0;
   let dv=null, yi=null;
+  // ERKEN ELEME: adayların büyük çoğunluğu 60-80. turda zaten belli oluyor.
+  // 200 tur koşturmak boşa gidiyordu; bu kapı aramayı belirgin hızlandırır.
+  const erkenRet = (sebep)=>({ seed, gecti:false, erken:true, erkenRet:sebep,
+    canlilik:0, sabitOran:0, hayatta:0, cesitlilik:0, olay:0, olayTip:0, tekel:1,
+    ayrisan:0, cokmus:0, erkenSayi:0, erkenTip:0, sapma:0, enSapma:0, yayilim:0, yapisal:0 });
+
   for (let t=0;t<T;t++){
     const onc = w.fac.map(f=>VARS.map(v=>f.v[v]));
     adim(w);
@@ -2042,6 +2133,15 @@ function dogrula(seed, ayar){
         const yeni=w.fac[i].v[VARS[vi]];
         if (t>40){ hareket += Math.abs(yeni-onc[i][vi]); ornek++; if (yeni<=2||yeni>=98) sabit++; }
       }
+    }
+    if (t === 60){
+      const e = w.olaylar.filter(o=>o.tur<=60);
+      if (e.length < 8 || new Set(e.map(o=>o.tip)).size < 4) return erkenRet('soguk-acilis');
+      if (w.olaylar.length > 90) return erkenRet('gurultu');
+    }
+    if (t === 85){
+      if (w.fac.filter(f=>f.canli && skor(f)>12).length < 4) return erkenRet('kirim');
+      if (w.olaylar.length > 125) return erkenRet('gurultu');
     }
     if (t===DT-1){ dv=durumVektoru(w); yi=yapisalImza(w); }
   }
@@ -2134,6 +2234,7 @@ function iyiTohum(baslangic, ayar, limit){
 }
 
 return { VARS, VAD, SEKIL, KAPSAM, KAVRAMLAR, KATMANLAR, AMACLAR, EVRELER,
+           SOZ, bilgiSeviyesi, gorunum, bolgeGorunum, gidisat, izSozu, hizSozu,
            KAYNAKLAR, dosyaUret, meseleTaramasi, MESELE_TANIM, kutuphaneEkle, SECENEK_TARIF,
            FIILLER, DOKTRINLER, hizalanma, ifsaCarpani, kanunKatkisi, kehanetDayanak, dogaKuvveti,
            oyuncuKur, hamleler, hamleYap, eliIsle, etkinlik,

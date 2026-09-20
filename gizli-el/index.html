@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#14110f">
+<title>Gizli El</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<style>
+:root{
+  --kagit:#14110f; --kagit2:#1b1714; --cizgi:#2e2822;
+  --murekkep:#e6ddd1; --soluk:#9a9086; --cok-soluk:#6b635b;
+  --kehribar:#c9a227; --kan:#a3564a;
+  --serif:'Iowan Old Style','Palatino Linotype','Book Antiqua',Palatino,Georgia,serif;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;background:var(--kagit);color:var(--murekkep)}
+body{font-family:var(--serif);font-size:17px;line-height:1.62;
+     padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+     overscroll-behavior:none}
+.sar{max-width:640px;margin:0 auto;padding:0 20px}
+h1,h2,h3{font-weight:400;margin:0}
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer;padding:0;text-align:left}
+.kucuk{font-family:var(--sans);font-size:12.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--cok-soluk)}
+.soluk{color:var(--soluk)}
+.ayrac{height:1px;background:var(--cizgi);margin:22px 0}
+
+/* ---- durum satırı ---- */
+#durum{position:sticky;top:0;z-index:20;background:linear-gradient(var(--kagit) 76%,transparent);
+       padding-top:14px;padding-bottom:10px}
+#durum .satir{font-family:var(--sans);font-size:13px;letter-spacing:.04em;color:var(--soluk);
+              display:flex;flex-wrap:wrap;gap:6px 14px}
+#durum .satir b{font-weight:500;color:var(--murekkep)}
+#durum .satir .uyari{color:var(--kan)}
+
+/* ---- çekmeceler ---- */
+#cekmeceler{display:flex;gap:20px;padding:6px 0 14px;border-bottom:1px solid var(--cizgi)}
+#cekmeceler button{font-family:var(--sans);font-size:13px;letter-spacing:.07em;
+                   text-transform:uppercase;color:var(--cok-soluk);padding:4px 0}
+#cekmeceler button[aria-current="true"]{color:var(--kehribar);
+       box-shadow:inset 0 -1px 0 var(--kehribar)}
+
+main{padding:24px 0 120px;min-height:60vh}
+section[hidden]{display:none}
+
+/* ---- kartlar ---- */
+.kart{border:1px solid var(--cizgi);background:var(--kagit2);padding:18px 18px 16px;margin:0 0 16px;
+      display:block;width:100%}
+.kart .ust{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:8px}
+.kart h3{font-size:19px}
+.kart .sure{font-family:var(--sans);font-size:12px;color:var(--kehribar);white-space:nowrap}
+.kart p{margin:6px 0 0;color:var(--soluk);font-size:16px}
+
+/* ---- kronik ---- */
+.olay{display:flex;gap:14px;padding:7px 0;border-bottom:1px solid rgba(46,40,34,.55)}
+.olay .t{font-family:var(--sans);font-size:11.5px;color:var(--cok-soluk);min-width:34px;padding-top:4px}
+.olay .m{flex:1}
+.olay.vurgu .m{color:var(--kehribar)}
+
+/* ---- fraksiyon listesi ---- */
+.frak{padding:14px 0;border-bottom:1px solid rgba(46,40,34,.55)}
+.frak .ad{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.frak .ad .rozet{font-family:var(--sans);font-size:11px;letter-spacing:.06em;color:var(--cok-soluk)}
+.frak .ozet{color:var(--soluk);font-size:15.5px;margin-top:3px}
+.frak .rakam{font-family:var(--sans);font-size:12.5px;color:var(--soluk);margin-top:6px;
+             display:flex;flex-wrap:wrap;gap:4px 16px}
+.frak .rakam b{color:var(--murekkep);font-weight:500}
+.nokta{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:8px;vertical-align:1px}
+
+/* ---- harita ---- */
+#sema{width:100%;height:auto;display:block;margin:6px 0 18px}
+#sema text{font-family:var(--sans);font-size:9px;fill:var(--soluk);pointer-events:none}
+#sema circle{pointer-events:auto}
+.bolgeBilgi{font-family:var(--sans);font-size:12.5px;color:var(--soluk);
+            border-top:1px solid var(--cizgi);padding-top:12px;min-height:54px}
+
+/* ---- kütüphane ---- */
+.kuram{padding:16px 0;border-bottom:1px solid rgba(46,40,34,.55)}
+.kuram h3{font-size:18px;color:var(--kehribar)}
+.kuram .tek{color:var(--murekkep);margin:5px 0 6px}
+.kuram .kaynak{font-family:var(--sans);font-size:12.5px;color:var(--cok-soluk)}
+
+/* ---- alt bar ---- */
+#alt{position:fixed;left:0;right:0;bottom:0;z-index:20;
+     background:linear-gradient(transparent,var(--kagit) 34%);
+     padding:26px 0 calc(16px + env(safe-area-inset-bottom))}
+#alt .sar{display:flex;gap:12px}
+.dugme{flex:1;border:1px solid var(--cizgi);background:var(--kagit2);padding:14px 16px;
+       text-align:center;font-family:var(--sans);font-size:13.5px;letter-spacing:.08em;
+       text-transform:uppercase;color:var(--murekkep)}
+.dugme.vurgu{border-color:var(--kehribar);color:var(--kehribar)}
+.dugme:disabled{opacity:.35}
+
+/* ---- örtü / kip ---- */
+#ortu{position:fixed;inset:0;z-index:40;background:var(--kagit);overflow-y:auto;
+      -webkit-overflow-scrolling:touch}
+#ortu .sar{padding-top:26px;padding-bottom:60px}
+.kapat{font-family:var(--sans);font-size:12.5px;letter-spacing:.07em;text-transform:uppercase;
+       color:var(--cok-soluk);margin-bottom:20px;display:block}
+
+/* ---- dosya ---- */
+.dosyaBaslik{font-size:26px;margin-bottom:2px}
+.taniklik{padding:13px 0;border-bottom:1px solid rgba(46,40,34,.55)}
+.taniklik .kaynak{font-family:var(--sans);font-size:11.5px;letter-spacing:.05em;
+                  text-transform:uppercase;color:var(--cok-soluk)}
+.taniklik .iddia{margin-top:3px;font-style:italic}
+.olcum{display:flex;justify-content:space-between;gap:12px;font-family:var(--sans);
+       font-size:13px;padding:6px 0;color:var(--soluk)}
+.olcum b{color:var(--murekkep);font-weight:500}
+.olcum.yok b{color:var(--cok-soluk);font-style:italic}
+.celiski{border-left:2px solid var(--kan);padding:4px 0 4px 14px;margin:12px 0}
+.celiski .yan{margin:6px 0;font-size:15.5px}
+.celiski .yan span{font-family:var(--sans);font-size:11.5px;color:var(--cok-soluk);
+                   display:block;letter-spacing:.05em;text-transform:uppercase}
+.secenek{display:block;width:100%;border:1px solid var(--cizgi);background:var(--kagit2);
+         padding:14px 16px;margin-bottom:10px}
+.secenek b{display:block;font-weight:400;font-size:17px}
+.secenek span{color:var(--soluk);font-size:15px}
+.secenek:active{border-color:var(--kehribar)}
+
+/* ---- emir ---- */
+.bosluk{border:none;border-bottom:1px dashed var(--cok-soluk);background:none;color:var(--kehribar);
+        padding:2px 4px;font:inherit;min-width:90px;display:inline-block;text-align:center}
+.bosluk.dolu{border-bottom-style:solid;border-color:var(--kehribar)}
+.emirCumle{font-size:21px;line-height:1.9;margin:14px 0 22px}
+.sec-liste button{display:block;width:100%;padding:12px 14px;border-bottom:1px solid var(--cizgi)}
+.sec-liste button .yan{font-family:var(--sans);font-size:12px;color:var(--cok-soluk);float:right}
+.bedel{font-family:var(--sans);font-size:13px;color:var(--soluk);margin:16px 0 20px;
+       border-top:1px solid var(--cizgi);padding-top:14px}
+.bedel b{color:var(--murekkep);font-weight:500}
+
+/* ---- başlangıç ---- */
+#giris{position:fixed;inset:0;z-index:60;background:var(--kagit);overflow-y:auto;display:flex;
+       align-items:center}
+#giris[hidden]{display:none}
+#ortu[hidden]{display:none}
+#giris .sar{width:100%;padding-top:40px;padding-bottom:40px}
+#giris h1{font-size:44px;letter-spacing:.14em;margin-bottom:6px}
+#giris .alt{color:var(--cok-soluk);font-size:15px;margin-bottom:34px}
+.dok{display:block;width:100%;border:1px solid var(--cizgi);background:var(--kagit2);
+     padding:15px 16px;margin-bottom:10px}
+.dok b{display:block;font-weight:400;font-size:18px;color:var(--kehribar)}
+.dok span{color:var(--soluk);font-size:15px}
+#arama{color:var(--cok-soluk);font-family:var(--sans);font-size:13px;margin-top:20px;min-height:22px}
+textarea{width:100%;height:110px;background:var(--kagit2);color:var(--soluk);border:1px solid var(--cizgi);
+         font-family:var(--sans);font-size:11px;padding:10px;margin-top:10px}
+</style>
+</head>
+<body>
+
+<div id="giris">
+  <div class="sar">
+    <h1>GİZLİ EL</h1>
+    <div class="alt">Hiçbir tahtta oturmuyorsun.</div>
+    <div class="kucuk" style="margin-bottom:12px">Doktrinini seç — neyin iyi olduğunu o tanımlar</div>
+    <div id="doktrinler"></div>
+    <div id="arama"></div>
+    <div class="ayrac"></div>
+    <button class="dugme" id="yukleBtn" style="display:none">Kayıtlı oyuna dön</button>
+    <details style="margin-top:14px">
+      <summary class="kucuk" style="cursor:pointer">Kayıt metnini içeri al</summary>
+      <textarea id="iceriAl" placeholder="Dışa aktardığın metni buraya yapıştır"></textarea>
+      <button class="dugme" id="iceriAlBtn" style="margin-top:8px">Yükle</button>
+    </details>
+  </div>
+</div>
+
+<header id="durum"><div class="sar"><div class="satir" id="durumSatir"></div></div></header>
+<nav><div class="sar" id="cekmeceler"></div></nav>
+
+<main class="sar">
+  <section id="masa"></section>
+  <section id="harita" hidden></section>
+  <section id="kronik" hidden></section>
+  <section id="kutuphane" hidden></section>
+</main>
+
+<div id="alt"><div class="sar">
+  <button class="dugme" id="emirBtn">Emir yaz</button>
+  <button class="dugme vurgu" id="gecBtn">Mevsimi geçir</button>
+</div></div>
+
+<div id="ortu" hidden><div class="sar" id="ortuIc"></div></div>
+
+<script src="tohumlar.js"></script>
+<script src="sim.js"></script>
+<script src="ui.js"></script>
+</body>
+</html>

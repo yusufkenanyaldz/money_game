@@ -1,0 +1,11 @@
+{
+  "name": "Gizli El",
+  "short_name": "Gizli El",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#14110f",
+  "theme_color": "#14110f",
+  "lang": "tr"
+}

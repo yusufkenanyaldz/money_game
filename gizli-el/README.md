@@ -540,3 +540,95 @@ tavanı, üç kriz türünün de doğması ve kendine özgü olgularla dosya
 doğa açması, doğa bilinmeden geri dönüş kuvvetinin hesaplanamaması,
 kanunların öngörü korelasyonu (0.71) ve dayanaklı kehanetin farklı
 bedellendirilmesi.
+
+---
+
+# Aşama 3: Arayüz
+
+Gösterge paneli değil **masa**. Sen dünyayı görmüyorsun; dünya hakkında
+rapor alıyorsun.
+
+## Hak etmediğin rakamı görmezsin
+
+Görünürlük sunum katmanında değil, oyun mantığında (`bilgiSeviyesi`,
+`gorunum`, `bolgeGorunum` — test edilebilir):
+
+| Seviye | Koşul | Ne görürsün |
+|---|---|---|
+| 0 | kaynağın yok | yalnızca dışarıdan görülen üç değişken, kelimeyle |
+| 1 | doğasını çözdün ya da orada kurumun var | altı değişken kelimeyle + gidişat |
+| 2 | olgun ajanın var | kesin rakam + gidişat |
+
+Fraksiyon satırı böyle okunur: `Kara Yemini — güçlü · dar · homurdanıyor`
+ve sağda `kaynağın yok`. İstikrar, meşruiyet ve bilgi hiç görünmez.
+
+**İfşa rakamla değil kelimeyle** gösteriliyor: *iz yok · silik · seçiliyor ·
+belirgin · tehlikeli · açıkta*. "İfşa 63" yazsaydım oyuncu onu optimize
+ederdi; "iz: belirgin" yazınca tartmak zorunda kalıyor. Doktrin hizalanması
+da aynı: *dünya sana benziyor / yaklaşıyor / kayıtsız / yabancı / karşı*.
+
+## Şema — yalnızca bildiğin kadarı
+
+Bölgeler halka üzerinde düğüm, komşuluklar çizgi. Coğrafya ve sahiplik
+herkesçe bilinir, **içerisi bilinmez**: içi boş düğüm "kaynağın yok"
+demektir, içi dolu düğüm zenginliği ve huzursuzluğu görebildiğin yer.
+Çift halka ortak toprağı gösterir (bölgelerin ölçülen %33'ü).
+
+## Emir yaz
+
+Fiil → hedef → onay. Hedef listesinde her satır yıpranmayı ve bırakacağı
+izi söyler (`yıpranmış ×0.42 · iz orta`), onay ekranı bedeli tekrar eder.
+Sayı yerine kelime: *az · orta · çok · pervasız*.
+
+## Açık dosyanın üstünden geçemezsin
+
+Bir mesele açıkken alt butonun yazısı **"Bekle · 2 dosya açık"** olur ve
+vurgusu kaybolur. Pencere son mevsime indiğinde geçmeye çalışırsan
+"Karar vermezsen karar senin yerine verilir" uyarısı çıkar. Yeni bir dosya
+geldiğinde hangi çekmecede olursan ol masaya çekilirsin.
+
+"10 tur ilerlet" butonu **yok**. Tek tek mevsim.
+
+## Açılış anlık
+
+Dünya arama tarayıcıda 2.5–15 saniye sürüyordu; telefonda çok daha kötü
+olurdu. İki düzeltme:
+
+- **Doğrulayıcıya erken eleme kapısı** eklendi: adayların çoğu 60. ve 85.
+  turda zaten belli oluyor (soğuk açılış, gürültü, kırım). 17.2 → 12.9 ms/tohum.
+- **160 doğrulanmış tohum önceden bulunup gömüldü** (`tohumlar.js`, 1 KB).
+  23.726 aday elenerek toplandı, kabul %0.67. Açılış artık **0.3 saniye**.
+  Oynadığın dünyalar işaretleniyor; liste tükenirse oyun canlı aramaya düşer.
+
+## Kayıt
+
+Her hamlede ve her mevsimde `localStorage`'a yazılıyor. Kütüphane ekranında
+**kaydı metin olarak dışa aktarma** var — iOS ana ekrana eklenmemiş
+sitelerin verisini 7 günde sildiği için bu şart.
+
+## Çevrimdışı
+
+`sw.js` beş dosyayı önbelleğe alıyor; internet olmadan açılıyor.
+Ölçüldü: **0 dış istek**, **0 hata**.
+
+## Yol boyunca bulunan hatalar
+
+- `hidden` olan giriş ekranı dokunmaları yutuyordu — CSS'teki `display:flex`
+  `[hidden]`'ı eziyordu. Telefonda oyun hiç başlamazdı.
+- Harita etiketleri düğümlerin üstüne binip tıklamayı engelliyordu; etiketlere
+  `pointer-events:none` ve düğümlere 17px görünmez dokunma hedefi eklendi.
+- Etiketler görüş alanından taşıp kesiliyordu (viewBox 300→380, yarıçap 118→98).
+- Örtü yarı saydamdı, arka plan sızıyordu.
+- **Oyuncu açık dosyanın üstünden geçip gidebiliyordu**: meseleler süresi
+  dolup kendiliğinden kapanıyor, karar hiç verilmiyordu.
+- Başka çekmecedeyken gelen dosya görünmüyordu.
+
+## Dosyalar
+
+`index.html` (9 KB) · `ui.js` (20 KB) · `sim.js` (60 KB) · `tohumlar.js` (1 KB)
+· `sw.js` · `manifest.webmanifest`
+
+Yayına almak için: GitHub → Settings → Pages → branch
+`claude/simple-addictive-game-design-q8yeyq`, klasör `/ (root)`. Adres
+`https://yusufkenanyaldz.github.io/money_game/gizli-el/` olur; telefonda
+Paylaş → Ana Ekrana Ekle.
