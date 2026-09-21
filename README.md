@@ -498,3 +498,12 @@ _ONE MORE TAP — kasaya al ya da kaybet._
 Menüde **ONE MORE TAP logosuna ~1.2 sn basılı tut** → **+100.000 Kasa** ("PATRON MODU").
 Tek kişilik, sunucusuz oyun olduğu için zararsızdır. Kodda `GEÇİCİ ALTIN HİLESİ`
 bloğu tek parça; yayına almadan önce silmek istersen o bloğu kaldırman yeter.
+
+---
+
+## Depodaki ikinci oyun: KATLA
+
+`katla/index.html` — tek parmakla oynanan bir zincir bulmacası. Sütuna
+dokun, para düşsün; aynı değerdekiler birleşip **ikiye katlansın**. Refleks
+değil karar oyunu: ONE MORE TAP'in bilerek seçilmiş tersi. Ayrıntılar için
+[`katla/README.md`](katla/README.md).
