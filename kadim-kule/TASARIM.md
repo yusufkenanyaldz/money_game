@@ -1,275 +1,223 @@
-# Kadim Kule — Oyun Tasarım Belgesi (taslak v0.1)
+# Kadim Kule — Oyun Tasarım Belgesi (v0.2)
 
-> Çalışma adı. Fantastik dünyada geçen, katman katman açılan, uzun soluklu,
-> telefon öncelikli, Türkçe bir idle oyun.
+> Fantastik dünyada geçen, Türk mitolojisinden beslenen, katman katman açılan,
+> uzun soluklu, telefon öncelikli, Türkçe bir idle oyun.
+>
+> **Durum:** Faz 1 bitti ve oynanabilir (Kat 1–3). Bu belge yapılan oyunu ve
+> sonraki fazların planını anlatır.
 
 ---
 
 ## 1. Özet
 
 Harabeye dönmüş kadim bir büyücü kulesinin son çırağısın. Kulenin kalbindeki
-sönmüş **Mana Kristali**'ne dokunarak onu yeniden uyandırırsın. Topladığın
-manayla yaratıklar çağırırsın. Yaratıklar senin yerine mana üretir. Kuleyi
-**kat kat** yeniden açtıkça yeni mekanikler gelir.
+sönmüş **Mana Kristali**'ne dokunarak onu yeniden uyandırırsın. Oyun açıldığında
+kristal gri ve sönüktür; dokundukça rengi ve ışığı geri gelir. Topladığın manayla
+yaratıklar çağırırsın. Yaratıklar senin yerine mana üretir. Kuleyi **kat kat**
+yeniden açtıkça yeni sistemler gelir.
 
-- **Katmanlı yapı = kulenin katları.** Her yeni kat yeni bir sistem açar. Oyuncu
-  ilerlemesini kulenin yükselmesi olarak görür.
-- **Önce dokunma, sonra idle.** İlk birkaç dakika yalnızca kristale
-  dokunursun. Çağırma Çemberi onarılınca yaratıklar gelir ve oyun kendi kendine
-  akmaya başlar.
-- **Hep görünür bir sonraki hedef.** Ekranın üstünde her zaman "sıradaki
-  hedef" çubuğu durur. Katmanlı oyunlar oyuncuyu kaybetmemek için buna muhtaçtır.
-- **Reklam ve satın alma yok** (varsayım).
+- **Katmanlı yapı = kulenin katları.** Her kat yeni bir sistem açar. "Kule"
+  sekmesi kulenin kat kat görselini gösterir.
+- **Önce dokunma, sonra idle.** İlk 1,5–3 dakika yalnızca dokunarak geçer.
+  Çağırma Çemberi onarılınca yaratıklar gelir, oyun kendi kendine akmaya başlar.
+- **Hep görünür bir sonraki hedef.** Üstteki hedef çubuğu her an ne yapılacağını
+  söyler.
+- **Rehber:** Üstadın Ruhu, kısa konuşma balonlarıyla yol gösterir.
+- **Reklam ve satın alma yok.**
+
+### Mitoloji tonu
+Klasik fantastik ile Türk mitolojisi karışık: peri, cüce, elf ve ejderhanın
+yanında Su İyesi, Bozkurt (Asena), Tulpar, Şahmeran, Zümrüdüanka ve talih
+getiren **Hüma Kuşu**. Kütüphanede Orhun Yazıtları, Dede Korkut'un Kitabı ve
+Uluğ Bey'in Yıldız Cetveli; dokunuşu güçlendiren telin adı **Kopuz**.
 
 ---
 
-## 2. Kule Katları (katman haritası)
+## 2. Kule Katları
 
-| Kat | Adı | Açtığı sistem | Açılma koşulu (taslak) | Hedef zaman |
-|---|---|---|---|---|
-| 1 | Kristal Odası | Dokunarak mana toplama | Baştan açık | 0. dk |
-| 2 | Çağırma Çemberi | Yaratıklar → **IDLE başlar** | Çemberi onar: 250 mana | ~3. dk |
-| 3 | Kütüphane | Parşömenler (tek seferlik yükseltmeler) | 10 Peri | ~10–15. dk |
-| 4 | Büyü Salonu | Aktif büyüler (bekleme süreli) | 1 Taş Golem | ~30. dk |
-| 5 | Rasathane | **Prestij 1: Yıldız Ayini** + Takımyıldız Haritası | Bu turda 1 Milyar mana | ~60–90. dk |
-| 6 | Portal | Seferler + Artefaktlar | 5. Yıldız Ayini | 1–3. gün |
-| 7 | Kadim Sunak | **Prestij 2: Kadim Uyanış** + Rünler + Sınavlar | Yıldız Tozu eşiği | 1–2. hafta |
-| 8+ | ??? | İleride (ör. Ejderha Yuvası, Tanrılar Meclisi) | — | — |
+| Kat | Adı | Açtığı sistem | Açılma koşulu | Aktif oyuncu (simülasyon) | Durum |
+|---|---|---|---|---|---|
+| 1 | Kristal Odası | Dokunarak mana | Baştan açık | 0. dk | ✅ Faz 1 |
+| 2 | Çağırma Çemberi | Yaratıklar, **IDLE başlar** | Çemberi onar: 2.500 mana | ~1,5–3. dk | ✅ Faz 1 |
+| 3 | Kütüphane | Parşömenler | 10 Cüce Madenci (enkazı kazarlar) | ~7. dk | ✅ Faz 1 |
+| 4 | Büyü Salonu | Aktif büyüler | İlk Taş Golem | ~30. dk | Faz 2 |
+| 5 | Rasathane | **Prestij 1: Yıldız Ayini** | Bu turda 1 Milyar mana | ~55. dk | Faz 2 |
+| 6 | Portal | Seferler, Artefaktlar | 5. Yıldız Ayini | 1–3. gün | Faz 3 |
+| 7 | Kadim Sunak | **Prestij 2: Kadim Uyanış** | Yıldız Tozu eşiği | 1–2. hafta | Faz 4 |
 
-Kilitli katlar arayüzde **siluet ve "???"** olarak görünür. Oyuncu ileride bir
-şey olduğunu bilir ama ne olduğunu bilmez. Bu merak unsuru.
-
-Yukarıdaki süreler çevrimdışı zaman dahil **hedeflerdir**. Gerçek sayılar denge
-simülasyonuyla bu hedeflere oturtulacak (bkz. §9).
+Mühürlü katlar Kule sekmesinde görünür ama adları gizlidir.
 
 ---
 
 ## 3. Kat 1 — Kristal Odası (dokunma evresi)
 
-- Kristale her dokunuş **1 mana** verir. Birden çok parmakla dokunmak sayılır.
-- **Kristali Parlat** yükseltmesi: dokunuş gücü +1. Maliyet 10 × 1,6ⁿ.
-- **Kritik dokunuş:** %5 şansla ×10 mana, ekranda parlama efekti.
-- **Hedef çubuğu:** "Çağırma Çemberini onar — 250 mana". Dolunca Kat 2 açılır.
-- Rehber karakter **Üstadın Ruhu** kısa konuşma balonlarıyla yol gösterir
-  ("Kristale dokun, çırak…"). Uzun anlatım yok, her adımda bir cümle.
+- Her dokunuş **1 mana**. Birden çok parmakla dokunmak sayılır.
+- **Kristali Parlat:** dokunuşa +1 mana. Maliyet 15 × 1,6ⁿ.
+- **Kritik dokunuş:** %5 şansla ×10, altın renkli sayı ve kıvılcımlar çıkar.
+- Hızlı art arda dokunmak kristal çanının ezgisini yukarı tırmandırır; ara
+  verince başa döner.
+- **Hedef:** Çağırma Çemberini onar (2.500 mana).
 
-**Geçiş keskin değil.** Periler geldikten sonra da ilk 10–15 dakika kazancın
-çoğu dokunmadan gelir. Sonra yaratıklar yavaşça öne geçer ve oyun "idle" hâle
-gelir. Dokunma sonra da anlamlı kalır (bkz. Rezonans, §5).
+Geçiş keskin değil. Çember açıldıktan sonra ilk birkaç dakika gelirin çoğu yine
+dokunuştan gelir, sonra yaratıklar öne geçer. **Kopuz Telleri** (Kütüphane)
+her dokunuşa saniyelik üretimin bir yüzdesini eklediği için dokunmak oyunun
+sonuna kadar anlamlı kalır.
 
-**Rastlantılar:** Ekranda ara sıra süzülen bir **Altın Kelebek** belirir.
-Dokunana kısa süreli bonus verir. Aktif oyuncuyu ödüllendirir, idle oyuncuyu
-cezalandırmaz.
+**Hüma Kuşu:** Çember onarıldıktan sonra 1,5–4 dakikada bir, 12 saniyeliğine
+ekrandan süzülerek geçer. Yakalayana:
+- %50 **Hüma'nın Gölgesi:** 30 sn boyunca üretim ×7
+- %35 **Hüma'nın Armağanı:** 10 dakikalık üretim kadar mana
+- %15 **Tüy Fırtınası:** 20 sn boyunca dokunuş ×10, kritik şansı +%25
 
 ---
 
-## 4. Kat 2 — Çağırma Çemberi (idle başlar)
+## 4. Kat 2 — Çağırma Çemberi
 
-### Yaratıklar (1. kademe, 10 tür)
+| # | Yaratık | Taban maliyet | Taban üretim (mana/sn) |
+|---|---|---|---|
+| 1 | Peri | 50 | 1 |
+| 2 | Cüce Madenci | 600 | 6 |
+| 3 | Su İyesi | 7.000 | 35 |
+| 4 | Orman Elfi | 80.000 | 200 |
+| 5 | Bozkurt | 1 Mn | 1.200 |
+| 6 | Taş Golem | 13 Mn | 7.000 |
+| 7 | Tulpar | 170 Mn | 40.000 |
+| 8 | Şahmeran | 2,2 Mr | 230.000 |
+| 9 | Zümrüdüanka | 30 Mr | 1,3 Mn |
+| 10 | Kadim Ejderha | 400 Mr | 7,5 Mn |
 
-| # | Yaratık | Taban maliyet | Taban üretim (mana/sn) | Renk teması |
-|---|---|---|---|---|
-| 1 | Peri | 15 | 0,5 | pembe |
-| 2 | Cüce Madenci | 180 | 4 | bakır/turuncu |
-| 3 | Orman Elfi | 2,2 B | 32 | yeşil |
-| 4 | Cin | 26 B | 256 | mor duman |
-| 5 | Taş Golem | 310 B | 2 B | taş grisi |
-| 6 | Grifon | 3,7 Mn | 16 B | altın |
-| 7 | Tulpar (kanatlı at) | 45 Mn | 131 B | gök mavisi |
-| 8 | Şahmeran | 540 Mn | 1 Mn | zümrüt |
-| 9 | Zümrüdüanka | 6,5 Mr | 8,4 Mn | ateş kırmızısı |
-| 10 | Kadim Ejderha | 78 Mr | 67 Mn | obsidyen/kızıl |
+- **Maliyet artışı:** her alımda ×1,15.
+- **Geri ödeme süresi** her kademede ~2 kat uzar (Peri 50 sn, Ejderha ~15 saat).
+  Bu, yeni yaratıkları heyecanlı, eskileri yine de değerli tutar.
+- **Toplu alım:** ×1 / ×10 / ×25 / MAKS.
+- **Eşikler:** bir türden 10, 25, 50, 100, 150, 200, 250, 300, 400, 500 … 1000
+  adede ulaşınca o türün üretimi ×2.
+- **Uyum:** her türden en az 25, 50, 100, 150, 200, 300, 400, 500 → tüm üretim ×2.
+- Kartlarda: tanesi ve toplam üretim, toplam içindeki pay, sıradaki eşik
+  çubuğu ve paran yetmiyorsa "≈ 3 dk" gibi bekleme süresi.
 
-(B = bin, Mn = milyon, Mr = milyar. Başlangıç değerleri: maliyet ×12,
-üretim ×8 artar. Simülasyonla ayarlanacak.)
-
-### Kurallar
-- **Maliyet artışı:** her alımda ×1,12 (türe göre 1,10–1,15 arası).
-- **Toplu alım:** ×1 / ×10 / ×25 / MAKS düğmeleri. Telefonda şart.
-- **Eşik bonusları:** bir türden 10, 25, 50, 100, 150, 200, 250, 300, 400, 500
-  adede ulaşınca o türün üretimi ×2. Kartta "sıradaki eşik" ilerleme çubuğu olur.
-- **Uyum bonusu:** her türden en az 25 → tüm üretim ×2 (50, 100… için de).
-- **Çevrimdışı kazanç** bu katla açılır: başta en fazla 2 saat, %50 verim.
-  Takımyıldız Haritası ile 24 saat ve %100'e kadar çıkar. Dönüşte bir özet
-  penceresi açılır: "Sen yokken periler 1,2 Mn mana topladı."
+### Çevrimdışı kazanç
+Oyun kapalıyken (ya da 60 saniyeden uzun arka planda) yaratıklar çalışmaya devam
+eder. Başta en fazla **2 saat**, **%50 verim**. Dönüşte "Hoş geldin, çırak!"
+penceresi toplananı gösterir. Hüma etkileri çevrimdışı sürmez.
 
 ---
 
 ## 5. Kat 3 — Kütüphane (Parşömenler)
 
-Manayla alınan tek seferlik yükseltmeler. Koşulu sağlanınca rafta belirirler.
+Tek seferlik, kalıcı yükseltmeler. Koşulu sağlanınca rafta belirir.
 
-- **Türe özel:** "Peri Tozu — Periler ×3", "Cüce Kazmaları — Cüceler ×3"… Her
-  tür için birkaç kademe olur.
-- **Genel:** "Kadim Metin — tüm üretim ×2".
-- **Rezonans I–V:** her dokunuş ek olarak mana/sn'nin %1 / %2 / %3 / %5 / %8'i
-  kadar mana verir. Böylece dokunma oyunun sonuna kadar anlamlı kalır.
-- **Kristal:** dokunuş gücü ve kritik şans yükseltmeleri.
-
----
-
-## 6. Kat 4 — Büyü Salonu (aktif büyüler)
-
-Telefonda kısa oturumlar için tasarlandı: gir, büyüleri at, çık. Hepsi
-bekleme süreli. Enerji sistemi yok.
-
-| Büyü | Etki (taslak) | Bekleme |
-|---|---|---|
-| Mana Seli | 30 sn boyunca üretim ×5 | 5 dk |
-| Altın Dokunuş | 20 sn boyunca dokunuş ×10, kritik şans %50 | 3 dk |
-| Zaman Bükümü | Anında 15 dakikalık üretim | 30 dk |
-| Yıldız Yağmuru | 30 sn boyunca düşen yıldızlara dokun, her biri bonus mana | 10 dk |
-
-Büyüler manayla seviye atlar (süre ve etki artar).
+- **Türe özel (her tür için 3):** 10 adette ×2, 50 adette ×2, 100 adette ×3.
+  Örn. Peri Tozu, Asena'nın İzi, Ergenekon Yolu, Lokman'ın Defteri, İlk Ateş.
+- **Genel (tüm üretim ×2):** Üstadın Notları, Orhun Yazıtları, Uluğ Bey'in
+  Yıldız Cetveli, Dede Korkut'un Kitabı, Divânu Lugâti't-Türk.
+- **Kopuz Telleri (5 tel):** her dokunuş saniyelik üretimin %2 / %3 / %5 / %5 /
+  %5'i kadar ek mana verir (toplam %20).
+- **Dokunuş:** Keskin Kristal ×2, Kristal Kalp ×3, Gök Taşı ×3; Parlak Göz
+  (kritik şansı +%5), Şimşek Dokunuşu (kritik ×2).
+- **Çevrimdışı:** Uyku Ninnisi (verim +%25), Rüya Kapısı (+4 saat), Derin Uyku
+  (+6 saat).
+- **Hüma:** Hüma Tüyü (daha sık gelir), Talih Kuşu (etkiler %50 uzun).
 
 ---
 
-## 7. Kat 5 — Rasathane (Prestij 1: Yıldız Ayini)
+## 6. Denge (simülasyonla ayarlandı)
 
-- **Koşul:** bu turda toplam 1 Milyar mana.
-- **Kazanç:** Yıldız Tozu ≈ ⌊10 × √(bu turdaki mana / 1 Milyar)⌋. Ekranda
-  canlı gösterilir: "Şimdi ayin yaparsan +37 Yıldız Tozu".
-- **Sıfırlananlar:** mana, yaratıklar, parşömenler, büyü seviyeleri.
-- **Kalanlar:** Yıldız Tozu, Takımyıldız Haritası, başarımlar, açılmış katlar.
-- **Pasif bonus:** toplamda kazanılmış her Yıldız Tozu kalıcı olarak +%2
-  üretim verir. Tozu harcamak bu bonusu **azaltmaz**. Böylece "harcasam mı,
-  biriktirsem mi" diye kötü hissettiren bir ikilem olmaz.
+`npm run sim` akıllı oynayan bir oyuncuyu taklit eder: her an "bekleme süresi +
+geri ödeme süresi" en kısa olan alımı yapar. Hüma hesaba katılmaz, yani gerçek
+oyuncu biraz daha hızlıdır.
 
-### Takımyıldız Haritası (yetenek ağacı, ~25 düğüm, 3 dal)
-- **Işık (üretim):** tüm üretim çarpanları, eşik bonuslarının güçlenmesi.
-- **Gölge (otomasyon):** yaratıkları tür tür otomatik alma, parşömenleri
-  otomatik alma, **Kristal Muhafızı** (saniyede otomatik dokunuş), en sonda
-  otomatik ayin. *Oyun asıl idle hâline burada kavuşur.*
-- **Zaman:** çevrimdışı süre ve verimi, büyü bekleme süreleri, ayinden sonra
-  hızlı başlangıç ("10 Peri ile başla").
+**Aktif oyuncu** (ilk 5 dk saniyede 3,5, sonra giderek azalan dokunuş):
 
----
+| Olay | Süre |
+|---|---|
+| Çağırma Çemberi | 1 dk 31 sn |
+| Kütüphane | 6 dk 49 sn |
+| İlk Taş Golem | 30 dk |
+| Bu turda 1 Milyar mana (ilk prestij koşulu) | 54 dk |
+| İlk Kadim Ejderha | 3 sa 52 dk |
 
-## 8. Sonraki katlar (Faz 3–4, ana hatlarıyla)
+Dokunuşun gelirdeki payı: 5. dk %32, 15. dk %17, 1. saat %22 (Kopuz sayesinde).
 
-### Kat 6 — Portal: Seferler ve Artefaktlar
-- 3 sefer yuvası. Diyar ve süre seçilir (15 dk / 1 sa / 4 sa / 12 sa).
-- Diyarlar: Fısıltı Ormanı, Cüce Dağları, Kum Denizi, Buz Tahtı, Gölge Diyarı.
-- Dönüşte **Artefakt parçaları** ve Yıldız Tozu gelir. Artefaktlar kalıcı
-  bonuslardır, parça toplayarak seviye atlarlar ve ayinlerde sıfırlanmazlar.
-- Telefonda "şu saatte geri dön" döngüsü yaratır.
+**Rahat oyuncu** (ilk 20 dk oyunda, sonra 3 saatte bir 5 dk): Taş Golem ~3 saat,
+1 Milyar ~6 saat, Kadim Ejderha ~15 saat, ilk Uyum ~1 gün.
 
-### Kat 7 — Kadim Sunak: Kadim Uyanış (Prestij 2)
-- Yıldız Tozu, harita ve 1. katmandaki her şey sıfırlanır. Karşılığında
-  **Kadim Rün** kazanılır. Artefaktlar kalır.
-- Rünlerle açılanlar:
-  - **2. kademe yaratıklar** (11–15): Tepegöz, Buz Devi, Kraken, Lav Titanı,
-    Yıldız Balinası.
-  - **Rün Yuvaları:** seçilebilen güçlü pasifler (oyun tarzına göre kurulum).
-  - **Sınavlar:** kısıtlı turlar ("Dokunmak yasak", "Yalnızca 3 tür yaratık",
-    "Büyü yok"). Tamamlayınca kalıcı ödül verir.
-
-### Başarımlar (her evrede)
-Her başarım kalıcı olarak +%1 üretim verir. Toplama ve keşif hissi için.
-
----
-
-## 9. Denge ve formüller
-
-- **Yaratık maliyeti:** taban × r^adet
-- **k adet toplu alım:** taban × r^adet × (r^k − 1) / (r − 1)
-- **MAKS alım:** k = ⌊ log( mana × (r − 1) / (taban × r^adet) + 1 ) / log r ⌋
-- **Üretim (tür başına):** adet × taban üretim × 2^(eşik sayısı) × parşömen
-  çarpanları × uyum × (1 + 0,02 × toplam Yıldız Tozu) × artefakt × büyü
-- **Dokunuş:** (dokunuş gücü + mana/sn × rezonans %) × kritik
+### Formüller
+- **Yaratık maliyeti:** taban × 1,15^adet; k adet: taban × 1,15^adet × (1,15^k − 1) / 0,15
+- **Üretim:** adet × taban üretim × 2^(eşik) × parşömen × 2^(uyum) × genel parşömen × Hüma
+- **Dokunuş:** (1 + parlatma seviyesi) × dokunuş parşömenleri + mana/sn × Kopuz % ; kritikte × kritik çarpanı
 - **Çevrimdışı:** min(geçen süre, sınır) × mana/sn × verim
 
-**Denge simülasyonu:** Node'da çalışan bir betik, akıllı oynayan bir oyuncuyu
-taklit eder (her an en verimli alımı yapar; "aktif" profilde saniyede 5
-dokunuş, "idle" profilde günde birkaç kez uğrar). Hangi dakikada hangi katın
-açıldığını çıkarır ve §2'deki hedef tablosuyla karşılaştırır. Sayıları buna
-göre ayarlarız. Her faz sonunda yeniden çalıştırılır.
+---
+
+## 7. Ses ve müzik
+
+Ses dosyası yok; her şey Web Audio ile tarayıcıda üretilir.
+- **Kristal çanı:** uyumsuz kısmi seslerle parlak bir çan. Hızlı dokunuşlar re
+  pentatonik dizide yukarı tırmanır; kritikte parlak bir akor çalar.
+- **Alım, parşömen (sayfa hışırtısı), eşik, kat açılışı, Hüma** için ayrı sesler.
+- **Müzik:** re perdesinde alçak bir dem sesi üstünde, **Hicaz makamında** saz
+  benzeri tel sesleri (Karplus-Strong sentezi). Ezgi rastgele ama durak
+  perdesine dönen cümlelerle gezinir; hiç tekrar etmez.
+- Ayarlar: ses efektleri, müzik, ses düzeyi, titreşim (Android). Üstteki düğme
+  hepsini tek dokunuşla susturur. Sayfa arka plana geçince ses durur.
 
 ---
 
-## 10. Telefon arayüzü
+## 8. Telefon arayüzü
 
-- **Dikey ekran, tek elle kullanım.**
-- **Üst çubuk:** mana miktarı, mana/sn, sıradaki hedef çubuğu.
-- **Orta:** parlayan, nabız gibi atan kristal. Dokununca yukarı uçan "+12"
-  sayıları ve parçacıklar çıkar. Android'de titreşim.
-- **Alt sekme çubuğu:** Kristal · Yaratıklar · Kütüphane · Büyüler · Kule.
-  Sekmeler açıldıkça belirir ve "Yeni!" rozeti taşır. "Kule" sekmesi kulenin
-  kat kat görselini gösterir ve Rasathane, Portal, Sunak, Başarımlar ve
-  Ayarlar'a buradan gidilir.
-- **Görsel dil:** gece mavisi ve mor gradyan arka plan, yıldızlar. Her yaratık
-  kendi renginde bir kartta durur.
-- **İkonlar:** game-icons.net SVG seti (4000+ fantastik ikon, CC BY 3.0,
-  "Emeği Geçenler" ekranında yazarları anılır). CSS ile renkli gradyanlarla
-  boyanır. Emoji kullanmıyoruz, çünkü her telefonda farklı görünüyor.
-- **Dokunma ergonomisi:** en az 44 px dokunma alanı, çift dokunmada yakınlaştırma
-  kapalı, çentikli ekranlar için güvenli alan payı.
-- **Ana ekrana eklenebilir (PWA):** uygulama gibi tam ekran açılır, internetsiz
-  çalışır.
+- Dikey ekran, tek elle kullanım, en az 44 px dokunma alanları.
+- **Üst çubuk:** mana, mana/sn, dokunuş değeri, etkin Hüma etkileri, ses düğmesi.
+- **Hedef çubuğu**, altında içerik, en altta **sekmeler:** Kristal · Yaratıklar ·
+  Kütüphane · Kule. Sekmeler açıldıkça belirir ve "Yeni" rozeti taşır;
+  Kütüphanede okunabilecek parşömen varsa kırmızı nokta çıkar.
+- **Görsel dil:** gece göğü ve İznik çinisi renkleri: kobalt, turkuaz (mana),
+  altın (maliyet, Hüma), mercan (kritik). Kristalin arkasında dönen Selçuklu
+  yıldızı. Arka planda parıldayan yıldızlar ve yükselen mana zerreleri.
+- **Yazı tipleri:** El Messiri (başlıklar ve sayılar), Alegreya Sans (metin).
+- **İkonlar:** game-icons.net (CC BY 3.0), her yaratık kendi renginde madalyonda.
+- **Sayılar:** milyonun altı tam yazılır (2.500), üstü Mn, Mr, Tn, Kd, Kn, Sk,
+  Sp, Ok, Nn, Dc; sonra bilimsel. Ayarlardan her zaman bilimsel seçilebilir.
+- **Ana ekrana ekleme:** simge ve tam ekran açılış hazır. Çevrimdışı çalışma
+  (service worker) oyun kalıcı bir adrese konunca eklenecek.
 
-### Sayı gösterimi (Türkçe)
-- Ondalık ayırıcı virgül: 1,5 Mn.
-- Kısaltmalar: B (bin), Mn (milyon), Mr (milyar), Tn (trilyon), Kd (katrilyon),
-  Kn (kentilyon) … desilyona kadar. Sonrasında bilimsel gösterim (1,23e45).
-  Ayarlardan her zaman bilimsel gösterim de seçilebilir.
+---
+
+## 9. Kayıt
+
+- Tarayıcıda otomatik: 10 saniyede bir, alımlardan sonra ve sayfa arka plana
+  geçince.
+- Sürüm numaralı; bozuk ya da eksik alanlar varsayılana döner, daha yeni sürümün
+  kaydı reddedilir.
+- **Dışa / içe aktarma:** `KADIMKULE1:` ile başlayan metin. Başka cihaza taşımak
+  için.
+- **Sıfırlama:** iki adımlı onayla.
+
+---
+
+## 10. Sonraki fazlar
+
+### Faz 2 — Kat 4–5
+- **Büyü Salonu:** Umay'ın Lütfu (üretim ×5, 30 sn), Altın Dokunuş, Zaman
+  Bükümü (anında 15 dk üretim), Yıldız Yağmuru. Bekleme süreli, seviye atlar.
+- **Başarımlar:** her biri kalıcı +%1 üretim.
+- **Yıldız Ayini (prestij 1):** Yıldız Tozu ≈ ⌊10 × √(bu turdaki mana / 1 Mr)⌋.
+  Kazanılan her toz kalıcı +%2 üretim; harcamak bu bonusu azaltmaz.
+- **Takımyıldız Haritası:** üç dal. **Ülgen** (ışık, üretim), **Erlik**
+  (gölge, otomasyon: otomatik çağırma, otomatik parşömen, Kristal Muhafızı ile
+  otomatik dokunuş), **Umay** (zaman: çevrimdışı süre ve verim, büyü bekleme
+  süreleri, hızlı başlangıç).
+
+### Faz 3 — Kat 6: Portal
+Seferler (15 dk / 1 sa / 4 sa / 12 sa) ve Artefaktlar. Diyarlar: Fısıltı
+Ormanı, Kaf Dağı, Ergenekon, Buz Tahtı, Erlik'in Yeraltı Ülkesi.
+
+### Faz 4 — Kat 7: Kadim Uyanış
+Kadim Rünler, 2. kademe yaratıklar (Tepegöz, Yelbegen, Buz Devi, Kraken,
+Yıldız Balinası), Rün Yuvaları, Sınavlar.
 
 ---
 
 ## 11. Teknik yapı
 
-- **Vite + TypeScript**, framework yok.
-- **break_infinity.js** (büyük sayı kütüphanesi) baştan kullanılır. Uzun
-  soluklu katmanlı bir oyunda sayılar 1e308'i geçecek. Sonradan geçiş yapmak
-  çok zahmetli olur.
-- **Oyun döngüsü:** mantık saniyede 10 sabit adım, çizim
-  `requestAnimationFrame` ile. Telefon sekmeyi uyutursa dönüşte geçen süre bir
-  kerede hesaplanır.
-- **Kayıt:** `localStorage`. Her 10 saniyede bir ve uygulama arka plana
-  atıldığında kaydeder (telefonda sayfa her an kapatılabilir). Kayıtlar sürüm
-  numaralıdır ve eski kayıtları yeni formata çeviren adımlar vardır. Kaydı
-  metin olarak dışa ve içe aktarmak mümkündür.
-- **Türkçe:** tüm metinler tek dosyada. Büyük harf dönüşümünde `tr-TR` yerel
-  ayarı kullanılır (i → İ, ı → I).
-- **Ses:** ilk sürümde yok. İstenirse dosya gerektirmeyen, WebAudio ile
-  sentezlenmiş basit efektler eklenir.
-- **Test:** Vitest (formüller, kayıt, çevrimdışı hesap). Playwright ile telefon
-  boyutunda gerçek tarayıcıda dokunma akışı ve ekran görüntüleri.
-
-```
-kadim-kule/
-  src/
-    core/     # saf oyun mantığı: durum, formüller, adım, prestij (DOM yok)
-    data/     # yaratık, parşömen, büyü tanımları (tablo hâlinde)
-    ui/       # ekranlar ve bileşenler
-    save/     # kayıt, sürüm geçişleri, çevrimdışı hesap
-    i18n/     # Türkçe metinler, sayı biçimlendirme
-  sim/        # denge simülasyonu
-  tests/
-```
-
----
-
-## 12. Yol haritası
-
-| Faz | İçerik | Sonuç |
-|---|---|---|
-| 0 | Bu belge, onay | ← şu an |
-| 1 | Kat 1–3: dokunma, 10 yaratık, Kütüphane, kayıt ve çevrimdışı kazanç, Türkçe sayılar, telefon arayüzü, PWA | İlk oynanabilir sürüm, telefondan oynanabilir link |
-| 2 | Kat 4–5: büyüler, başarımlar, Yıldız Ayini, Takımyıldız Haritası, otomasyon | İlk prestij döngüsü |
-| 3 | Kat 6: Portal, seferler, artefaktlar | Günlük uğrama döngüsü |
-| 4 | Kat 7: Kadim Uyanış, rünler, 2. kademe yaratıklar, sınavlar | Uzun vadeli oyun sonu |
-
-Her fazın sonunda simülasyon ve testler çalıştırılır, telefon ekranında
-denenir ve sana oynanabilir bir link verilir.
-
----
-
-## 13. Açık sorular
-
-1. **İsim:** "Kadim Kule" uygun mu?
-2. **Mitoloji tonu:** Şu an klasik fantastik (peri, cüce, elf, ejderha) ile Türk
-   mitolojisi (Tulpar, Şahmeran, Zümrüdüanka, Tepegöz) karışık. Bu karışım mı
-   kalsın, tek yöne mi çekelim?
-3. **Tempo:** İlk prestijin ~1–1,5 saatte gelmesi uygun mu? Daha hızlı ya da
-   daha yavaş mı olsun?
-4. **Ses:** Basit sentezlenmiş efektler ister misin?
+Bkz. [README.md](README.md).

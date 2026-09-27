@@ -1,0 +1,28 @@
+{
+  "name": "kadim-kule",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host",
+    "build": "tsc --noEmit && vite build && node scripts/artifact.mjs",
+    "preview": "vite preview --host",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "sim": "tsx sim/simulate.ts",
+    "icons": "node scripts/icons.mjs",
+    "e2e": "node e2e/smoke.mjs"
+  },
+  "dependencies": {
+    "break_infinity.js": "^2.2.0"
+  },
+  "devDependencies": {
+    "@iconify-json/game-icons": "^1.2.4",
+    "playwright-core": "1.56",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.1",
+    "vite-plugin-singlefile": "^2.3.3",
+    "vitest": "^5.0.2"
+  }
+}
