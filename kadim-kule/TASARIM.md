@@ -172,8 +172,20 @@ Ses dosyası yok; her şey Web Audio ile tarayıcıda üretilir.
   Kütüphane · Kule. Sekmeler açıldıkça belirir ve "Yeni" rozeti taşır;
   Kütüphanede okunabilecek parşömen varsa kırmızı nokta çıkar.
 - **Görsel dil:** gece göğü ve İznik çinisi renkleri: kobalt, turkuaz (mana),
-  altın (maliyet, Hüma), mercan (kritik). Kristalin arkasında dönen Selçuklu
-  yıldızı. Arka planda parıldayan yıldızlar ve yükselen mana zerreleri.
+  altın (maliyet, Hüma), mercan (kritik). Arka planda parıldayan yıldızlar,
+  yavaşça sürüklenen renkli bulutsular ve yükselen mana zerreleri.
+- **Kristal sahnesi (oyunun kalbi):** kristal taş bir sunağın üstünde süzülür.
+  İçinde kalp gibi atan bir ışık çekirdeği, yüzeyinde gezinen bir parıltı var.
+  Arkasında ışık hüzmeleri ve dönen iki Selçuklu yıldızı, çevresinde Göktürk
+  harfleriyle "Tengri · Türük" yazan dönen bir halka var. Dokununca kristal
+  dokunulan yana eğilir, şok dalgası ve kıvılcımlar çıkar. Hızlı dokundukça
+  kristal "ısınır": halkalar hızlanır, ışık ve zerreler artar. Çağrılan her yaratık
+  türü kendi renginde küçük bir ruh olarak kristalin yörüngesinde döner ve ona
+  mana akıtır; idle üretim gözle görülür. Hüma'nın Gölgesi sırasında sahne
+  altın rengine döner.
+- **Canlılık:** alınabilir düğmelerin üstünden ara ara ışık geçer; sahip olunan
+  yaratıkların madalyonunda kendi renginde bir hale döner; alımda madalyon
+  zıplar ve kıvılcım saçar; eşikte kart altın rengiyle parlar.
 - **Yazı tipleri:** El Messiri (başlıklar ve sayılar), Alegreya Sans (metin).
 - **İkonlar:** game-icons.net (CC BY 3.0), her yaratık kendi renginde madalyonda.
 - **Sayılar:** milyonun altı tam yazılır (2.500), üstü Mn, Mr, Tn, Kd, Kn, Sk,

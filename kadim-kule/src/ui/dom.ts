@@ -66,3 +66,35 @@ export function show(el: HTMLElement, visible: boolean): void {
 export function disable(el: HTMLButtonElement, off: boolean): void {
   if (el.disabled !== off) el.disabled = off;
 }
+
+/** Bir öğenin ortasından saçılan kıvılcımlar ve yükselen kısa bir yazı. */
+export function burst(from: HTMLElement, color: string, count: number, label?: string): void {
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const r = from.getBoundingClientRect();
+  const x = r.left + r.width / 2;
+  const y = r.top + r.height / 2;
+  for (let k = 0; k < count; k++) {
+    const p = h('div', { class: 'kivilcim', style: { background: color, 'box-shadow': `0 0 8px ${color}` } });
+    document.body.append(p);
+    const a = Math.random() * Math.PI * 2;
+    const d = 26 + Math.random() * 38;
+    p.animate(
+      [
+        { transform: `translate(${x}px, ${y}px) scale(1)`, opacity: 1 },
+        { transform: `translate(${x + Math.cos(a) * d}px, ${y + Math.sin(a) * d}px) scale(0.2)`, opacity: 0 },
+      ],
+      { duration: 420 + Math.random() * 260, easing: 'cubic-bezier(.2,.8,.4,1)', fill: 'forwards' },
+    ).onfinish = () => p.remove();
+  }
+  if (label) {
+    const t = h('div', { class: 'kivilcim-yazi' }, label);
+    document.body.append(t);
+    t.animate(
+      [
+        { transform: `translate(${x}px, ${y - 10}px) translate(-50%, -50%) scale(0.7)`, opacity: 1 },
+        { transform: `translate(${x}px, ${y - 56}px) translate(-50%, -50%) scale(1)`, opacity: 0 },
+      ],
+      { duration: 800, easing: 'ease-out', fill: 'forwards' },
+    ).onfinish = () => t.remove();
+  }
+}

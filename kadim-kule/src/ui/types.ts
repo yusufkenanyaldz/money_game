@@ -24,4 +24,6 @@ export interface Game {
 export interface View {
   el: HTMLElement;
   update(): void;
+  /** Sekme görünür olunca ya da gizlenince çağrılır (animasyon döngülerini durdurmak için). */
+  setVisible?(visible: boolean): void;
 }

@@ -9,7 +9,7 @@ import {
 } from '../core/formulas';
 import { CREATURES, MILESTONES } from '../data/creatures';
 import { fmt, fmtRate, fmtTime } from '../i18n/format';
-import { cssVar, disable, h, icon, show, text, toggle } from './dom';
+import { burst, cssVar, disable, h, icon, show, text, toggle } from './dom';
 import type { Game, View } from './types';
 
 type BuyMode = 1 | 10 | 25 | 'max';
@@ -62,7 +62,12 @@ export class CreaturesView implements View {
       const msRow = h('div', { class: 'esik' }, msBarEl, msTextEl);
       const topEl = h('span', { class: 'ust-yazi' });
       const costEl = h('span', { class: 'maliyet' });
-      const btn = h('button', { class: 'dugme', type: 'button', onclick: () => this.buy(i) }, topEl, costEl);
+      const btn = h(
+        'button',
+        { class: 'dugme', type: 'button', style: { '--gecikme': `${(i * 0.43) % 3}s` }, onclick: () => this.buy(i) },
+        topEl,
+        costEl,
+      );
       const medal = h('div', { class: 'madalyon', style: { '--a': c.colors[0], '--b': c.colors[1] } }, icon(c.icon));
       const el = h(
         'div',
@@ -113,7 +118,30 @@ export class CreaturesView implements View {
   private buy(i: number): void {
     const s = this.game.state;
     const n = this.mode === 'max' ? 'max' : this.mode;
-    this.game.handle(buyCreature(s, i, n));
+    const events = buyCreature(s, i, n);
+    const bought = events.find((e) => e.type === 'buy');
+    if (bought?.type === 'buy') this.celebrate(i, bought.amount, events.some((e) => e.type === 'milestone'));
+    this.game.handle(events);
+  }
+
+  /** Alımda madalyon zıplar, kıvılcım saçar; eşikte kart altın rengiyle parlar. */
+  private celebrate(i: number, amount: number, milestone: boolean): void {
+    const card = this.cards[i];
+    card.medal.animate(
+      [{ transform: 'scale(1)' }, { transform: 'scale(1.22) rotate(-6deg)' }, { transform: 'scale(1)' }],
+      { duration: 380, easing: 'cubic-bezier(.3,1.6,.5,1)' },
+    );
+    burst(card.medal, CREATURES[i].colors[0], milestone ? 16 : 8, `+${amount}`);
+    if (milestone) {
+      card.el.animate(
+        [
+          { boxShadow: '0 0 0 0 rgb(243 195 90 / 0)', borderColor: '#2a3a7a' },
+          { boxShadow: '0 0 28px 4px rgb(243 195 90 / 0.55)', borderColor: '#f3c35a', offset: 0.25 },
+          { boxShadow: '0 0 0 0 rgb(243 195 90 / 0)', borderColor: '#2a3a7a' },
+        ],
+        { duration: 1100, easing: 'ease-out' },
+      );
+    }
   }
 
   update(): void {
@@ -134,6 +162,7 @@ export class CreaturesView implements View {
       show(card.countEl, s.creatures[i] > 0);
       show(card.btn, visible);
       if (silhouette) {
+        toggle(card.medal, 'canli', false);
         card.name('???');
         card.rate('Önceki yaratığı çağırınca belirir.');
         card.medal.style.setProperty('--a', '#223066');
@@ -148,6 +177,7 @@ export class CreaturesView implements View {
       }
 
       const owned = s.creatures[i];
+      toggle(card.medal, 'canli', owned > 0);
       card.name(CREATURES[i].name);
       card.count(String(owned));
       const each = perUnitProduction(s, i);

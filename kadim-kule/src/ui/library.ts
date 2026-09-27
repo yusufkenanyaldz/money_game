@@ -2,7 +2,7 @@ import { buyScroll } from '../core/actions';
 import { totalProduction } from '../core/formulas';
 import { SCROLLS, SCROLL_BY_ID, type ScrollDef } from '../data/scrolls';
 import { fmt, fmtTime } from '../i18n/format';
-import { cssVar, disable, h, icon, text, toggle } from './dom';
+import { burst, cssVar, disable, h, icon, text, toggle } from './dom';
 import { effectText } from './text';
 import type { Game, View } from './types';
 
@@ -47,18 +47,24 @@ export class LibraryView implements View {
   }
 
   private rebuild(avail: ScrollDef[]): void {
-    this.cards = avail.map((def) => {
+    this.cards = avail.map((def, k) => {
       const topEl = h('span', { class: 'ust-yazi' });
+      const medal = h('div', { class: 'madalyon parsomen' }, icon(def.icon));
+      const read = () => {
+        const events = buyScroll(this.game.state, def.id);
+        if (events.length) burst(medal, '#f3c35a', 12);
+        this.game.handle(events);
+      };
       const btn = h(
         'button',
-        { class: 'dugme', type: 'button', onclick: () => this.game.handle(buyScroll(this.game.state, def.id)) },
+        { class: 'dugme', type: 'button', style: { '--gecikme': `${(k * 0.53) % 3}s` }, onclick: read },
         topEl,
         h('span', { class: 'maliyet' }, fmt(def.cost)),
       );
       const el = h(
         'div',
         { class: 'kart' },
-        h('div', { class: 'madalyon parsomen' }, icon(def.icon)),
+        medal,
         h(
           'div',
           { class: 'kart-govde' },

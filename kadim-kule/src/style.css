@@ -292,9 +292,33 @@ textarea:focus-visible {
 
 .dugme.hazir {
   border-color: var(--altin);
-  background: linear-gradient(180deg, #f6cf6e, #d9a03a);
+  background: linear-gradient(180deg, #f8d77c, #d9a03a);
   color: #2a1a02;
-  box-shadow: 0 0 14px rgb(243 195 90 / 0.35);
+  box-shadow: 0 0 16px rgb(243 195 90 / 0.4);
+  overflow: hidden;
+}
+
+/* Alınabilir düğmelerin üzerinden ara ara bir ışık geçer. */
+.dugme.hazir::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(105deg, transparent 30%, rgb(255 255 255 / 0.65) 48%, transparent 66%);
+  transform: translateX(-130%);
+  animation: dugme-isilti 3.4s ease-in-out infinite;
+  animation-delay: var(--gecikme, 0s);
+}
+
+@keyframes dugme-isilti {
+  0%,
+  60% {
+    transform: translateX(-130%);
+  }
+  90%,
+  100% {
+    transform: translateX(130%);
+  }
 }
 
 .dugme .maliyet {
@@ -365,57 +389,172 @@ textarea:focus-visible {
 
 .kristal-sahne {
   --uyanis: 1;
+  --enerji: 0;
   position: relative;
   display: grid;
   place-items: center;
-  padding-top: 8px;
+  margin-inline: -16px;
+  padding: 18px 0 0;
+}
+
+.kristal-tuval {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.kristal-tuval.arka {
+  z-index: 0;
+}
+
+.kristal-tuval.on {
+  z-index: 2;
 }
 
 .kristal-dugme {
   position: relative;
-  width: min(72vw, 300px);
-  aspect-ratio: 1 / 1.1;
+  z-index: 1;
+  width: min(76vw, 300px);
+  aspect-ratio: 200 / 260;
   max-width: 100%;
   border: 0;
   padding: 0;
   background: none;
   cursor: pointer;
   touch-action: none;
-  filter: saturate(calc(0.25 + var(--uyanis) * 0.75)) brightness(calc(0.55 + var(--uyanis) * 0.45));
+  filter: saturate(calc(0.2 + var(--uyanis) * 0.8)) brightness(calc(0.5 + var(--uyanis) * 0.5));
   transition: filter 0.6s ease;
 }
 
 .kristal-dugme svg {
+  position: relative;
   width: 100%;
   height: 100%;
   overflow: visible;
 }
 
-.kristal-yildiz {
-  transform-origin: 100px 118px;
-  animation: don 60s linear infinite;
+.kristal-isinlar {
+  position: absolute;
+  left: 50%;
+  top: 42.3%;
+  width: 185%;
+  aspect-ratio: 1;
+  pointer-events: none;
+  background: repeating-conic-gradient(from 0deg, rgb(69 220 200 / 0.22) 0deg 4deg, transparent 9deg 22.5deg);
+  -webkit-mask: radial-gradient(circle, #000 10%, rgb(0 0 0 / 0.45) 32%, transparent 62%);
+  mask: radial-gradient(circle, #000 10%, rgb(0 0 0 / 0.45) 32%, transparent 62%);
+  opacity: calc(0.4 + var(--enerji) * 0.6);
+  transform: translate(-50%, -50%);
+  animation: isin-don 48s linear infinite;
 }
 
-.kristal-yildiz.ters {
-  animation-duration: 90s;
-  animation-direction: reverse;
+.kristal-sahne.altin .kristal-isinlar {
+  background: repeating-conic-gradient(from 0deg, rgb(243 195 90 / 0.3) 0deg 4deg, transparent 9deg 22.5deg);
 }
 
-@keyframes don {
+@keyframes isin-don {
+  from {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
   to {
-    transform: rotate(360deg);
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+.kristal-yildiz {
+  opacity: calc(0.45 + var(--enerji) * 0.55);
+}
+
+.kristal-yildiz.ic {
+  opacity: calc(0.35 + var(--enerji) * 0.6);
+}
+
+.run-halkasi {
+  opacity: 0;
+  transition: opacity 1.2s ease;
+  fill: #f3c35a;
+}
+
+.run-halkasi.hazir {
+  opacity: calc(0.6 + var(--enerji) * 0.4);
+}
+
+.run-halkasi text {
+  font-family: 'Noto Sans Old Turkic', sans-serif;
+  font-size: 12px;
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+
+.kristal-suzul {
+  animation: suzul 4.2s ease-in-out infinite;
+}
+
+@keyframes suzul {
+  50% {
+    transform: translateY(-7px);
   }
 }
 
 .kristal-govde {
-  transform-origin: 100px 120px;
-  animation: nabiz 3.2s ease-in-out infinite;
+  transform-origin: 100px 110px;
 }
 
-@keyframes nabiz {
-  50% {
-    transform: translateY(-4px);
+.kristal-hale {
+  opacity: calc(0.4 + var(--enerji) * 0.6);
+}
+
+.kristal-sahne.altin .kristal-hale {
+  fill: #f3c35a;
+}
+
+.kristal-cekirdek {
+  transform-box: fill-box;
+  transform-origin: center;
+  opacity: calc(0.5 + var(--enerji) * 0.5);
+  animation: kalp 2.4s ease-in-out infinite;
+}
+
+@keyframes kalp {
+  0%,
+  60%,
+  100% {
+    transform: scale(0.82);
   }
+  12% {
+    transform: scale(1.1);
+  }
+  24% {
+    transform: scale(0.9);
+  }
+  36% {
+    transform: scale(1.04);
+  }
+}
+
+.kristal-isilti {
+  animation: isilti 5s ease-in-out infinite;
+}
+
+@keyframes isilti {
+  0%,
+  55% {
+    transform: translateX(-70px);
+  }
+  85%,
+  100% {
+    transform: translateX(230px);
+  }
+}
+
+.sunak-isik {
+  opacity: calc(0.45 + var(--enerji) * 0.55);
+}
+
+.sunak-oluk {
+  opacity: calc(0.45 + var(--enerji) * 0.55);
 }
 
 .kristal-parilti {
@@ -464,23 +603,6 @@ textarea:focus-visible {
   text-shadow: 0 0 14px rgb(242 100 79 / 0.9), 0 2px 0 rgb(0 0 0 / 0.5);
 }
 
-.zerre {
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  pointer-events: none;
-  background: var(--turkuaz);
-  box-shadow: 0 0 8px var(--turkuaz);
-  z-index: 4;
-}
-
-.zerre.altin {
-  background: var(--altin);
-  box-shadow: 0 0 8px var(--altin);
-}
 
 .kristal-bilgi {
   text-align: center;
@@ -535,6 +657,65 @@ textarea:focus-visible {
 
 .madalyon .ikon {
   filter: drop-shadow(0 2px 2px rgb(0 0 0 / 0.35));
+}
+
+.madalyon {
+  isolation: isolate;
+}
+
+/* Sahip olunan yaratığın madalyonunun çevresinde kendi renginde bir hale döner. */
+.madalyon.canli::before {
+  content: '';
+  position: absolute;
+  inset: -7px;
+  z-index: -1;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, transparent 0 45%, var(--a) 72%, #fff 76%, transparent 82%);
+  -webkit-mask: radial-gradient(closest-side, transparent 0 76%, #000 80%);
+  mask: radial-gradient(closest-side, transparent 0 76%, #000 80%);
+  animation: don 3.8s linear infinite;
+  opacity: 0.85;
+}
+
+.madalyon.canli .ikon {
+  animation: nefes 3s ease-in-out infinite;
+}
+
+@keyframes don {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes nefes {
+  50% {
+    transform: scale(1.08) translateY(-1px);
+  }
+}
+
+.kivilcim {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 7px;
+  height: 7px;
+  margin: -3.5px 0 0 -3.5px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 45;
+}
+
+.kivilcim-yazi {
+  position: fixed;
+  left: 0;
+  top: 0;
+  pointer-events: none;
+  z-index: 45;
+  font-family: var(--yazi-baslik);
+  font-weight: 700;
+  font-size: 20px;
+  color: var(--fildisi);
+  text-shadow: 0 0 10px rgb(69 220 200 / 0.9);
 }
 
 .siluet .madalyon {
@@ -971,6 +1152,17 @@ textarea.kayit-metni {
   border-radius: 99px;
   background: var(--mercan);
   box-shadow: 0 0 0 2px var(--gok-derin);
+}
+
+.rozet:not(.yeni) {
+  animation: rozet-nabiz 1.4s ease-in-out infinite;
+}
+
+@keyframes rozet-nabiz {
+  50% {
+    transform: scale(1.35);
+    box-shadow: 0 0 0 2px var(--gok-derin), 0 0 10px var(--mercan);
+  }
 }
 
 .rozet.yeni {

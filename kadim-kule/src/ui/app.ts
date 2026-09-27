@@ -48,6 +48,8 @@ export class App implements Game {
   private stars: Starfield;
 
   // üst çubuk
+  private manaNum: HTMLElement;
+  private manaIcon = h('span', { class: 'mana-ikon' }, icon('kristal'));
   private manaText: (v: string) => void;
   private subText: (v: string) => void;
   private buffBox: HTMLElement;
@@ -85,6 +87,7 @@ export class App implements Game {
 
     // ---- üst çubuk ----
     const manaNum = h('div', { class: 'mana-sayi', 'aria-live': 'off' });
+    this.manaNum = manaNum;
     const sub = h('div', { class: 'mana-alt' });
     this.manaText = text(manaNum);
     this.subText = (() => {
@@ -101,7 +104,7 @@ export class App implements Game {
     const header = h(
       'header',
       { class: 'ust' },
-      h('div', { class: 'mana' }, h('span', { class: 'mana-ikon' }, icon('kristal')), h('div', {}, manaNum, sub)),
+      h('div', { class: 'mana' }, this.manaIcon, h('div', {}, manaNum, sub)),
       h('div', { class: 'ust-dugmeler' }, this.muteBtn),
       this.buffBox,
     );
@@ -208,6 +211,7 @@ export class App implements Game {
         case 'tap':
           this.sound.tap(e.crit);
           this.vibrate(e.crit ? 25 : 8);
+          this.pulseMana(e.crit);
           break;
         case 'tapUpgrade':
           this.sound.tapUpgrade();
@@ -249,6 +253,7 @@ export class App implements Game {
           break;
         case 'humaCatch':
           this.sound.humaCatch();
+          this.pulseMana(true);
           this.vibrate(40);
           this.toast(
             e.amount ? `${HUMA_REWARD_TEXT[e.reward]}: +${fmt(e.amount)} mana` : HUMA_REWARD_TEXT[e.reward],
@@ -321,6 +326,24 @@ export class App implements Game {
 
   // ---- iç işler ----
 
+  /** Mana sayacı ve simgesi kazançta kısa bir nabız atar. */
+  private pulseMana(strong: boolean): void {
+    this.manaIcon.animate(
+      [{ transform: 'scale(1)' }, { transform: `scale(${strong ? 1.35 : 1.15}) rotate(${strong ? 12 : 4}deg)` }, { transform: 'scale(1)' }],
+      { duration: strong ? 420 : 200, easing: 'ease-out' },
+    );
+    if (strong) {
+      this.manaNum.animate(
+        [
+          { transform: 'scale(1)', textShadow: '0 0 0 transparent' },
+          { transform: 'scale(1.1)', textShadow: '0 0 18px rgb(243 195 90 / 0.9)', color: '#ffe3a1', offset: 0.3 },
+          { transform: 'scale(1)', textShadow: '0 0 0 transparent' },
+        ],
+        { duration: 520, easing: 'ease-out' },
+      );
+    }
+  }
+
   private saveSoon(): void {
     window.clearTimeout(this.saveTimer);
     this.saveTimer = window.setTimeout(() => this.save(), 1500);
@@ -332,6 +355,7 @@ export class App implements Game {
       const on = t.id === id;
       t.btn.setAttribute('aria-selected', String(on));
       t.view.el.hidden = !on;
+      t.view.setVisible?.(on);
       if (on) {
         t.fresh = false;
         t.view.update();
@@ -415,6 +439,7 @@ export class App implements Game {
     } else {
       this.sound.setHidden(false);
       this.stars.pause(false);
+      this.tabs.find((t) => t.id === this.active)?.view.setVisible?.(true);
       if (this.hiddenAt !== undefined) this.catchUp(true);
       this.hiddenAt = undefined;
     }

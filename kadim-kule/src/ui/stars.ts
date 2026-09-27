@@ -8,6 +8,15 @@ interface Star {
   gold: boolean;
 }
 
+interface Nebula {
+  x: number;
+  y: number;
+  r: number;
+  vx: number;
+  vy: number;
+  color: string;
+}
+
 interface Mote {
   x: number;
   y: number;
@@ -20,6 +29,7 @@ export class Starfield {
   private ctx: CanvasRenderingContext2D | null;
   private stars: Star[] = [];
   private motes: Mote[] = [];
+  private nebulae: Nebula[] = [];
   private paused = false;
   private last = 0;
   private w = 0;
@@ -57,6 +67,21 @@ export class Starfield {
       gold: Math.random() < 0.12,
     }));
     this.motes = Array.from({ length: 14 }, () => this.newMote(true));
+    // Göğe renk katan, çok yavaş sürüklenen bulutsular: kobalt, mor, turkuaz, mercan
+    const big = Math.max(this.w, this.h);
+    this.nebulae = [
+      ['49,96,216', 0.2, 0.25, 0.55],
+      ['122,63,209', 0.8, 0.45, 0.5],
+      ['69,220,200', 0.35, 0.8, 0.45],
+      ['242,100,79', 0.9, 0.9, 0.3],
+    ].map(([color, fx, fy, fr]) => ({
+      x: (fx as number) * this.w,
+      y: (fy as number) * this.h,
+      r: (fr as number) * big,
+      vx: (Math.random() - 0.5) * 6,
+      vy: (Math.random() - 0.5) * 6,
+      color: color as string,
+    }));
     this.draw(0);
   }
 
@@ -78,6 +103,12 @@ export class Starfield {
         m.y -= m.vy * dt;
         if (m.y < -10) Object.assign(m, this.newMote(false));
       }
+      for (const n of this.nebulae) {
+        n.x += n.vx * dt;
+        n.y += n.vy * dt;
+        if (n.x < 0 || n.x > this.w) n.vx = -n.vx;
+        if (n.y < 0 || n.y > this.h) n.vy = -n.vy;
+      }
       this.draw(t / 1000);
     }
     requestAnimationFrame((n) => this.loop(n));
@@ -87,6 +118,15 @@ export class Starfield {
     const c = this.ctx;
     if (!c) return;
     c.clearRect(0, 0, this.w, this.h);
+    for (const n of this.nebulae) {
+      const g = c.createRadialGradient(n.x, n.y, 0, n.x, n.y, n.r);
+      g.addColorStop(0, `rgba(${n.color},0.16)`);
+      g.addColorStop(0.5, `rgba(${n.color},0.06)`);
+      g.addColorStop(1, `rgba(${n.color},0)`);
+      c.globalAlpha = 1;
+      c.fillStyle = g;
+      c.fillRect(n.x - n.r, n.y - n.r, n.r * 2, n.r * 2);
+    }
     for (const s of this.stars) {
       const a = 0.35 + 0.65 * (0.5 + 0.5 * Math.sin(time * s.speed + s.phase));
       c.globalAlpha = a;

@@ -95,10 +95,13 @@ function midSave(overrides = {}) {
   if (await p.locator('.sekme', { hasText: 'Yaratıklar' }).isVisible()) fail('Yaratıklar sekmesi baştan görünüyor');
   const crystal = p.locator('.kristal-dugme');
   for (let i = 0; i < 40; i++) await crystal.tap({ force: true });
-  const m = Number(await mana(p));
+  await p.waitForTimeout(150); // sayaç bir sonraki karede güncellenir
+  const m = Number((await mana(p)).replace(/\./g, ''));
   if (!(m >= 40)) fail(`40 dokunuş en az 40 mana vermeliydi (${m})`);
   await p.locator('.ustat .dugme').tap();
   await p.waitForTimeout(300);
+  for (let i = 0; i < 6; i++) await crystal.tap({ force: true, position: { x: 150 + i * 8, y: 170 } });
+  await p.waitForTimeout(90);
   await p.screenshot({ path: shots + '02-dokunuslar.png' });
   await ctx.close();
 }
@@ -106,6 +109,7 @@ function midSave(overrides = {}) {
 // 2) Oyun ortası: yaratıklar, Hüma, kütüphane, kule
 {
   const { ctx, p } = await scenario(midSave());
+  await p.waitForTimeout(1500);
   await p.screenshot({ path: shots + '03-kristal-orta.png' });
   await p.locator('.sekme', { hasText: 'Yaratıklar' }).tap();
   await p.waitForTimeout(300);
