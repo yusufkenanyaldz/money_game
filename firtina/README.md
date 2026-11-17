@@ -5,20 +5,20 @@ Tarayıcıda oynanan, tek dosyalık (bağımlılıksız, sıfır dış istek) bi
 
 ## Neler var?
 
-**Görsel**
-- Elle (kodla) çizilmiş yaratıklar: hayaletler, yarasalar (kanat çırpar), taş golemler, göz-yaratıklar, boynuzlu canavarlar, taçlı bekçiler.
-- Taş döşemeli zindan zemini, mumlar, kayalar, kemikler, parlayan rün çemberleri.
-- **Işık ve gölge:** karanlık bir zindan; ışığı sen, büyülerin, patlamalar ve mumlar getiriyor.
-- Vuruşta ezilip esneme (squash & stretch), beyaz flaş, ölümde parlayıp sönme, kıvılcım + duman katmanlı patlamalar, yerde yanık izleri.
-- Toplanan hasar sayıları (ekranı doldurmaz), kritikler zıplar.
+**Görsel — karanlık fantastik**
+- Soluk, kasvetli palet: kemik, kurumuş kan, pas, demir. Neon ve pastel yok.
+- Tırnaklı (serif) yazı, keskin köşeli çerçeveler, emoji yerine çizgiyle çizilmiş Futhark rünleri.
+- Kambur hortlaklar, leş yarasaları, kırıklarından kor sızan taş devler, başlıklı sis cadıları, cehennem domuzları, boynuzlu kafatası bekçiler.
+- Karanlık zindan; ışığı sen, büyülerin ve mumlar getirir. Ölen düşman çöker, yerde kan izi kalır.
+- Derin, kasvetli ses tasarımı; seviyeler Roma rakamıyla.
 
 **Eşyalar ve ilerleme**
 - **11 büyü**, 4 element (Ateş, Buz, Şimşek, Rün) ve 13 pasif.
 - **Kart nadirliği:** Sıradan / Nadir / Destansı / Efsanevi — Destansı +2 seviye, Efsanevi devasa bonus. Kartlar tam olarak neyin değiştiğini gösterir (Hasar 16 → 21).
-- **Evrim:** 5. seviye büyü + eşi olan pasif → elit sandığından yeni bir büyü çıkar (ör. Ateş Topu + Rün Gücü = Güneş Patlaması).
+- **Uyanış:** 5. seviye büyü + eşi olan pasif → elit sandığından yeni bir büyü çıkar (ör. Ateş Topu + Rün Gücü → Güneş Patlaması).
 - **Sandık açma animasyonu:** 1, 3 ya da 5 ödüllü sandıklar; ışınlar en iyi ödülün renginde parlar.
-- **Rün fenerleri:** kır → Rün Bombası (ekranı temizler), Zaman Kumu (her şey donar), Öfke İksiri (×2 hasar), mıknatıs, şifa, altın kesesi.
-- **Kombo sayacı:** 25 / 50 / 100 / 500… öldürmede ödül yağmuru.
+- **Rün dikilitaşları:** kır → Rün Bombası (ekranı temizler), Zaman Kumu (her şey donar), Öfke İksiri (×2 hasar), mıknatıs, şifa, altın kesesi.
+- **Katliam serisi:** 25 / 50 / 100 / 500… öldürmede ödül yağmuru.
 - **Element tepkimeleri:** Ateş+Buz = BUHAR, Ateş+Şimşek = PATLAMA, Buz+Şimşek = KIRILMA; Rün büyüleri işaretli düşmana +%30.
 - 3 bekçi, 11 emanet, 4 kahraman, Sığınak'ta kalıcı güçlendirmeler.
 
