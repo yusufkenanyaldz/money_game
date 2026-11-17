@@ -3,26 +3,24 @@
 Tarayıcıda oynanan, tek dosyalık (bağımlılıksız, sıfır dış istek) bir
 "hayatta kalma" (survivor-like) oyunu. `index.html` dosyasını aç, oyna.
 
-## Türün sıkıcı kısmını nasıl düzeltiyor?
+## Neler var?
 
-Bu türdeki oyunlar bir süre sonra "yürü, sayılar büyüsün" hâline gelir.
-Rün Fırtınası'nda karar vermek gerçekten önemli:
+**Görsel**
+- Elle (kodla) çizilmiş yaratıklar: hayaletler, yarasalar (kanat çırpar), taş golemler, göz-yaratıklar, boynuzlu canavarlar, taçlı bekçiler.
+- Taş döşemeli zindan zemini, mumlar, kayalar, kemikler, parlayan rün çemberleri.
+- **Işık ve gölge:** karanlık bir zindan; ışığı sen, büyülerin, patlamalar ve mumlar getiriyor.
+- Vuruşta ezilip esneme (squash & stretch), beyaz flaş, ölümde parlayıp sönme, kıvılcım + duman katmanlı patlamalar, yerde yanık izleri.
+- Toplanan hasar sayıları (ekranı doldurmaz), kritikler zıplar.
 
-- **Element tepkimeleri.** Her büyü düşmanı elementiyle işaretler
-  (Ateş = yanma, Buz = soğuma/donma, Şimşek = şok). İşaretli düşmana
-  *farklı* bir element değerse tepkime patlar:
-  - Ateş + Buz → **BUHAR** (ağır vuruş + haşlayan bulut)
-  - Ateş + Şimşek → **PATLAMA** (alan patlaması, savurma)
-  - Buz + Şimşek → **KIRILMA** (canın yüzdesi kadar hasar + kırılganlık)
-
-  Yani yalnızca "en güçlü büyü" değil, birbirini tamamlayan büyüler seçmek kazandırır.
-- **Atılma (dash)** — kısa dokunulmazlıklı kaçış; kuşatmadan kurtulmak beceri ister.
-- **İşaret veren düşmanlar** — hücum eden Boynuzlar çizgi çizer, tükürenler parlar; okunabilir tehlike.
-- **3 bekçi (4:00, 8:00, 12:00)** — halka mermi, hücum, çağırma, sarmal saldırıları.
-- **Elit sandıkları** — 5. seviyedeki büyüyü **UYANDIRIR** (6. seviye, davranış değiştirir).
-- **Emanetler** — her bekçiden sonra oyunun kurallarını büken 10 eşsiz eşyadan biri.
-- **Sığınak** — altınla kalıcı güçlendirmeler (can, hasar, yenileme hakkı, diriliş…).
-- **Sürü olayları** — düşmanlar seni halka şeklinde çevreler; dash'in değeri burada ortaya çıkar.
+**Eşyalar ve ilerleme**
+- **11 büyü**, 4 element (Ateş, Buz, Şimşek, Rün) ve 13 pasif.
+- **Kart nadirliği:** Sıradan / Nadir / Destansı / Efsanevi — Destansı +2 seviye, Efsanevi devasa bonus. Kartlar tam olarak neyin değiştiğini gösterir (Hasar 16 → 21).
+- **Evrim:** 5. seviye büyü + eşi olan pasif → elit sandığından yeni bir büyü çıkar (ör. Ateş Topu + Rün Gücü = Güneş Patlaması).
+- **Sandık açma animasyonu:** 1, 3 ya da 5 ödüllü sandıklar; ışınlar en iyi ödülün renginde parlar.
+- **Rün fenerleri:** kır → Rün Bombası (ekranı temizler), Zaman Kumu (her şey donar), Öfke İksiri (×2 hasar), mıknatıs, şifa, altın kesesi.
+- **Kombo sayacı:** 25 / 50 / 100 / 500… öldürmede ödül yağmuru.
+- **Element tepkimeleri:** Ateş+Buz = BUHAR, Ateş+Şimşek = PATLAMA, Buz+Şimşek = KIRILMA; Rün büyüleri işaretli düşmana +%30.
+- 3 bekçi, 11 emanet, 4 kahraman, Sığınak'ta kalıcı güçlendirmeler.
 
 ## Kontroller
 
