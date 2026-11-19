@@ -26,3 +26,10 @@ Dünyayı sonsuz bir karanlık yutmuş. Elinde tek bir fener var. Işığın ula
 ## Denge
 Başsız tarayıcıda bot simülasyonuyla ayarlandı: ilk yerler ilk dakikalarda açılır, ilk söndürme ~12. dakikadan itibaren mümkün,
 ilk tur ~45 dakikada duvara dayanır; rünlerle sonraki turlar belirgin şekilde ileri gider. Katedral ve Uçurum Kapısı birkaç söndürme ister.
+
+## Android (APK)
+`fener/android/build.sh` Android SDK olmadan APK üretir; gereken araçları (aapt2, smali, apksig) Maven Central'dan indirir.
+```
+KEYSTORE=/yol/sonfener.p12 KEYPASS=... VCODE=2 VNAME=1.1 fener/android/build.sh SonFener.apk
+```
+Güncellemelerin telefona üstüne kurulabilmesi için **her seferinde aynı anahtar** (sonfener.p12) kullanılmalı ve `VCODE` artırılmalı. Anahtar repoya konmaz.
