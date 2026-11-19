@@ -18,18 +18,23 @@ canvas{position:fixed;inset:0;display:block}
 button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 svg.ru{display:block;overflow:visible}
 #top{position:fixed;top:0;left:0;right:var(--pw);padding:calc(10px + env(safe-area-inset-top)) 16px 0;text-align:center;pointer-events:none}
+#kor .ki{height:.95em;vertical-align:-.14em;margin-right:10px;filter:drop-shadow(0 0 10px rgba(224,120,40,.5))}
 #kor{font-size:clamp(28px,7vw,40px);letter-spacing:.06em;color:#eadfca;text-shadow:0 0 24px rgba(224,160,80,.35),0 2px 6px #000;font-variant-numeric:tabular-nums}
 #kor small{font-size:.42em;letter-spacing:.3em;color:var(--ember);margin-left:6px;vertical-align:.5em}
 #rate{font-size:13px;color:var(--dim);font-style:italic;margin-top:2px}
-#wave{position:relative;width:min(420px,88%);margin:10px auto 0;height:22px;border:1px solid var(--line2);background:rgba(0,0,0,.6);overflow:hidden}
-#waveFill{position:absolute;inset:0;width:0;background:linear-gradient(90deg,rgba(184,53,42,.15),rgba(184,53,42,.45))}
-#waveTxt{position:absolute;inset:0;display:grid;place-items:center;font-size:11.5px;letter-spacing:.08em;white-space:nowrap;text-shadow:0 1px 3px #000}
-#wave.warn{border-color:var(--blood)}
-#wave.live{border-color:var(--ember);animation:pulse .5s infinite alternate}
+#wave{position:relative;width:min(470px,94%);margin:8px auto 0;height:40px}
+#wave::after{content:"";position:absolute;inset:0;border-style:solid;border-width:12px 40px;border-image:url(assets/bar.webp) 45 150 fill / 12px 40px stretch;pointer-events:none}
+#wave .trk{position:absolute;inset:11px 28px;background:rgba(5,4,3,.92);overflow:hidden}
+#waveFill{position:absolute;top:0;bottom:0;left:0;width:0;background:url(assets/bar-dolgu.webp) left center/auto 100%;opacity:.8;transition:width .3s}
+#waveTxt{position:absolute;inset:0;z-index:1;display:grid;place-items:center;font-size:11.5px;letter-spacing:.08em;white-space:nowrap;text-shadow:0 0 4px #000,0 0 8px #000,0 1px 2px #000}
+#wave.warn #waveFill{filter:hue-rotate(-25deg) saturate(1.6) brightness(.85)}
+#wave.live .trk{animation:pulse .5s infinite alternate}#wave.live #waveFill{opacity:1}
 @keyframes pulse{to{box-shadow:0 0 18px rgba(224,160,80,.5)}}
 #gear{position:fixed;top:calc(10px + env(safe-area-inset-top));right:calc(var(--pw) + 12px);width:34px;height:34px;border:1px solid var(--line2);background:rgba(0,0,0,.5);font-size:15px;color:var(--dim)}
 #hint{position:fixed;left:0;right:var(--pw);bottom:calc(var(--ph) + 14px);text-align:center;font-style:italic;color:var(--dim);font-size:14px;letter-spacing:.06em;pointer-events:none;transition:opacity .6s;text-shadow:0 1px 4px #000}
-#panel{position:fixed;left:0;right:0;bottom:0;height:var(--ph);background:var(--panel);border-top:1px solid var(--line2);display:flex;flex-direction:column;padding-bottom:env(safe-area-inset-bottom)}
+#panel{position:fixed;left:0;right:0;bottom:0;height:var(--ph);display:flex;flex-direction:column;border-style:solid;border-width:40px;border-image:url(assets/panel.webp) 150 fill / 40px / 0 stretch;padding:0 2px calc(env(safe-area-inset-bottom)) ;margin:0 -4px -6px}
+#panel{box-shadow:inset 0 0 0 2000px rgba(7,5,4,.5)}
+#panel>*{margin:-14px -12px 0}#panel #body{margin:0 -12px -18px}
 #tabs{display:flex;border-bottom:1px solid var(--line)}
 #tabs button{flex:1;padding:12px 2px;font-size:11.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--dim);border-bottom:2px solid transparent;position:relative}
 #tabs button.on{color:var(--ink);border-bottom-color:var(--gold)}
@@ -40,27 +45,28 @@ svg.ru{display:block;overflow:visible}
 .mode button{padding:3px 10px;font-size:11px;letter-spacing:.15em;border:1px solid var(--line);color:var(--dim)}
 .mode button.on{border-color:var(--gold);color:var(--ink)}
 .row{display:flex;align-items:center;gap:12px;padding:11px 2px;border-bottom:1px solid var(--line)}
-.row .ic{flex:none;width:38px;height:38px;display:grid;place-items:center;border:1px solid var(--line2);background:radial-gradient(circle,rgba(224,160,80,.08),transparent 70%)}
+.row .ic:has(img){border:0;background:none}.row .ic img{width:48px;height:auto;filter:drop-shadow(0 2px 4px #000)}
+.row .ic{flex:none;width:44px;height:44px;display:grid;place-items:center;border-radius:50%;border:2px solid #4a3a2c;box-shadow:0 0 0 1px #120d0a,inset 0 0 12px rgba(0,0,0,.9),0 2px 5px #000;background:radial-gradient(circle,#2a1a10,#0c0806 70%)}
 .row .ic svg{width:14px;height:19px}
-.row.dark .ic{border-color:rgba(125,157,179,.35);background:none}
+.row.dark .ic{border-color:#2c3a44;background:radial-gradient(circle,#141a1e,#060708 70%)}
 .row .tx{flex:1;min-width:0}
 .row .tt{font-size:15.5px;line-height:1.2}
 .row .tt i{font-style:normal;font-size:12px;color:var(--gold);margin-left:6px;letter-spacing:.08em}
 .row .sb{font-size:12.5px;color:var(--dim);font-style:italic;margin-top:3px;line-height:1.35}
 .row .sb b{color:#bfb5a4;font-weight:400;font-style:normal}
 .row.dark .tt{color:var(--cold)}
-.buy{flex:none;min-width:96px;padding:8px 8px;border:1px solid var(--line2);font-size:12.5px;text-align:center;line-height:1.25;background:rgba(0,0,0,.35);transition:border-color .15s,background .15s}
+.buy{flex:none;min-width:110px;min-height:46px;padding:4px 10px;border-style:solid;border-width:12px 22px;border-image:url(assets/buton.webp) 50 85 fill / 12px 22px stretch;font-size:13px;text-align:center;line-height:1.2;color:#eadfca;text-shadow:0 1px 3px #000;transition:filter .15s}
+.buy:not(:disabled):hover{border-image-source:url(assets/buton-parla.webp)}
+.buy:not(:disabled):active{border-image-source:url(assets/buton-bas.webp);transform:translateY(1px)}
 .buy small{display:block;font-size:9.5px;letter-spacing:.2em;color:var(--dim);text-transform:uppercase}
-.buy:not(:disabled){border-color:rgba(201,162,74,.6)}
-.buy:not(:disabled):active{background:rgba(201,162,74,.15)}
-.buy:disabled{opacity:.38;cursor:default}
-.buy.red:not(:disabled){border-color:var(--cold)}
+.buy:disabled{filter:grayscale(.75) brightness(.78);color:#9d9385;cursor:default}
+.buy.red:not(:disabled){filter:hue-rotate(170deg) saturate(.6)}
 .mystery{padding:14px 4px;color:var(--dim);font-style:italic;font-size:13px;line-height:1.5;border-bottom:1px solid var(--line)}
 .mystery b{color:var(--ink);font-weight:400;font-style:normal}
 .hd{padding:14px 2px 6px;font-size:13px;line-height:1.55;color:var(--dim);font-style:italic}
 .hd b{color:var(--ink);font-style:normal;font-weight:400}
-.big{display:block;width:100%;margin:8px 0 6px;padding:13px;border:1px solid var(--blood);background:linear-gradient(180deg,rgba(110,23,18,.85),rgba(50,10,8,.85));letter-spacing:.25em;text-transform:uppercase;font-size:13px}
-.big:disabled{opacity:.35;border-color:var(--line2);background:none}
+.big{display:block;width:100%;margin:8px 0 6px;padding:8px 14px;border-style:solid;border-width:14px 28px;border-image:url(assets/buton-parla.webp) 55 95 fill / 14px 28px stretch;letter-spacing:.2em;text-transform:uppercase;font-size:12.5px;color:#f0e2c4;text-shadow:0 1px 3px #000}
+.big:disabled{border-image-source:url(assets/buton.webp);filter:grayscale(.7) brightness(.6)}
 .note{padding:12px 2px;border-bottom:1px solid var(--line)}
 .note b{display:block;font-weight:400;font-size:12px;letter-spacing:.2em;color:var(--gold);text-transform:uppercase}
 .note p{font-style:italic;color:#b4ab9b;font-size:14px;line-height:1.5;margin-top:4px}
@@ -72,19 +78,27 @@ svg.ru{display:block;overflow:visible}
 #toast p{font-style:italic;font-size:14.5px;line-height:1.5;color:#cfc5b3}
 .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(3,2,2,.86);padding:18px;z-index:5}
 .modal.on{display:flex}
-.mbox{width:min(440px,100%);text-align:center;border-top:1px solid var(--line2);border-bottom:1px solid var(--line2);padding:22px 8px}
+.mbox{width:min(460px,100%);text-align:center;border-style:solid;border-width:44px;border-image:url(assets/panel.webp) 150 fill / 44px / 0 stretch;padding:0 6px}
 .mbox h2{font-weight:400;letter-spacing:.28em;font-size:22px;margin-bottom:12px}
 .mbox p{color:#a9a090;font-style:italic;line-height:1.6;font-size:14.5px;margin:6px 0}
 .mbox p b{color:var(--ink);font-style:normal;font-weight:400}
-.mbox .btn{display:inline-block;margin:14px 6px 0;padding:11px 22px;border:1px solid var(--line2);letter-spacing:.25em;text-transform:uppercase;font-size:12px}
-.mbox .btn.pri{border-color:var(--blood);background:rgba(110,23,18,.6)}
+.mbox .btn{display:inline-block;margin:14px 4px 0;min-width:130px;padding:6px 14px;border-style:solid;border-width:12px 22px;border-image:url(assets/buton.webp) 50 85 fill / 12px 22px stretch;letter-spacing:.2em;text-transform:uppercase;font-size:12px;text-shadow:0 1px 3px #000}
+.mbox .btn.pri{border-image-source:url(assets/buton-parla.webp)}
 .mbox .stat{display:flex;justify-content:space-between;padding:7px 4px;border-bottom:1px solid var(--line);font-size:14px}
 .mbox .stat span{color:var(--dim);font-style:italic}
 #veil{position:fixed;inset:0;background:#000;opacity:0;pointer-events:none;transition:opacity 1.4s;z-index:6}
 #veil.on{opacity:1}
+@media (max-width:600px){
+  #panel{border-width:26px;border-image-width:26px}
+  #panel>*{margin:-8px -6px 0}#panel #body{margin:0 -6px -10px}
+  .row{gap:10px;padding:9px 0}.row .tt{font-size:14.5px}.row .sb{font-size:12px}
+  .row .ic{width:38px;height:38px}.row .ic img{width:42px}
+  .buy{min-width:96px;font-size:12.5px}
+  #tabs button{padding:10px 2px;letter-spacing:.16em}
+}
 @media (min-width:900px){
   :root{--pw:390px;--ph:0px}
-  #panel{left:auto;top:0;width:var(--pw);height:auto;border-top:0;border-left:1px solid var(--line2)}
+  #panel{left:auto;top:0;width:var(--pw);height:auto;margin:0}
   #hint{bottom:40px}
 }
 </style>
@@ -94,7 +108,7 @@ svg.ru{display:block;overflow:visible}
 <div id="top">
   <div id="kor">0<small>KOR</small></div>
   <div id="rate">fener zayıf yanıyor</div>
-  <div id="wave"><div id="waveFill"></div><span id="waveTxt"></span></div>
+  <div id="wave"><div class="trk"><div id="waveFill"></div></div><span id="waveTxt"></span></div>
 </div>
 <button id="gear" aria-label="Ayarlar">⚙</button>
 <div id="hint">Fenere dokun.</div>
@@ -181,7 +195,7 @@ function newRun(){
   const off=Math.random()*TAU;
   S.run={fitil:(S.runes.raidho||0)*2,sur:0,cam:0,waveN:0,waveT:interval(),phase:'calm',live:0,boost:0,
     locs:LOCS.map((L,i)=>({lv:0,dark:false,ang:off+i*2.39996+rnd(-.25,.25),name:pick(L.names)}))};
-  S.kor=0;S.total=0;
+  genProps();S.kor=0;S.total=0;
 }
 function load(){
   try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&s.run)return s;}catch(e){}
@@ -258,6 +272,25 @@ const lightSpr=mk(128,128,g=>{const gr=g.createRadialGradient(64,64,0,64,64,64);
 const gc={};
 function glow(c){return gc[c]||(gc[c]=mk(64,64,g=>{const r=g.createRadialGradient(32,32,0,32,32,32);r.addColorStop(0,c);r.addColorStop(.3,c+'88');r.addColorStop(1,c+'00');g.fillStyle=r;g.fillRect(0,0,64,64);}));}
 
+/* ---------- GÖRSELLER ---------- */
+const IMG={};
+for(const k of['fener','kasa','fici','vazo','tabure','dikilitas','samdan','sandik']){const i=new Image();i.src='assets/'+k+'.webp';IMG[k]=i;}
+const ok=k=>IMG[k]&&IMG[k].complete&&IMG[k].naturalWidth>0;
+const PROP={fici:{h:.55,w:3},kasa:{h:.5,w:3},tabure:{h:.42,w:2},vazo:{h:.62,w:2},samdan:{h:.78,w:2,lit:[[.5,.12]]},dikilitas:{h:.95,w:1.4,rune:1},sandik:{h:.52,w:1}};
+function genProps(){
+  const run=S.run,out=[],ks=Object.keys(PROP);let tw=0;for(const k of ks)tw+=PROP[k].w;
+  for(let i=0;i<30;i++){
+    const d=.9+Math.pow(Math.random(),1.5)*82,a=Math.random()*TAU;
+    let r=Math.random()*tw,k='fici';for(const x of ks){r-=PROP[x].w;if(r<=0){k=x;break;}}
+    if(run.locs.some((l,j)=>Math.abs(LOCS[j].d-d)<Math.max(1.4,d*.3)&&Math.abs(Math.atan2(Math.sin(l.ang-a),Math.cos(l.ang-a)))<.55))continue;
+    if(out.some(o=>Math.abs(o.d-d)<Math.max(1,d*.2)&&Math.abs(Math.atan2(Math.sin(o.a-a),Math.cos(o.a-a)))<.4))continue;
+    out.push({d,a,k,f:Math.random()<.5?-1:1});
+  }
+  run.props=out;
+}
+function propPos(o,cx,cy){const r=sr(o.d);return[cx+Math.cos(o.a)*r,cy+Math.sin(o.a)*r*.8];}
+const propSize=()=>clamp(zoom*1.15,34,72);
+
 /* ---------- YER ÇİZİMLERİ ---------- */
 function drawPlace(kind,x,y,s,st,t){
   // st: 0 yakılmamış, 1 yanıyor, 2 karanlığa düşmüş
@@ -329,6 +362,10 @@ function draw(now){
   // yerler
   const fl=.92+.05*Math.sin(t*7)+.03*Math.sin(t*23)+flare*.15;
   const lightR=sr(Rw)*fl*(1-shrink*.35);
+  const ps=propSize();
+  for(const o of run.props||[]){if(o.d>Rw*1.08||!ok(o.k))continue;const [x,y]=propPos(o,cx,cy),P=PROP[o.k],im=IMG[o.k],h=ps*P.h,w=h*im.width/im.height;
+    ctx.fillStyle='rgba(0,0,0,.45)';ctx.beginPath();ctx.ellipse(x,y,w*.5,h*.09,0,0,TAU);ctx.fill();
+    ctx.save();ctx.translate(x,y);ctx.scale(o.f,1);ctx.drawImage(im,-w/2,-h,w,h);ctx.restore();}
   for(let i=0;i<LOCS.length;i++){
     const L=LOCS[i],l=run.locs[i];if(!revealed(i))continue;
     const r=sr(L.d),x=cx+Math.cos(l.ang)*r,y=cy+Math.sin(l.ang)*r*.8;
@@ -345,6 +382,8 @@ function draw(now){
   lx.drawImage(lightSpr,(cx-lr)*k,(cy-lr*.85)*k,lr*2*k,lr*1.7*k);
   for(let i=0;i<LOCS.length;i++){const l=run.locs[i];if(!revealed(i)||l.dark||l.lv<=0)continue;const r=sr(LOCS[i].d),x=cx+Math.cos(l.ang)*r,y=cy+Math.sin(l.ang)*r*.8,q=clamp(zoom*.9,30,80);
     lx.globalAlpha=.55;lx.drawImage(lightSpr,(x-q)*k,(y-q)*k,q*2*k,q*2*k);}
+  for(const o of run.props||[]){if(o.d>Rw*1.08)continue;const P=PROP[o.k];if(!P.lit&&!P.rune)continue;const [x,y]=propPos(o,cx,cy),q=ps*(1.1+.08*Math.sin(t*9+o.a*7));
+    lx.globalAlpha=.6;lx.drawImage(lightSpr,(x-q)*k,(y-ps*P.h*.7-q)*k,q*2*k,q*2*k);}
   for(const p of sparks){lx.globalAlpha=Math.min(.6,p.l);const q=26;lx.drawImage(lightSpr,(p.x-q)*k,(p.y-q)*k,q*2*k,q*2*k);}
   lx.globalAlpha=1;
   ctx.drawImage(lc,0,0,W,H);
@@ -366,7 +405,16 @@ function draw(now){
   if(nx>=0){const l=run.locs[nx],r=sr(LOCS[nx].d),x=cx+Math.cos(l.ang)*r,y=cy+Math.sin(l.ang)*r*.8;
     if(x>-20&&x<W-PW+20&&y>-20&&y<H-PH+20){ctx.globalAlpha=.18+.1*Math.sin(t*1.3);ctx.font='22px Georgia,serif';ctx.textAlign='center';ctx.fillStyle='#837b70';ctx.fillText('?',x,y);ctx.globalAlpha=1;}}
   // fener ve kıvılcımlar
-  drawLantern(cx,cy,clamp(zoom*.7,26,48),fl,t);
+  ctx.globalCompositeOperation='lighter';
+  for(const o of run.props||[]){if(o.d>Rw*1.08)continue;const P=PROP[o.k];if(!P.lit&&!P.rune)continue;const [x,y]=propPos(o,cx,cy),h=ps*P.h,g=h*(P.rune?.9:.7)*(.9+.1*Math.sin(t*11+o.a*5));
+    ctx.globalAlpha=P.rune?.35+.15*Math.sin(t*1.7+o.a):.55;ctx.drawImage(glow(P.rune?'#e0a050':'#ffb060'),x-g/2,y-h*(P.rune?.55:.88)-g/2,g,g);}
+  ctx.globalAlpha=1;ctx.globalCompositeOperation='source-over';
+  if(ok('fener')){const im=IMG.fener,h=clamp(zoom*1.75,64,120),w=h*im.width/im.height,top=cy-h*.56+Math.sin(t*1.2)*1.2;
+    ctx.fillStyle='rgba(0,0,0,.55)';ctx.beginPath();ctx.ellipse(cx,top+h*.99,w*.42,h*.05,0,0,TAU);ctx.fill();
+    ctx.drawImage(im,cx-w/2,top,w,h);
+    ctx.globalCompositeOperation='lighter';const g=h*(.85+.25*flare);ctx.globalAlpha=.28+.3*(fl-.9)*4;ctx.drawImage(glow('#e0a050'),cx-g/2,top+h*.6-g/2,g,g);
+    ctx.globalAlpha=1;ctx.globalCompositeOperation='source-over';}
+  else drawLantern(cx,cy,clamp(zoom*.7,26,48),fl,t);
   ctx.globalCompositeOperation='lighter';
   for(let i=sparks.length-1;i>=0;i--){const p=sparks[i];p.l-=.016;p.x+=p.vx*.016;p.y+=p.vy*.016;p.vy-=30*.016;if(p.l<=0){sparks.splice(i,1);continue;}
     ctx.globalAlpha=Math.min(1,p.l*1.6);ctx.fillStyle='#ffb060';ctx.fillRect(p.x-1.2,p.y-1.2,2.4,2.4);}
@@ -484,13 +532,13 @@ function rowEl(sp){
 function specsFor(){
   const run=S.run,out=[];
   if(tab==='fener'){
-    out.push({icon:icon('kenaz','#e0a050'),
+    out.push({icon:'<img src="assets/ikon-fitil.webp" alt="">',
       tt:()=>`Fitil <i>${run.fitil}</i>`,sb:()=>{const a=R(),L=run.fitil+1,b=1+L*1.2+L*L*.06;return`Işık <b>${a.toFixed(1)} → ${b.toFixed(1)}</b> adıma ulaşır. Işık büyüdükçe gece de sertleşir.`;},
       can:()=>S.kor>=fitilCost(),buy:()=>{S.kor-=fitilCost();run.fitil++;},bt:()=>`Uzat<small>${fmt(fitilCost())}</small>`});
-    out.push({icon:icon('algiz','#b8ae9c'),
+    out.push({icon:'<img src="assets/ikon-sur.webp" alt="">',
       tt:()=>`Sur <i>${run.sur}</i>`,sb:()=>`Savunma <b>${fmt(defBase(run.sur))} → ${fmt(defBase(run.sur+1))}</b>. Sıradaki gecenin gücü <b>${fmt(waveStr(run.waveN))}</b>.`,
       can:()=>S.kor>=surCost(),buy:()=>{S.kor-=surCost();run.sur++;},bt:()=>`Ör<small>${fmt(surCost())}</small>`});
-    out.push({icon:icon('uruz','#b8ae9c'),
+    out.push({icon:'<img src="assets/ikon-gunes.webp" alt="">',
       tt:()=>`Cam <i>${run.cam}</i>`,sb:()=>`Her dokunuş <b>+${fmt(tapGain())}</b> kor. Gece dalgası sırasında dokunmak feneri harlar.`,
       can:()=>S.kor>=camCost(),buy:()=>{S.kor-=camCost();run.cam++;},bt:()=>`Parlat<small>${fmt(camCost())}</small>`});
   }else if(tab==='yer'){
@@ -528,7 +576,7 @@ function render(){
   }
   if(tab==='run'){
     const h=document.createElement('div');h.className='hd';
-    h.innerHTML=`Elindeki kül: <b id="kulNow"></b>. Harcanmamış her kül üretimi %3 artırır.<br>Feneri söndürürsen her şey sıfırlanır; geriye kül ve kazınmış rünler kalır.`;
+    h.innerHTML=`<img src="assets/ikon-kul.webp" alt="" style="width:40px;float:left;margin:0 10px 4px 0">Elindeki kül: <b id="kulNow"></b>. Harcanmamış her kül üretimi %3 artırır.<br>Feneri söndürürsen her şey sıfırlanır; geriye kül ve kazınmış rünler kalır.`;
     body.appendChild(h);
     const b=document.createElement('button');b.className='big';b.id='pres';b.onclick=prestigeAsk;body.appendChild(b);
   }
@@ -548,7 +596,7 @@ function refresh(){
   for(const r of rows){setHTML(r.eTT,r.tt());setHTML(r.eSB,r.sb());setHTML(r.eBtn,r.bt());r.eBtn.disabled=!r.can();}
   const pr=$('#pres');if(pr){const g=kulGain();pr.disabled=g<KUL_REQ;setHTML(pr,g<KUL_REQ?`Feneri söndür · en az ${fmt(Math.pow(KUL_REQ,2)*1e5)} toplam kor gerekir`:`Feneri söndür · +${g} kül`);setHTML($('#kulNow'),String(S.kul));}
   const run=S.run,p=prod();
-  setHTML($('#kor'),fmt(S.kor)+'<small>KOR</small>');
+  setHTML($('#kor'),'<img class="ki" src="assets/ikon-kor.webp" alt="">'+fmt(S.kor)+'<small>KOR</small>');
   setHTML($('#rate'),p>0?`${fmt(p)} kor / sn`:'fener zayıf yanıyor');
   const wv=$('#wave'),W0=waveStr(run.waveN),D=defense();
   if(run.phase==='wave'){wv.className='live';$('#waveFill').style.width=(run.live/4*100)+'%';
@@ -607,6 +655,7 @@ addEventListener('resize',resize);
 
 S=load();
 if(!S){S=freshSave();newRun();}
+if(!S.run.props)genProps();
 resize();buildArt();
 offline();
 render();refresh();

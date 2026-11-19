@@ -1,6 +1,6 @@
 # SON FENER
 
-Karanlık fantastik bir idle (boşta ilerleyen) oyun. Tek `index.html`, bağımlılıksız, çevrimdışı çalışır.
+Karanlık fantastik bir idle (boşta ilerleyen) oyun. `index.html` + `assets/` klasörü; bağımlılıksız, çevrimdışı çalışır (klasörü birlikte taşı).
 
 Dünyayı sonsuz bir karanlık yutmuş. Elinde tek bir fener var. Işığın ulaştığı yerleri geri alırsın.
 
