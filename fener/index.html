@@ -173,6 +173,63 @@ const LOCS=[
   {kind:'cathedral',d:64,base:150000,cost:1.4e9,rune:'ingwaz',names:['Katedral','Kral Mezarı','Kristal Salon'],note:'Duvar resimlerinde hep aynı fener var. Ve onu hep aynı el tutuyor.'},
   {kind:'gate',d:85,base:1e6,cost:2.5e10,rune:'dagaz',names:['Uçurum Kapısı'],note:'Kapının ardında karanlık yok. Söndürülmüş bin fener var. Benimki de bir gün aralarında olacak.'},
 ];
+
+const NOTE_LV=[0,10,25];
+const NOTES=[
+ ['Kapı içeriden kilitliydi. Ocakta hâlâ ılık kül vardı.',
+  'Masada iki tabak. Birinin yanına not bırakılmış: “Fenerci dönünce onu da doyururuz.”',
+  'Yatağın altında küçük bir mum buldum. Hiç yakılmamış. Saklamışlar. Benden mi, karanlıktan mı?'],
+ ['Aşağı bir taş attım. Ses gelmedi. Bir süre sonra taş geri geldi.',
+  'Kuyunun taşına çocuk eliyle kazınmış: “Güneşi aşağı sakladılar.”',
+  'İpi çektim. Kovada su yoktu. Avuç avuç kül vardı. Hâlâ sıcaktı.'],
+ ['Toprak yeni kazılmış. İçeriden değil, dışarıdan.',
+  'Taşlarda hiç isim yok. Hepsinde aynı gün yazıyor: Işığın götürüldüğü gün.',
+  'Mezarlar boş. Buraya gömülenler ölmemiş. Sadece karanlıkta bırakılmışlar.'],
+ ['Duvara biri çentikler kazımış. Her gün bir çentik eksilmiş.',
+  'Değirmenci son aylarda un değil kül öğütmüş. Duvara yazmış: “Ekmek değil, ışık lazım.”',
+  'Son çentiğin yanında: “Fenerci bizi bekletmeyecekti. Söz vermişti.”'],
+ ['Madenciler aşağıda bir şey duyduklarını söylemiş. Sonra hepsi aşağı inmiş.',
+  'Duvarlarda tırnak izleri var. Yukarı değil, aşağı doğru kazmışlar. Işığı orada sanmışlar.',
+  'En dipte, kömürle yazılmış: “Aşağıda ışık yok. Işığı alan yukarıda. Elinde bir fenerle.”'],
+ ['Keşişler ışığı saklamış. Karanlıktan değil, karanlık için.',
+  'Dua kitabının her sayfasında aynı satır: “Gece bizim sesimizdir. Fenerci duymaz.”',
+  'Son keşişin notu: “Gece dalgası öfke değildir. Üşüyen yüzler, sıcaklığa uzanan ellerdir.”'],
+ ['Kuleden baktım: karanlığın da bir kıyısı var. Biri orada bekliyor.',
+  'Gözcünün defteri: “Fener her büyüdüğünde gece de büyüyor. Işık, gölgesini kendi doğurur.”',
+  'Kıyıda bekleyeni yeniden gördüm. Elinde bir fener vardı. Yüzü benimkiydi.'],
+ ['Duvar resimlerinde hep aynı fener var. Ve onu hep aynı el tutuyor.',
+  'Bir resimde herkes güneşin etrafında toplanmış. Bir el güneşi bir fenerin içine koyuyor. Resmin gerisi siyaha boyanmış.',
+  'Mihrabın taşına kazınmış: “Son güneşi çalan, sonsuz gecede onu beklemeye mahkûmdur.”'],
+ ['Kapının ardında karanlık yok. Söndürülmüş bin fener var. Benimki de bir gün aralarında olacak.',
+  'Her sönmüş fenerin dibine aynı rün kazınmış. Benim elimden çıkma. Hepsini ben söndürmüşüm.',
+  'Kapı fısıldadı: “Işığı tutmaya devam edebilirsin. Ya da geri verebilirsin.”'],
+];
+const MEMORY=['Külü avucuma aldım. Tanıdık geldi.','Yeni fener yandı. Avucumda aynı yanık izi var.','Bu yolu daha önce yürüdüm. Taşlar adımlarımı hatırlıyor.',
+ 'Karanlıktan bir ses adımı söyledi. Adımı ben bile unutmuştum.','Kaç kez söndürdüm? Kül sayıyor. Ben saymıyorum.','Yine.'];
+const WHISPER=['Üşüyoruz…','Biraz ışık…','Bizi unuttun.','Neden götürdün?','Fenerci… dön…','Sadece ısınmak istiyoruz.','Bekledik.','Sözün vardı.'];
+const ENDING=['Feneri yere bıraktım. Camını açtım.','Alev bir an tereddüt etti. Sonra yükseldi.','Karanlık geri çekilmedi. Yaklaştı. Sıcaklığa uzanan eller, yüzler.',
+ 'Hepsini tanıdım. Kulübede yemeğimi bekleyenler. Kuyuya yazan çocuk. Çentik sayan değirmenci.','Işık onlara dağıldı. Bende hiçbir şey kalmadı.',
+ 'Ve ufukta, çok uzun zamandır ilk kez, gökyüzü ağardı.'];
+const hasNote=(i,j)=>S.notes.includes(i+'-'+j);
+function giveNote(i,j){if(hasNote(i,j))return;S.notes.push(i+'-'+j);markTab('gunce');dirty=true;toast(S.run.locs[i].name.toLocaleUpperCase('tr-TR'),NOTES[i][j]);}
+function checkNotes(){for(let i=0;i<LOCS.length;i++){const l=S.run.locs[i];if(!revealed(i)||l.dark)continue;for(let j=1;j<3;j++)if(l.lv>=NOTE_LV[j])giveNote(i,j);}}
+let whispered=0;
+function whisper(){if(S.notes.length<6||S.run.dawn)return;const [cx,cy]=center();const w=WHISPER[(whispered++ + S.runs)%WHISPER.length];
+  floats.push({x:cx+rnd(-60,60),y:cy-90,t:w,l:3.2,s:15,c:'#8fa3b3'});}
+function standAtGate(){
+  modal(`<h2>UÇURUM KAPISI</h2><p>Bin sönmüş fener önünde. Benimki elimde yanıyor.</p><p>Işığı tutmaya devam edebilirsin. Ya da geri verebilirsin.</p>
+   <button class="btn" data-close>Feneri tut</button><button class="btn pri" id="giveLight">Işığı geri ver</button>`);
+  $('#giveLight').onclick=dawn;
+}
+function dawn(){
+  $('#modal').classList.remove('on');sfx('kul');const v=$('#veil');v.style.transition='opacity 2.5s';v.style.background='#000';v.classList.add('on');
+  let k=0;const step=()=>{if(k<ENDING.length){$('#mbox').innerHTML=`<p style="font-size:17px;color:#d8cfbf">${ENDING[k]}</p>`;$('#modal').classList.add('on');$('#modal').style.background='transparent';$('#modal').style.zIndex=7;k++;setTimeout(step,3600);}
+    else{S.run.dawn=1;S.dawns=(S.dawns||0)+1;tendr=[];S.run.phase='calm';persist();dirty=true;v.style.transition='opacity 4s';v.style.background='#f3dcb0';
+      setTimeout(()=>{v.classList.remove('on');$('#modal').style.background='';$('#modal').style.zIndex='';
+        modal(`<h2 style="color:#e8cfa0">ŞAFAK</h2><p>Fener söndü. Ama bu sefer, gece de.</p><button class="btn pri" data-close>Devam</button>`);
+        setTimeout(()=>{v.style.background='#000';v.style.transition='opacity 1.4s';},4500);},2500);}};
+  setTimeout(step,2600);
+}
 const MILES=[10,25,50,100,150,200,300,400];
 const RUNE_UP={
   fehu:{n:'Fehu',d:'+%50 kor üretimi',base:2},
@@ -190,7 +247,7 @@ const KUL_REQ=3;
 /* ---------- KAYIT ---------- */
 const KEY='sonfener_v1';
 let S=null;
-function freshSave(){return{kor:0,total:0,life:0,kul:0,kulTotal:0,runes:{},notes:[],runs:0,mute:false,last:Date.now(),taps:0,held:0,fell:0,run:null};}
+function freshSave(){return{kor:0,total:0,life:0,kul:0,kulTotal:0,runes:{},notes:[],dawns:0,runs:0,mute:false,last:Date.now(),taps:0,held:0,fell:0,run:null};}
 function newRun(){
   const off=Math.random()*TAU;
   S.run={fitil:(S.runes.raidho||0)*2,sur:0,cam:0,waveN:0,waveT:interval(),phase:'calm',live:0,boost:0,
@@ -393,7 +450,7 @@ function draw(now){
   }
   // karanlık
   lx.globalCompositeOperation='source-over';lx.clearRect(0,0,lc.width,lc.height);
-  lx.fillStyle=run.phase==='wave'?'rgba(2,1,1,.985)':'rgba(3,2,2,.975)';lx.fillRect(0,0,lc.width,lc.height);
+  lx.fillStyle=run.dawn?'rgba(40,24,12,.55)':run.phase==='wave'?'rgba(2,1,1,.985)':'rgba(3,2,2,.975)';lx.fillRect(0,0,lc.width,lc.height);
   lx.globalCompositeOperation='destination-out';
   const k=lc.width/W,lr=lightR*1.35;
   lx.drawImage(lightSpr,(cx-lr)*k,(cy-lr*.85)*k,lr*2*k,lr*1.7*k);
@@ -453,16 +510,18 @@ function gain(n){S.kor+=n;S.total+=n;S.life+=n;}
 function tick(dt){
   const run=S.run;
   gain(prod()*dt);
-  if(run.phase==='calm'){
+  if(run.dawn){run.phase='calm';run.waveT=interval();}
+  else if(run.phase==='calm'){
     const before=run.waveT;run.waveT-=dt;
     if(before>10&&run.waveT<=10)sfx('warn');
     if(run.waveT<=0){run.phase='wave';run.live=4;run.boost=0;startTendrils();}
   }else if(run.phase==='wave'){
     run.live-=dt;if(run.live<=0)resolveWave(false);
   }
-  checkReveal();
+  checkReveal();checkNotes();
 }
 function startTendrils(){
+  whisper();
   const W0=waveStr(S.run.waveN),D=defense();const force=clamp(W0/D,0.4,1.6);
   tendr=Array.from({length:16},(_,i)=>({a:i/16*TAU+rnd(-.2,.2),c:rnd(-.5,.5),w:rnd(8,22),p:0,v:rnd(.25,.45),force}));
 }
@@ -493,8 +552,8 @@ function checkReveal(){
   if(knownRevealed<0){knownRevealed=n;return;}
   if(n>knownRevealed){
     for(let i=knownRevealed;i<n;i++){const l=S.run.locs[i];sfx('reveal');
-      if(!S.notes.includes(i)){S.notes.push(i);markTab('gunce');}
-      toast(l.name.toLocaleUpperCase('tr-TR'),LOCS[i].note);}
+      if(!hasNote(i,0)){S.notes.push(i+'-0');markTab('gunce');}
+      toast(l.name.toLocaleUpperCase('tr-TR'),NOTES[i][0]);}
     knownRevealed=n;markTab('yer');dirty=true;
   }
 }
@@ -520,7 +579,8 @@ function offline(){
     const step=Math.min(el,run.waveT);
     const g=prod()*step*offEff();gain(g);rep.gained+=g;
     el-=step;run.waveT-=step;
-    if(run.waveT<=0){const r=resolveWave(true,true);if(r.held)rep.held++;else{rep.fell++;r.lost.forEach(n=>rep.lost.add(n));}}
+    if(run.waveT<=0&&run.dawn)run.waveT=interval();
+    else if(run.waveT<=0){const r=resolveWave(true,true);if(r.held)rep.held++;else{rep.fell++;r.lost.forEach(n=>rep.lost.add(n));}}
   }
   const lostNow=run.locs.filter(l=>l.dark).map(l=>l.name);
   modal(`<h2>SEN YOKKEN</h2>
@@ -598,9 +658,11 @@ function render(){
     const b=document.createElement('button');b.className='big';b.id='pres';b.onclick=prestigeAsk;body.appendChild(b);
   }
   if(tab==='gunce'){
-    const h=document.createElement('div');h.className='hd';h.innerHTML=`Işığın değdiği yerlerden kalan notlar. <b>${S.notes.length} / ${LOCS.length}</b>`;body.appendChild(h);
-    LOCS.forEach((L,i)=>{const d=document.createElement('div');const got=S.notes.includes(i);d.className='note'+(got?'':' lock');
-      d.innerHTML=got?`<b>${L.names[0]}</b><p>${L.note}</p>`:`<b>· · ·</b><p>Karanlıkta, ${L.d} adım ötede.</p>`;body.appendChild(d);});
+    const h=document.createElement('div');h.className='hd';h.innerHTML=`Işığın değdiği yerlerden kalan notlar. <b>${S.notes.length} / ${LOCS.length*3}</b>`;body.appendChild(h);
+    if(hasNote(8,2)&&!S.run.dawn){const g=document.createElement('button');g.className='big';g.textContent='Kapının önünde dur';g.onclick=standAtGate;body.appendChild(g);}
+    LOCS.forEach((L,i)=>{const any=hasNote(i,0);const d=document.createElement('div');d.className='note'+(any?'':' lock');
+      if(!any){d.innerHTML=`<b>· · ·</b><p>Karanlıkta, ${L.d} adım ötede.</p>`;body.appendChild(d);return;}
+      d.innerHTML=`<b>${L.names[0]}</b>`+[0,1,2].map(j=>hasNote(i,j)?`<p>${NOTES[i][j]}</p>`:`<p style="color:#4a453e">· · · (${NOTE_LV[j]}. derece)</p>`).join('');body.appendChild(d);});
     const x=document.createElement('div');x.className='hd';
     x.innerHTML=`Söndürülen fener: <b>${S.runs}</b> · toplam kor: <b>${fmt(S.life)}</b> · savuşturulan gece: <b>${S.held}</b> · düşen gece: <b>${S.fell}</b>`;body.appendChild(x);
   }else for(const sp of specsFor()){body.appendChild(rowEl(sp));rows.push(sp);}
@@ -616,7 +678,8 @@ function refresh(){
   setHTML($('#kor'),'<img class="ki" src="assets/ikon-kor.webp" alt="">'+fmt(S.kor)+'<small>KOR</small>');
   setHTML($('#rate'),p>0?`${fmt(p)} kor / sn`:'fener zayıf yanıyor');
   const wv=$('#wave'),W0=waveStr(run.waveN),D=defense();
-  if(run.phase==='wave'){wv.className='live';$('#waveFill').style.width=(run.live/4*100)+'%';
+  if(run.dawn){wv.className='';$('#waveFill').style.width='100%';setHTML($('#waveTxt'),'Şafak sökmüş · gece gelmiyor');}
+  else if(run.phase==='wave'){wv.className='live';$('#waveFill').style.width=(run.live/4*100)+'%';
     setHTML($('#waveTxt'),`GECE DALGASI · dokun, feneri harla · ışık +%${Math.round(run.boost*100)}`);}
   else{wv.className=W0>D?'warn':'';$('#waveFill').style.width=((1-run.waveT/interval())*100)+'%';
     setHTML($('#waveTxt'),W0>D*2.5&&kulGain()>=KUL_REQ?`Gece artık durdurulamaz · feneri söndürme vakti`:`Gece ${fmtT(run.waveT)} sonra · güç ${fmt(W0)} / savunma ${fmt(D)}${W0>D?' · zayıfsın':''}`);if(W0>D*2.5&&kulGain()>=KUL_REQ)markTab('run');}
@@ -647,7 +710,7 @@ function doPrestige(){
   setTimeout(()=>{S.kul+=g;S.kulTotal+=g;S.runs++;newRun();knownRevealed=-1;tendr=[];dirty=true;tab='run';
     document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x.dataset.t==='run'));
     render();refresh();persist();$('#veil').classList.remove('on');
-    toast('KÜLDEN','Yeni bir fener yandı. Eskisinin külü avucunda.');},1600);
+    toast('KÜLDEN',MEMORY[Math.min(S.runs,MEMORY.length)-1]);},1600);
 }
 $('#gear').onclick=()=>{audio();sfx('click');
   modal(`<h2>AYARLAR</h2><button class="btn" id="muteT">${S.mute?'Sesi aç':'Sesi kapat'}</button><br><button class="btn" id="wipe">Her şeyi sil</button><br><button class="btn pri" data-close>Kapat</button>`);
@@ -673,6 +736,7 @@ addEventListener('resize',resize);
 S=load();
 if(!S){S=freshSave();newRun();}
 if(!S.run.props)genProps();
+S.notes=(S.notes||[]).map(n=>typeof n==='number'?n+'-0':n);S.dawns=S.dawns||0;
 resize();buildArt();
 offline();
 render();refresh();
