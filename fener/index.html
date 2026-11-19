@@ -277,8 +277,11 @@ const IMG={};
 for(const k of['fener','kasa','fici','vazo','tabure','dikilitas','samdan','sandik']){const i=new Image();i.src='assets/'+k+'.webp';IMG[k]=i;}
 const ok=k=>IMG[k]&&IMG[k].complete&&IMG[k].naturalWidth>0;
 const PLACE={hut:['kulube',.9],well:['kuyu',.85],grave:['mezarlik',.85],mill:['degirmen',1.3],mine:['maden',.95],abbey:['manastir',1.25],tower:['kule',1.55],cathedral:['katedral',1.55],gate:['kapi',1.4]};
-const DARK={};
-for(const k in PLACE){const i=new Image();i.onload=()=>{DARK[k]=mk(i.width,i.height,g=>{g.drawImage(i,0,0);g.globalCompositeOperation='saturation';g.fillStyle='#808080';g.fillRect(0,0,i.width,i.height);
+const DARK={},ANIM={"grave": [24, 308, 220], "hut": [24, 256, 220], "well": [24, 149, 220], "mine": [24, 239, 220], "abbey": [24, 126, 220], "tower": [24, 62, 220], "cathedral": [24, 145, 220], "mill": [24, 120, 220], "gate": [24, 182, 220]},ASH={};
+for(const k in ANIM){const i=new Image();i.onload=()=>{const [n,fw,fh]=ANIM[k];ASH[k]=i;
+  DARK[k]=mk(fw,fh,g=>{g.drawImage(i,0,0,fw,fh,0,0,fw,fh);g.globalCompositeOperation='saturation';g.fillStyle='#808080';g.fillRect(0,0,fw,fh);
+  g.globalCompositeOperation='source-atop';g.fillStyle='rgba(8,14,22,.62)';g.fillRect(0,0,fw,fh);g.globalCompositeOperation='destination-in';g.drawImage(i,0,0,fw,fh,0,0,fw,fh);});};i.src='assets/anim-'+k+'.webp';}
+for(const k in PLACE){const i=new Image();i.onload=()=>{if(!ANIM[k])DARK[k]=mk(i.width,i.height,g=>{g.drawImage(i,0,0);g.globalCompositeOperation='saturation';g.fillStyle='#808080';g.fillRect(0,0,i.width,i.height);
   g.globalCompositeOperation='source-atop';g.fillStyle='rgba(8,14,22,.62)';g.fillRect(0,0,i.width,i.height);g.globalCompositeOperation='destination-in';g.drawImage(i,0,0);});};i.src='assets/yer-'+PLACE[k][0]+'.webp';IMG['p_'+k]=i;}
 const PROP={fici:{h:.55,w:3},kasa:{h:.5,w:3},tabure:{h:.42,w:2},vazo:{h:.62,w:2},samdan:{h:.78,w:2,lit:[[.5,.12]]},dikilitas:{h:.95,w:1.4,rune:1},sandik:{h:.52,w:1}};
 function genProps(){
@@ -377,7 +380,13 @@ function draw(now){
     let s=clamp(zoom*.62,22,44),ly=y+s*.75;
     if(ok('p_'+L.kind)){const im=l.dark?DARK[L.kind]||IMG['p_'+L.kind]:IMG['p_'+L.kind],h=clamp(zoom*2,30,130)*PLACE[L.kind][1],w=h*im.width/im.height;
       ctx.fillStyle='rgba(0,0,0,.5)';ctx.beginPath();ctx.ellipse(x,y,w*.48,h*.07,0,0,TAU);ctx.fill();
-      if(l.lv<=0&&!l.dark)ctx.globalAlpha=.55;ctx.drawImage(im,x-w/2,y-h*.94,w,h);ctx.globalAlpha=1;ly=y+17;}
+      if(l.lv<=0&&!l.dark)ctx.globalAlpha=.55;
+      const A=ANIM[L.kind],sh=ASH[L.kind];
+      if(A&&sh){const [n,fw,fh]=A,w2=h*fw/fh;
+        if(l.dark&&DARK[L.kind])ctx.drawImage(DARK[L.kind],x-w2/2,y-h*.94,w2,h);
+        else{const f=Math.floor(t*10+i*7)%n;ctx.drawImage(sh,f*fw,0,fw,fh,x-w2/2,y-h*.94,w2,h);}}
+      else ctx.drawImage(im,x-w/2,y-h*.94,w,h);
+      ctx.globalAlpha=1;ly=y+17;}
     else drawPlace(L.kind,x,y,s,l.dark?2:l.lv>0?1:0,t);
     ctx.font=`${clamp(s*.42,10.5,13)}px Georgia,serif`;ctx.textAlign='center';ctx.fillStyle=l.dark?'rgba(125,157,179,.75)':'rgba(216,207,191,.8)';
     const nm=W-PW>=560?l.name+' · ':'';ctx.strokeStyle='rgba(0,0,0,.85)';ctx.lineWidth=3;const tx=l.dark?nm+'söndü':l.lv>0?nm+l.lv:(nm?l.name:'·');ctx.strokeText(tx,x,ly);ctx.fillText(tx,x,ly);
