@@ -29,7 +29,7 @@ Oyunun merkezi. Ekranın ortasında, yerde duruyor.
 an old wrought-iron lantern standing on the ground, four glass panes, a single small warm flame inside, soot-stained metal, ring handle on top, glowing softly
 ```
 
-## 2. Yerler (9 adet)
+## 2. Yerler (9 adet) — ✓ eklendi
 Her biri hem **yanıyor** hem **sönmüş** hâlde gösteriliyor; sönmüş hâlini ben koddan üretirim, sadece yanan hâlini iste.
 Pencereler/ışık kaynakları amber renkte hafif parlasın.
 

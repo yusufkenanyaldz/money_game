@@ -276,6 +276,10 @@ function glow(c){return gc[c]||(gc[c]=mk(64,64,g=>{const r=g.createRadialGradien
 const IMG={};
 for(const k of['fener','kasa','fici','vazo','tabure','dikilitas','samdan','sandik']){const i=new Image();i.src='assets/'+k+'.webp';IMG[k]=i;}
 const ok=k=>IMG[k]&&IMG[k].complete&&IMG[k].naturalWidth>0;
+const PLACE={hut:['kulube',.9],well:['kuyu',.85],grave:['mezarlik',.85],mill:['degirmen',1.3],mine:['maden',.95],abbey:['manastir',1.25],tower:['kule',1.55],cathedral:['katedral',1.55],gate:['kapi',1.4]};
+const DARK={};
+for(const k in PLACE){const i=new Image();i.onload=()=>{DARK[k]=mk(i.width,i.height,g=>{g.drawImage(i,0,0);g.globalCompositeOperation='saturation';g.fillStyle='#808080';g.fillRect(0,0,i.width,i.height);
+  g.globalCompositeOperation='source-atop';g.fillStyle='rgba(8,14,22,.62)';g.fillRect(0,0,i.width,i.height);g.globalCompositeOperation='destination-in';g.drawImage(i,0,0);});};i.src='assets/yer-'+PLACE[k][0]+'.webp';IMG['p_'+k]=i;}
 const PROP={fici:{h:.55,w:3},kasa:{h:.5,w:3},tabure:{h:.42,w:2},vazo:{h:.62,w:2},samdan:{h:.78,w:2,lit:[[.5,.12]]},dikilitas:{h:.95,w:1.4,rune:1},sandik:{h:.52,w:1}};
 function genProps(){
   const run=S.run,out=[],ks=Object.keys(PROP);let tw=0;for(const k of ks)tw+=PROP[k].w;
@@ -289,7 +293,7 @@ function genProps(){
   run.props=out;
 }
 function propPos(o,cx,cy){const r=sr(o.d);return[cx+Math.cos(o.a)*r,cy+Math.sin(o.a)*r*.8];}
-const propSize=()=>clamp(zoom*1.15,34,72);
+const propSize=()=>clamp(zoom*1.15,W-PW<560?22:34,72);
 
 /* ---------- YER ÇİZİMLERİ ---------- */
 function drawPlace(kind,x,y,s,st,t){
@@ -363,16 +367,20 @@ function draw(now){
   const fl=.92+.05*Math.sin(t*7)+.03*Math.sin(t*23)+flare*.15;
   const lightR=sr(Rw)*fl*(1-shrink*.35);
   const ps=propSize();
-  for(const o of run.props||[]){if(o.d>Rw*1.08||!ok(o.k))continue;const [x,y]=propPos(o,cx,cy),P=PROP[o.k],im=IMG[o.k],h=ps*P.h,w=h*im.width/im.height;
+  const small=W-PW<560;
+  for(const [pi,o] of (run.props||[]).entries()){if(o.d>Rw*1.08||!ok(o.k)||(small&&pi%2))continue;const [x,y]=propPos(o,cx,cy),P=PROP[o.k],im=IMG[o.k],h=ps*P.h,w=h*im.width/im.height;
     ctx.fillStyle='rgba(0,0,0,.45)';ctx.beginPath();ctx.ellipse(x,y,w*.5,h*.09,0,0,TAU);ctx.fill();
     ctx.save();ctx.translate(x,y);ctx.scale(o.f,1);ctx.drawImage(im,-w/2,-h,w,h);ctx.restore();}
   for(let i=0;i<LOCS.length;i++){
     const L=LOCS[i],l=run.locs[i];if(!revealed(i))continue;
     const r=sr(L.d),x=cx+Math.cos(l.ang)*r,y=cy+Math.sin(l.ang)*r*.8;
-    const s=clamp(zoom*.62,22,44);
-    drawPlace(L.kind,x,y,s,l.dark?2:l.lv>0?1:0,t);
+    let s=clamp(zoom*.62,22,44),ly=y+s*.75;
+    if(ok('p_'+L.kind)){const im=l.dark?DARK[L.kind]||IMG['p_'+L.kind]:IMG['p_'+L.kind],h=clamp(zoom*2,30,130)*PLACE[L.kind][1],w=h*im.width/im.height;
+      ctx.fillStyle='rgba(0,0,0,.5)';ctx.beginPath();ctx.ellipse(x,y,w*.48,h*.07,0,0,TAU);ctx.fill();
+      if(l.lv<=0&&!l.dark)ctx.globalAlpha=.55;ctx.drawImage(im,x-w/2,y-h*.94,w,h);ctx.globalAlpha=1;ly=y+17;}
+    else drawPlace(L.kind,x,y,s,l.dark?2:l.lv>0?1:0,t);
     ctx.font=`${clamp(s*.42,10.5,13)}px Georgia,serif`;ctx.textAlign='center';ctx.fillStyle=l.dark?'rgba(125,157,179,.75)':'rgba(216,207,191,.8)';
-    const nm=W-PW>=560?l.name+' · ':'';ctx.fillText(l.dark?nm+'söndü':l.lv>0?nm+l.lv:(nm?l.name:'·'),x,y+s*.75);
+    const nm=W-PW>=560?l.name+' · ':'';ctx.strokeStyle='rgba(0,0,0,.85)';ctx.lineWidth=3;const tx=l.dark?nm+'söndü':l.lv>0?nm+l.lv:(nm?l.name:'·');ctx.strokeText(tx,x,ly);ctx.fillText(tx,x,ly);
   }
   // karanlık
   lx.globalCompositeOperation='source-over';lx.clearRect(0,0,lc.width,lc.height);
@@ -380,7 +388,7 @@ function draw(now){
   lx.globalCompositeOperation='destination-out';
   const k=lc.width/W,lr=lightR*1.35;
   lx.drawImage(lightSpr,(cx-lr)*k,(cy-lr*.85)*k,lr*2*k,lr*1.7*k);
-  for(let i=0;i<LOCS.length;i++){const l=run.locs[i];if(!revealed(i)||l.dark||l.lv<=0)continue;const r=sr(LOCS[i].d),x=cx+Math.cos(l.ang)*r,y=cy+Math.sin(l.ang)*r*.8,q=clamp(zoom*.9,30,80);
+  for(let i=0;i<LOCS.length;i++){const l=run.locs[i];if(!revealed(i)||l.dark||l.lv<=0)continue;const r=sr(LOCS[i].d),x=cx+Math.cos(l.ang)*r,y=cy+Math.sin(l.ang)*r*.8-zoom*.4,q=clamp(zoom*1.3,40,110);
     lx.globalAlpha=.55;lx.drawImage(lightSpr,(x-q)*k,(y-q)*k,q*2*k,q*2*k);}
   for(const o of run.props||[]){if(o.d>Rw*1.08)continue;const P=PROP[o.k];if(!P.lit&&!P.rune)continue;const [x,y]=propPos(o,cx,cy),q=ps*(1.1+.08*Math.sin(t*9+o.a*7));
     lx.globalAlpha=.6;lx.drawImage(lightSpr,(x-q)*k,(y-ps*P.h*.7-q)*k,q*2*k,q*2*k);}
