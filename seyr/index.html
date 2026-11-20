@@ -31,7 +31,7 @@ canvas{position:fixed;inset:0;display:block}
 </head>
 <body>
 <canvas id="c"></canvas>
-<div id="hud">GARİP<small>sol: yürü · sağ: vur, kaçın</small></div>
+<div id="hud">GARİP<small></small></div>
 <button id="ses" aria-label="Ses">🔊</button>
 <div class="btn" id="kac">KAÇIN</div>
 <div class="btn" id="vur">VUR</div>
@@ -89,7 +89,10 @@ function input(){let x=0,y=0;
 
 /* ---------- EYLEMLER ---------- */
 function setSt(s){if(P.st===s)return;
-  P.prev={st:P.st,f:curFrame(),face:P.face};P.blend=0;
+  const one=x=>x==='yumruk'||x==='kacin';
+  P.prev={st:P.st,f:curFrame(),face:P.face,t0:performance.now(),one:one(P.st),rate:P.st==='kos'||P.st==='yuru'?Math.max(.75,P.rate||1):1};P.blend=0;
+  // geçiş süresi: vuruşa hızlı, duruşa yumuşak
+  P.bdur=s==='yumruk'?.11:s==='kacin'?.1:(s==='bekle'&&(P.prev.st==='kos'||P.prev.st==='yuru'))?.22:.16;
   // yürüme <-> koşma arasında adım fazını koru
   const loop=x=>x==='yuru'||x==='kos'||x==='yuru2';P.ph=(loop(s)&&loop(P.prev.st))?P.ph:0;P.st=s;P.t=0;}
 function curFrame(){const N=ANIM['anim-garip-'+P.st][0];
@@ -105,12 +108,12 @@ function update(dt){
     if(P.st==='kacin'){const k=P.act/.6;P.vx=-P.face*420*k;}else P.vx*=Math.pow(.02,dt);  // geriye sıçrar
     if(P.st==='yumruk'&&!P.hitDone&&curFrame()>=PUNCH.hit){P.hitDone=true;play('vur',.9);
       for(const d of DUMMY){if(d.down>0)continue;const dx=(d.x-P.x)*P.face,dy=Math.abs(d.y-P.y);
-        if(dx>20&&dx<170&&dy<.18){d.hp--;d.shake=.35;for(let i=0;i<14;i++)parts.push({x:d.x,gy:d.y,h:rnd(70,150),vx:P.face*rnd(60,260),vh:rnd(60,260),l:rnd(.4,.8),c:Math.random()<.5?'#c9a24a':'#e8cf8a'});
+        if(dx>20&&dx<170&&dy<.18){d.hp-=GUCLU.dmg;d.shake=.35;for(let i=0;i<14;i++)parts.push({x:d.x,gy:d.y,h:rnd(70,150),vx:P.face*rnd(60,260),vh:rnd(60,260),l:rnd(.4,.8),c:Math.random()<.5?'#c9a24a':'#e8cf8a'});
           if(d.hp<=0){d.down=4;d.hp=3;}}}}
     if(P.act<=0)setSt('bekle');
   }else{
     const run=m>.85,tvx=m>.12?ix*(run?RUN:WALK):0,tvy=m>.12?iy*(run?.55:.35):0;
-    const acc=m>.12?6:4.2;                       // hızlanma / yavaşlama
+    const acc=m>.12?7:6.5;                       // hızlanma / yavaşlama
     P.vx+=(tvx-P.vx)*Math.min(1,acc*dt);P.vy+=(tvy-P.vy)*Math.min(1,acc*dt);
     if(m>.12&&Math.abs(ix)>.15)P.face=ix>0?1:-1;
     const sp=Math.abs(P.vx)+Math.abs(P.vy)*400;
@@ -120,8 +123,8 @@ function update(dt){
   P.x+=P.vx*dt;P.y=clamp(P.y+P.vy*dt,0,1);
   // animasyon hızı hareket hızına bağlı: yavaşlarken adımlar da yavaşlar
   const sp2=Math.abs(P.vx)+Math.abs(P.vy)*400;
-  P.ph+=dt*15*(P.st==='kos'?clamp(sp2/RUN,.55,1.1):P.st==='yuru'?clamp(sp2/WALK,.45,1.1):1);
-  P.t+=dt;P.blend=Math.min(1,P.blend+dt/BLEND);
+  P.rate=P.st==='kos'?clamp(sp2/RUN,.8,1.1):P.st==='yuru'?clamp(sp2/WALK,.75,1.1):1;P.ph+=dt*15*P.rate;
+  P.t+=dt;P.blend=Math.min(1,P.blend+dt/(P.bdur||BLEND));
   for(const d of DUMMY){d.shake=Math.max(0,d.shake-dt);if(d.down>0)d.down-=dt;}
   for(let i=parts.length-1;i>=0;i--){const p=parts[i];p.l-=dt;p.x+=p.vx*dt;p.h+=p.vh*dt;p.vh-=520*dt;if(p.l<=0)parts.splice(i,1);}
   camX+=(P.x-camX)*Math.min(1,dt*4);
@@ -170,7 +173,8 @@ function sprite(st,f,face,alpha){const n='anim-garip-'+st,[N,fw,fh,C,src]=ANIM[n
 function hero(){const s=scaleAt(P.y),x=P.x-camX+W/2,y=yScr(P.y),h=H*.4*s;
   ctx.fillStyle='rgba(40,30,10,.3)';ctx.beginPath();ctx.ellipse(x,y,h*.17,h*.035,0,0,7);ctx.fill();
   const k=P.blend*P.blend*(3-2*P.blend);          // yumuşak eğri
-  if(P.prev&&k<1){sprite(P.prev.st,P.prev.f,P.prev.face,1-k);sprite(P.st,curFrame(),P.face,Math.min(1,k*1.6));}
+  if(P.prev&&k<1){const pp=P.prev,N=ANIM['anim-garip-'+pp.st][0],adv=Math.floor((performance.now()-pp.t0)/1000*15*pp.rate);
+    sprite(pp.st,pp.one?Math.min(N-1,pp.f+adv):(pp.f+adv)%N,pp.face,1-k);sprite(P.st,curFrame(),P.face,Math.min(1,k*1.6));}
   else sprite(P.st,curFrame(),P.face,1);
 }
 function draw(){ctx.setTransform(DPR,0,0,DPR,0,0);
@@ -185,10 +189,14 @@ function draw(){ctx.setTransform(DPR,0,0,DPR,0,0);
     const dx=joy.x-joy.bx,dy=joy.y-joy.by,d=Math.min(60,Math.hypot(dx,dy)),a=Math.atan2(dy,dx);ctx.fillStyle='rgba(201,162,74,.75)';ctx.beginPath();ctx.arc(joy.bx+Math.cos(a)*d,joy.by+Math.sin(a)*d,26,0,7);ctx.fill();}}
 
 let last=performance.now(),running=false;
-function frame(now){const dt=Math.min(.05,(now-last)/1000);last=now;if(running)update(dt);draw();requestAnimationFrame(frame);}
+function frame(now){const dt=Math.min(.05,(now-last)/1000);last=now;if(running&&!paused)update(dt);draw();requestAnimationFrame(frame);}
 document.getElementById('basla').onclick=async()=>{await initAudio();try{await document.documentElement.requestFullscreen?.();await screen.orientation?.lock?.('landscape');}catch(e){}document.getElementById('bas').remove();running=true;};
 requestAnimationFrame(frame);
 window.__s={P,DUMMY,attack,dodge,update,joy,set run(v){running=v}};
+// defter ile bağ: güç → vuruş, defter açıkken oyun durur
+let paused=false,GUCLU={dmg:1};
+window.__oyun={durdur(v){paused=v;},guc(h){GUCLU.dmg=1+Math.floor((h.L-1)/10)*.5+h.g.alp/2000;},seviye(L){play('vur',1);}};
 </script>
+<script src="defter.js"></script>
 </body>
 </html>

@@ -5,11 +5,11 @@ Her adım bitince telefonda denenir, beğenilmeden bir sonrakine geçilmez.
 
 ---
 
-## 0. Hemen ilk iş: geçişlerdeki "donma" hissi
+## 0. Geçişlerdeki "donma" hissi — DÜZELTİLDİ (APK 1.2), telefonda denenecek
 Son denemede (APK 1.1) geçişler yumuşadı ama donma hissi verdi. Muhtemel sebepler:
-- [ ] Çapraz geçişte **eski poz sabit bir kare** olarak sönüyor → eski hareket de geçiş boyunca oynamaya devam etmeli.
-- [ ] Yavaşlarken adım animasyonu %45'e kadar düşüyor → ağır çekim gibi; alt sınırı yükselt (~%75), yavaşlamayı kısalt.
-- [ ] Yumruk başında bekleme pozu sönerken gard pozu geliyor → yumruğa geçiş daha kısa olsun (Grok önerisi: 120 ms), her geçişe ayrı süre.
+- [x] Çapraz geçişte **eski poz sabit bir kare** olarak sönüyor → eski hareket de geçiş boyunca oynamaya devam etmeli.
+- [x] Yavaşlarken adım animasyonu %45'e kadar düşüyor → ağır çekim gibi; alt sınırı yükselt (~%75), yavaşlamayı kısalt.
+- [x] Yumruk başında bekleme pozu sönerken gard pozu geliyor → yumruğa geçiş daha kısa olsun (Grok önerisi: 120 ms), her geçişe ayrı süre.
 - [ ] Gerekirse köprü klipler (Grok): koşudan durma, yürümeye ilk adım.
 
 ## 1. Ana karakter (1–100. seviye) — ŞU AN BURADAYIZ
@@ -42,7 +42,7 @@ Her görünüm için gereken hareketler (Garip'tekilerle aynı): bekleme, yürü
 ## 3. Emanetler, silahlar, yadigârlar
 - [ ] 10 emanetin simgeleri (Ezel Kandili, Lokman'ın Kalemi, Yedi Deniz Kabuğu, Sonsuz Gevher Dizisi, Seher Halkası, Tozkoparan Nalı, İskender'in Aynası, Sessiz Ejder Mührü, Kaf Dağı Yankısı, Âb-ı Hayat Damlası).
 - [ ] Kılıçlar ve yadigârlar (aksesuarlar): hangi başarıyla kazanılacakları.
-- [ ] Anahtar sayfası (sembol → gerçek anlam): ayarlarda gizli, uzun basınca açılır.
+- [x] Anahtar (sembol → gerçek anlam): DEFTER başlığına uzun basınca açılır.
 
 ## 4. Canavarlar
 - [ ] Bölüm sonu canavarları: Kızıl Dev, Yedi Dilli Yılan, Bin Yüzlü Gulyabani, Karabasan, Sis Albastısı, Zifiri Börü, Ateş İfriti, Yeşil Gözlü Ejder, Tavus Şah, Sırça Saray Cini, Dahhâk (son).
@@ -51,12 +51,14 @@ Her görünüm için gereken hareketler (Garip'tekilerle aynı): bekleme, yürü
 
 ## 5. Mekanikler
 - [ ] Savaş: can, hasar, isabet, darbe alma, emanetlerin canavarlara karşı gücü.
-- [ ] Seviye ve 4 güç (Kut, Hikmet, Alp, Cevher) hesabı.
-- [ ] Yıldız Defteri (akşam muhasebesi) + Seher Çiyi (dürüstlük ödülü).
-- [ ] Devamlılık serisi (az ama devamlı).
+- [x] Seviye (1–100, eğri: ~240 tecrübe/gün ile ~1 yıl) ve 4 güç (Kut, Hikmet, Alp, Cevher) — `defter.js`
+- [x] Yıldız Defteri + Seher Çiyi (itiraf da aynı tecrübeyi verir; ayrıca çiy)
+- [x] Devamlılık serisi (+%2/gün, en çok +%50; boş gün seriyi yarıya indirir)
+- [x] Zikirmatik, günlük giriş ekranı, gizli anahtar (DEFTER başlığına 1,5 sn bas)
+- [x] Vuruş gücü seviyeye ve Alp gücüne bağlı (ilk adım)
 
 ## 6. Gerçek hayat bağlantıları
-- [ ] **Kitap okuma:** elle sayfa girişi. Ölçü: **10 sayfa = 30 dakika** (Risale-i Nur temposu). Süre tutmaya gerek yok.
+- [x] **Kitap okuma:** elle sayfa girişi. Ölçü: **10 sayfa = 30 dakika** (Risale-i Nur temposu). Süre tutmaya gerek yok.
 - [ ] **Adım / yürüyüş:** Android **Health Connect**. ⚠ Not: Health Connect, şu anki basit APK yönteminin yetmediği Android kütüphaneleri gerektirir; bu aşamada derleme düzenini büyütmemiz gerekecek (ya da ilk sürümde elle giriş).
 - [ ] **Zikir:** kullanıcının kullandığı zikir uygulamasından veri alma. Önce uygulamanın adı öğrenilecek; dışa veri veriyor mu bakılacak. Vermiyorsa: oyun içi zikirmatik ya da elle giriş.
 - [ ] Kur'an okuma, kitap dinleme, tesbihat, ahlaki emanetler: elle giriş / Yıldız Defteri.
