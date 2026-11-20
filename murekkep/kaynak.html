@@ -4,16 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Mürekkep Damlası - Roguelite Kaligrafi Arcade</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- STIL -->
     <style>
         * {
             box-sizing: border-box;
             user-select: none;
             -webkit-user-select: none;
             -webkit-touch-callout: none;
-            touch-action: none;
+            -webkit-tap-highlight-color: transparent;
         }
+        button { touch-action: manipulation; }
 
         body, html {
             margin: 0;
@@ -21,8 +21,9 @@
             width: 100%;
             height: 100%;
             overflow: hidden;
+            overscroll-behavior: none;
             background-color: #f5efe2;
-            font-family: 'Inter', sans-serif;
+            font-family: 'Inter', system-ui, sans-serif;
             color: #141312;
         }
 
@@ -31,6 +32,7 @@
         }
 
         canvas {
+            touch-action: none;
             display: block;
             width: 100%;
             height: 100%;
@@ -67,6 +69,14 @@
             animation: crisisBorder 0.9s infinite ease-in-out;
         }
 
+        /* Gece bölgesinde üst panel okunur kalsın */
+        #scoreText { transition: color .4s; }
+        #hud.hud-dark #scoreText { color: #f8fafc; }
+        #hud.hud-dark #hudSubRow { color: #cbd5e1; }
+        #hud.hud-dark #diffBadgeHud { color: #e7e5e4; background: rgba(231, 229, 228, 0.12); border-color: rgba(231, 229, 228, 0.3); }
+        #hud.hud-dark .gold-pill { color: #fcd34d; border-color: rgba(252, 211, 77, 0.5); }
+        #hud.hud-dark .huner-pill { color: #fca5a5; border-color: rgba(252, 165, 165, 0.5); }
+
         .custom-scroll::-webkit-scrollbar {
             width: 5px;
         }
@@ -89,7 +99,7 @@
     <div id="screenEffectOverlay" class="fixed inset-0 pointer-events-none z-10 transition-opacity duration-300 opacity-0"></div>
 
     <!-- Kriz Dalgası (Mühür Fırtınası) Üst Banner -->
-    <div id="crisisBanner" class="fixed top-20 left-1/2 -translate-x-1/2 z-20 pointer-events-none hidden">
+    <div id="crisisBanner" class="fixed top-32 left-1/2 -translate-x-1/2 z-20 pointer-events-none hidden">
         <div class="px-4 py-1.5 rounded-full bg-[#991b1b]/95 border-2 border-[#fca5a5] text-white font-calligraphy text-xs sm:text-sm font-black tracking-widest shadow-xl flex items-center gap-2">
             <span>⚡ MÜHÜR FIRTINASI</span>
             <span id="crisisTimerText" class="px-2 py-0.5 rounded bg-black/40 text-amber-300">15.0s</span>
@@ -97,7 +107,7 @@
     </div>
 
     <!-- Fever (Mürekkep Taşkını) Üst Banner -->
-    <div id="feverBanner" class="fixed top-20 left-1/2 -translate-x-1/2 z-20 pointer-events-none hidden">
+    <div id="feverBanner" class="fixed top-32 left-1/2 -translate-x-1/2 z-20 pointer-events-none hidden">
         <div class="px-4 py-1.5 rounded-full bg-gradient-to-r from-[#b91c1c] via-[#d49b27] to-[#b91c1c] border-2 border-amber-200 text-white font-calligraphy text-xs sm:text-sm font-black tracking-widest shadow-xl flex items-center gap-2">
             <span>🔥 MÜREKKEP TAŞKINI (DOKUNULMAZ)</span>
             <span id="feverTimerText" class="px-2 py-0.5 rounded bg-black/40 text-amber-200">5.0s</span>
@@ -107,22 +117,25 @@
     <!-- Oyun İçi Üst Bilgi Paneli (HUD) -->
     <div id="hud" class="fixed top-0 left-0 w-full p-3 sm:p-4 flex justify-between items-start pointer-events-none z-10 hidden">
         <!-- Sol: Yükseklik, Kombo, Altın Varak & Aktif Tılsımlar -->
-        <div class="flex flex-col gap-1">
+        <div class="flex flex-col gap-1 min-w-0">
             <div class="flex items-center gap-2">
                 <span id="scoreText" class="font-calligraphy text-3xl sm:text-4xl font-black tracking-tight text-[#141312]">0m</span>
-                <span id="comboBadge" class="hidden font-calligraphy text-xs sm:text-sm font-extrabold px-2.5 py-0.5 rounded-md hanko-seal tracking-wider shadow-sm">
+                <span id="comboBadge" class="hidden whitespace-nowrap font-calligraphy text-xs sm:text-sm font-extrabold px-2.5 py-0.5 rounded-md hanko-seal tracking-wider shadow-sm">
                     KOMBO x2
-                </span>
-                <span id="diffBadgeHud" class="font-calligraphy text-[10px] font-bold px-2 py-0.5 rounded bg-stone-800/15 text-stone-700 border border-stone-800/20">
-                    ÇIRAK 1.0x
                 </span>
             </div>
 
-            <div id="hudSubRow" class="flex items-center gap-2 text-xs font-semibold text-stone-700">
+            <div id="hudSubRow" class="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs font-semibold text-stone-700">
+                <span id="diffBadgeHud" class="whitespace-nowrap font-calligraphy text-[10px] font-bold px-2 py-0.5 rounded bg-stone-800/15 text-stone-700 border border-stone-800/20">
+                    ÇIRAK 1.0x
+                </span>
                 <span>🏆 <span id="bestScoreHud" class="font-calligraphy">0m</span></span>
                 <span class="opacity-40">•</span>
-                <span class="flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#d49b27]/20 border border-[#d49b27]/50 text-[#8a600c]">
+                <span class="gold-pill flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#d49b27]/20 border border-[#d49b27]/50 text-[#8a600c]">
                     <span>✦</span> <span id="goldCountHud" class="font-calligraphy font-bold">0</span>
+                </span>
+                <span class="huner-pill flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#d93829]/10 border border-[#d93829]/40 text-[#b91c1c]" title="Hüner: kıl payı, dönüş, mühür kırma">
+                    <span>✧</span> <span id="hunerHud" class="font-calligraphy font-bold">0</span>
                 </span>
             </div>
 
@@ -159,18 +172,18 @@
         </div>
 
         <!-- Sağ: Mürekkep Haznesi & Ses Butonu -->
-        <div class="flex items-start gap-2 pointer-events-auto">
-            <div id="inkCard" class="flex flex-col items-end gap-1 bg-[#ede4d1]/92 backdrop-blur-sm px-2.5 py-2 rounded-xl border border-stone-800/20 shadow-sm">
+        <div class="shrink-0 flex items-start gap-2 pointer-events-auto">
+            <div id="inkCard" class="shrink-0 flex flex-col items-end gap-1 bg-[#ede4d1]/90 backdrop-blur-sm px-2.5 py-2 rounded-xl border border-stone-800/20 shadow-sm">
                 <div class="flex items-center gap-1 text-[10px] font-calligraphy font-bold tracking-wider">
                     <span>💧 MÜREKKEP</span>
                     <span id="inkNumericText" class="opacity-75">100</span>
                 </div>
-                <div class="w-24 sm:w-32 h-2.5 bg-stone-400/40 rounded-full overflow-hidden border border-stone-500/40 p-0.5">
+                <div class="w-20 sm:w-32 h-2.5 bg-stone-400/40 rounded-full overflow-hidden border border-stone-500/40 p-0.5">
                     <div id="inkBarFill" class="h-full bg-[#141312] rounded-full transition-all duration-75" style="width: 100%;"></div>
                 </div>
             </div>
 
-            <button id="soundToggleBtn" class="p-2.5 rounded-xl bg-[#ede4d1]/92 border border-stone-800/20 text-stone-800 hover:brightness-95 transition shadow-sm" title="Sesi Aç/Kapat">
+            <button id="soundToggleBtn" class="p-2.5 rounded-xl bg-[#ede4d1]/90 border border-stone-800/20 text-stone-800 hover:brightness-95 transition shadow-sm" title="Sesi Aç/Kapat">
                 <svg id="soundOnIcon" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
                     <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
                     <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
@@ -214,7 +227,7 @@
     </div>
 
     <!-- ANA MENÜ / HATTAT LOBİSİ -->
-    <div id="startScreen" class="fixed inset-0 bg-[#f5efe2]/90 backdrop-blur-sm flex flex-col items-center justify-center p-3 sm:p-4 z-30 overflow-y-auto">
+    <div id="startScreen" class="fixed inset-0 bg-[#f5efe2]/90 backdrop-blur-sm flex flex-col items-center p-3 sm:p-4 z-30 overflow-y-auto overscroll-contain">
         <div class="max-w-xl w-full bg-[#faf6ed] border-2 border-stone-800/25 rounded-3xl p-4 sm:p-6 shadow-[0_24px_60px_rgba(20,19,18,0.2)] my-auto">
             <!-- Üst Bakiye, Rekor & Mürekkep Özü Sandık Çubuğu -->
             <div class="flex flex-wrap justify-between items-center gap-2 mb-3">
@@ -305,19 +318,19 @@
                     Kuşanılan Yetenek Slotu: 2 / 2
                 </div>
 
-                <div id="shopItemsContainer" class="max-h-56 overflow-y-auto custom-scroll pr-1 space-y-2"></div>
+                <div id="shopItemsContainer" class="max-h-56 overflow-y-auto overscroll-contain custom-scroll pr-1 space-y-2"></div>
             </div>
 
             <!-- Oyuna Başla Butonu -->
-            <button id="startBtn" class="w-full py-3.5 rounded-2xl font-calligraphy font-extrabold text-base sm:text-lg tracking-widest text-[#f5efe2] bg-[#141312] hover:bg-stone-800 shadow-[0_8px_22px_rgba(20,19,18,0.3)] transition transform active:scale-95 animate-pulse-glow">
+            <button id="startBtn" class="sticky bottom-0 w-full py-3.5 rounded-2xl font-calligraphy font-extrabold text-base sm:text-lg tracking-widest text-[#f5efe2] bg-[#141312] hover:bg-stone-800 shadow-[0_8px_22px_rgba(20,19,18,0.3)] transition transform active:scale-95 animate-pulse-glow">
                 PARŞÖMENE ATIL
             </button>
         </div>
     </div>
 
     <!-- HATTAT GİZEMLİ SANDIĞI (GACHA / ÖDÜL MODALI) -->
-    <div id="chestModal" class="fixed inset-0 bg-stone-950/80 backdrop-blur-md flex items-center justify-center p-4 z-40 hidden">
-        <div class="max-w-sm w-full bg-[#faf6ed] border-2 border-[#d49b27] rounded-3xl p-6 text-center shadow-2xl">
+    <div id="chestModal" class="fixed inset-0 bg-stone-950/80 backdrop-blur-md flex flex-col items-center p-4 z-40 hidden overflow-y-auto overscroll-contain">
+        <div class="my-auto max-w-sm w-full bg-[#faf6ed] border-2 border-[#d49b27] rounded-3xl p-6 text-center shadow-2xl">
             <div class="hanko-seal inline-block px-3 py-0.5 rounded font-calligraphy text-xs font-extrabold mb-2">
                 HATTAT HAZİNE SANDIĞI
             </div>
@@ -332,8 +345,8 @@
     </div>
 
     <!-- OYUN BİTTİ EKRANI -->
-    <div id="gameOverScreen" class="fixed inset-0 bg-[#f5efe2]/88 backdrop-blur-md flex flex-col items-center justify-center p-4 z-30 hidden">
-        <div class="max-w-sm w-full bg-[#faf6ed] border-2 border-stone-800/25 rounded-3xl p-6 text-center shadow-[0_20px_50px_rgba(20,19,18,0.2)]">
+    <div id="gameOverScreen" class="fixed inset-0 bg-[#f5efe2]/90 backdrop-blur-md flex flex-col items-center p-4 z-30 hidden overflow-y-auto overscroll-contain">
+        <div class="my-auto max-w-sm w-full bg-[#faf6ed] border-2 border-stone-800/25 rounded-3xl p-6 text-center shadow-[0_20px_50px_rgba(20,19,18,0.2)]">
             <div id="gameOverReason" class="hanko-seal inline-block px-3 py-0.5 rounded font-calligraphy text-[11px] font-extrabold tracking-widest uppercase mb-2">
                 PARŞÖMENDEN DÜŞTÜ
             </div>
@@ -343,6 +356,7 @@
                 <div class="bg-[#efe7d6] p-2.5 rounded-2xl border border-stone-800/15">
                     <div class="text-[10px] text-stone-500 font-semibold uppercase">Yükseklik</div>
                     <div id="finalScoreText" class="font-calligraphy text-xl font-black text-[#141312]">0m</div>
+                    <div id="finalHunerText" class="text-[10px] font-bold text-[#b91c1c]">✧ 0 hüner</div>
                 </div>
                 <div class="bg-[#efe7d6] p-2.5 rounded-2xl border border-stone-800/15">
                     <div class="text-[10px] text-stone-500 font-semibold uppercase">Max Kombo</div>
@@ -478,7 +492,7 @@
                 icon: '⏳',
                 price: 0,
                 cooldown: 11.0,
-                desc: '3.5 saniye boyunca mürekkep harcamadan tam ağır çekim ve geniş nişan sağlar.'
+                desc: '+35 mürekkep verir; 3,5 sn boyunca havada nişan almak bedavadır ve zaman neredeyse durur.'
             },
             {
                 id: 'ink_nova',
@@ -494,7 +508,7 @@
                 icon: '🔥',
                 price: 95,
                 cooldown: 22.0,
-                desc: 'Anında alev dalgasıyla 120m göğe fırlar (veya hazırsa ölümden otomatik kurtarır).'
+                desc: 'Alev dalgasıyla 200 m\'yi aşkın göğe fırlar. Hazır bekliyorsa ölümden bir kez otomatik kurtarır.'
             },
             {
                 id: 'vortex_pull',
@@ -521,7 +535,7 @@
                 icon: '🎯',
                 maxLvl: 3,
                 basePrice: 50,
-                desc: 'Nişan yayını %45 uzatır ve hokkaların yakalama mıknatısını güçlendirir.'
+                desc: 'Nişan yayını seviye başına %25 uzatır; hokka yakalama alanını ve varak çekimini büyütür.'
             },
             {
                 id: 'combo_alchemist',
@@ -529,7 +543,7 @@
                 icon: '⚗️',
                 maxLvl: 3,
                 basePrice: 65,
-                desc: 'Zincir süresini iki katına çıkarır ve her 5x komboda rastgele tılsım verir.'
+                desc: 'Kombo süresini 4,5 sn\'den 7 / 9,5 / 12 sn\'ye uzatır; her 5x komboda rastgele tılsım verir.'
             },
             {
                 id: 'unbreakable_porcelain',
@@ -537,7 +551,7 @@
                 icon: '🏺',
                 maxLvl: 3,
                 basePrice: 45,
-                desc: 'Porselen hokkaların kırılma süresini uzatır ve kırılınca yukarı patlama itişi verir.'
+                desc: 'Porselen hokkaların ömrünü seviye başına 0,45 sn uzatır; kırılınca yukarı patlama itişi verir.'
             },
             {
                 id: 'greedy_dragon',
@@ -545,7 +559,7 @@
                 icon: '🐉',
                 maxLvl: 3,
                 basePrice: 70,
-                desc: 'Altın Varak değerini %40 artırır ve her 100m yükseklikte varak yağmuru başlatır.'
+                desc: 'Altın Varak kazancını %20 / %40 / %60 artırır ve her 100 m\'de varak yağmuru başlatır.'
             },
             {
                 id: 'wall_ricochet',
@@ -603,7 +617,7 @@
                 id: 'vermilion',
                 name: 'Kızıl İmparator Mührü',
                 price: 50,
-                bonusDesc: '+%10 Kombo Puanı',
+                bonusDesc: '+%10 Hüner Puanı',
                 main: '#b91c1c',
                 trailRgb: '185, 28, 28',
                 highlight: 'rgba(254, 226, 226, 0.88)',
@@ -713,6 +727,7 @@
         }
 
         loadSaveData();
+        document.addEventListener('visibilitychange', () => { if (document.hidden) persistSaveData(); });
 
         function getDifficulty() {
             return DIFFICULTIES.find(d => d.id === saveData.difficulty) || DIFFICULTIES[0];
@@ -733,7 +748,12 @@
         class ZenSoundEngine {
             constructor() {
                 this.ctx = null;
-                this.enabled = true;
+                this.enabled = saveData.soundOn !== false;
+            }
+
+            syncIcon() {
+                document.getElementById('soundOnIcon').classList.toggle('hidden', !this.enabled);
+                document.getElementById('soundOffIcon').classList.toggle('hidden', this.enabled);
             }
 
             init() {
@@ -748,8 +768,9 @@
 
             toggle() {
                 this.enabled = !this.enabled;
-                document.getElementById('soundOnIcon').classList.toggle('hidden', !this.enabled);
-                document.getElementById('soundOffIcon').classList.toggle('hidden', this.enabled);
+                saveData.soundOn = this.enabled;
+                persistSaveData();
+                this.syncIcon();
             }
 
             playBrushWhoosh(power = 0.7, isBoosted = false) {
@@ -906,6 +927,7 @@
         }
 
         const sfx = new ZenSoundEngine();
+        sfx.syncIcon();
 
         // =====================================================================
         // 4. LOBİ, ZORLUK SEÇİCİ, GÖREVLER, SANDIK VE 4 SEKMELİ MAĞAZA UI
@@ -962,7 +984,7 @@
 
             loadoutGrid.innerHTML = `
                 <div class="p-1.5 rounded-xl bg-[#faf6ed] border border-stone-800/15 text-center">
-                    <div class="text-stone-500 font-semibold">Yetenekler (2)</div>
+                    <div class="text-stone-500 font-semibold">Yetenekler (${saveData.equippedSkills.length}/2)</div>
                     <div class="text-sm mt-0.5">${eqSkills || 'Seçilmedi'}</div>
                 </div>
                 <div class="p-1.5 rounded-xl bg-[#faf6ed] border border-stone-800/15 text-center">
@@ -1059,7 +1081,7 @@
                                         ? 'bg-[#d49b27] text-stone-950'
                                         : 'bg-stone-300 text-stone-500'
                         }">
-                            ${isEquipped ? `SLOT ${equippedIdx + 1}` : unlocked ? 'KUŞAN' : `✦ ${sk.price}`}
+                            ${isEquipped ? `SLOT ${equippedIdx + 1} ✕` : unlocked ? 'KUŞAN' : `✦ ${sk.price}`}
                         </button>
                     `;
 
@@ -1074,8 +1096,18 @@
                             } else {
                                 sfx.playImpact(false);
                             }
-                        } else if (!isEquipped) {
-                            if (saveData.equippedSkills.length >= 2) saveData.equippedSkills.shift();
+                        } else if (isEquipped) {
+                            /* Yuvadaki yeteneğe dokunmak onu çıkarır */
+                            saveData.equippedSkills = saveData.equippedSkills.filter(id => id !== sk.id);
+                            sfx.playKotoNote(2);
+                        } else if (saveData.equippedSkills.length >= 2) {
+                            /* Yuvalar dolu: hangisinin çıkacağına oyuncu karar versin */
+                            sfx.playImpact(false);
+                            infoBar.textContent = 'İki yuva da dolu: önce birindeki yeteneğe dokunup çıkar.';
+                            infoBar.classList.add('text-[#d93829]');
+                            setTimeout(() => infoBar.classList.remove('text-[#d93829]'), 1800);
+                            return;
+                        } else {
                             saveData.equippedSkills.push(sk.id);
                             sfx.playKotoNote(4);
                         }
@@ -1410,6 +1442,7 @@
         }
 
         function resizeCanvas() {
+            const oldWidth = width;
             width = window.innerWidth;
             height = window.innerHeight;
             dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -1417,11 +1450,23 @@
             canvas.height = height * dpr;
             ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
             if (!grainPattern) createPaperGrain();
+            /* Oyun sırasında ekran döndürülürse dünyayı yeni genişliğe yay */
+            if (gameState === 'PLAYING' && oldWidth > 0 && oldWidth !== width) {
+                const k = width / oldWidth;
+                const sx = o => { o.x *= k; if (o.baseX !== undefined) o.baseX *= k; };
+                nodes.forEach(sx); seals.forEach(sx); collectibles.forEach(sx);
+                inkSplatters.forEach(sx); drop.trail.forEach(sx);
+                windZones.forEach(w => { w.x *= k; w.w = Math.min(200, width * 0.5); });
+                drop.x *= k;
+            }
         }
         window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
 
         function lerp(a, b, t) { return a + (b - a) * t; }
+        function lightenHex(hex, t) {
+            if (typeof hex !== 'string' || hex[0] !== '#' || hex.length !== 7) return hex;
+            return lerpColor(hex, '#ffffff', t);
+        }
         function lerpColor(hex1, hex2, t) {
             const c1 = parseInt(hex1.slice(1), 16);
             const c2 = parseInt(hex2.slice(1), 16);
@@ -1458,6 +1503,12 @@
         let maxAltitude = 0;
         let startY = 0;
         let runGold = 0;
+        let runHuner = 0; /* Hüner: kıl payı, havada dönüş, mühür kırma. Yükseklikten ayrı tutulur. */
+        function addHuner(amount) {
+            const gained = amount * (getActiveSkin().id === 'vermilion' ? 1.1 : 1);
+            runHuner += gained;
+            return Math.round(gained);
+        }
         let maxCombo = 1;
         let lastDragonMilestone = 0;
 
@@ -1516,6 +1567,7 @@
 
         const drag = {
             active: false,
+            pointerId: null,
             startX: 0,
             startY: 0,
             curX: 0,
@@ -1536,6 +1588,7 @@
         let floatingTexts = [];
         let highestGenY = 0;
         let nextId = 1;
+        resizeCanvas(); /* oyun değişkenleri tanımlandıktan sonra */
 
         function triggerShake(intensity, duration = 0.16) {
             shakeIntensity = Math.max(shakeIntensity, intensity);
@@ -1585,20 +1638,29 @@
             });
         }
 
+        /* "Tek koşuda" görevleri her koşu başında sıfırlanır (tamamlanmış olanlar ödül bekler, dokunulmaz) */
+        const PER_RUN_QUEST_TYPES = ['nearMiss', 'gold', 'skill'];
+        function resetPerRunQuests() {
+            saveData.activeQuests.forEach(q => {
+                if (PER_RUN_QUEST_TYPES.includes(q.type) && q.progress < q.target) q.progress = 0;
+            });
+        }
+
+        /* Koşu sırasında kayıt her değişimde değil; görev tamamlanınca ve koşu bitince yazılır */
         function updateQuestProgress(type, amount = 1, isAbsolute = false) {
-            let updated = false;
+            let completed = false;
             saveData.activeQuests.forEach(q => {
                 if (q.progress >= q.target) return;
                 if (q.type === type) {
                     q.progress = isAbsolute ? Math.max(q.progress, amount) : (q.progress + amount);
                     if (q.progress >= q.target) {
-                        spawnFloatingText(width * 0.5, drop.y - 60, `🎯 GÖREV TAMAM: ${q.text}!`, '#15803d', 13);
+                        spawnFloatingText(width * 0.5, drop.y - 60, '🎯 GÖREV TAMAM!', '#15803d', 15);
                         sfx.playGoldChime();
+                        completed = true;
                     }
-                    updated = true;
                 }
             });
-            if (updated) persistSaveData();
+            if (completed) persistSaveData();
         }
 
         // =====================================================================
@@ -1904,6 +1966,8 @@
             drop.stretchX = 1;
             drop.stretchY = 1;
 
+            resetPerRunQuests();
+
             // Kuşanılan Tek Kullanımlık Eşyaları Tüket ve Aktifleştir
             let startBoostAlt = 0;
             const consumedNow = [];
@@ -1935,7 +1999,11 @@
                 const def = SKILLS_CATALOG.find(s => s.id === id) || SKILLS_CATALOG[0];
                 return { id: def.id, cd: 0, maxCd: def.cooldown };
             });
-            activeSkillSlots.forEach((slot, idx) => {
+            [0, 1].forEach(idx => {
+                const slot = activeSkillSlots[idx];
+                const btn = document.getElementById(`skillSlotBtn${idx}`);
+                btn.classList.toggle('invisible', !slot); /* boş yuva: düğme gizli ama yerleşim bozulmaz */
+                if (!slot) return;
                 const def = SKILLS_CATALOG.find(s => s.id === slot.id);
                 document.getElementById(`skillIcon${idx}`).textContent = def.icon;
                 document.getElementById(`skillName${idx}`).textContent = def.name;
@@ -1953,6 +2021,7 @@
             maxAltitude = startBoostAlt;
             currentScore = startBoostAlt;
             runGold = 0;
+            runHuner = 0;
             maxCombo = 1;
             lastDragonMilestone = 0;
             crisisTimer = 0;
@@ -1960,6 +2029,7 @@
             feverTimer = 0;
 
             drag.active = false;
+            drag.pointerId = null;
             timeScale = 1.0;
 
             highestGenY = Math.min(startY, drop.y);
@@ -1997,6 +2067,7 @@
 
             gameState = 'GAMEOVER';
             drag.active = false;
+            drag.pointerId = null;
             timeScale = 1.0;
             crisisTimer = 0;
             feverTimer = 0;
@@ -2010,11 +2081,10 @@
             const skin = getActiveSkin();
             const dragonRuneLvl = getRuneLevel('greedy_dragon');
 
-            let totalMult = diff.mult;
-            if (skin.id === 'gold_leaf') totalMult += 0.15;
-            if (dragonRuneLvl > 0) totalMult += dragonRuneLvl * 0.20;
+            /* Fırça ve rün bonusları gerçek yüzde: zorluk çarpanının üstüne çarpılır */
+            let totalMult = diff.mult * (1 + (skin.id === 'gold_leaf' ? 0.15 : 0) + dragonRuneLvl * 0.20);
 
-            let finalGoldEarned = Math.round(runGold * totalMult + (currentScore / 35) * diff.mult);
+            let finalGoldEarned = Math.round(runGold * totalMult + ((currentScore + runHuner) / 35) * diff.mult);
 
             // Kader Mührü (Şans Zarı) Etkisi
             let diceDoubled = false;
@@ -2031,13 +2101,14 @@
             if (isNewRecord) saveData.bestScore = currentScore;
 
             saveData.gold += finalGoldEarned;
-            const essenceGain = Math.min(100, Math.round((currentScore / 15 + maxCombo * 3) * (skin.id === 'cosmic_ink' ? 1.2 : 1)));
+            const essenceGain = Math.min(100, Math.round(((currentScore + runHuner) / 15 + maxCombo * 3) * (skin.id === 'cosmic_ink' ? 1.2 : 1)));
             saveData.essence = Math.min(100, saveData.essence + essenceGain);
             persistSaveData();
 
             // Game Over UI Güncelle
             document.getElementById('gameOverReason').textContent = reason;
             document.getElementById('finalScoreText').textContent = `${currentScore}m`;
+            document.getElementById('finalHunerText').textContent = `✧ ${Math.round(runHuner)} hüner`;
             document.getElementById('finalComboText').textContent = `x${maxCombo}`;
             document.getElementById('finalGoldText').textContent = `+${finalGoldEarned} ✦`;
             document.getElementById('diceLuckBanner').classList.toggle('hidden', !diceDoubled);
@@ -2049,7 +2120,7 @@
             document.getElementById('skillBarHud').classList.add('hidden');
             document.getElementById('crisisBanner').classList.add('hidden');
             document.getElementById('feverBanner').classList.add('hidden');
-            document.getElementById('screenEffectOverlay').style.opacity = '0';
+            setOverlayMode('');
             document.getElementById('gameOverScreen').classList.remove('hidden');
         }
 
@@ -2060,8 +2131,9 @@
             const dx = drag.startX - drag.curX;
             const dy = drag.startY - drag.curY;
             const rawDist = Math.hypot(dx, dy);
+            const onJade = !!(drop.latchedNode && drop.latchedNode.type === 'jade');
 
-            if (rawDist < MIN_DRAG_DIST) {
+            if (rawDist < MIN_DRAG_DIST && !onJade) {
                 drag.power = 0;
                 drag.launchVx = 0;
                 drag.launchVy = 0;
@@ -2070,7 +2142,9 @@
             }
 
             const clampedDist = Math.min(rawDist, MAX_DRAG_DIST);
-            drag.power = Math.max(0.18, (clampedDist - MIN_DRAG_DIST) / (MAX_DRAG_DIST - MIN_DRAG_DIST));
+            drag.power = (onJade && rawDist < MIN_DRAG_DIST)
+                ? 0.85
+                : Math.max(0.18, (clampedDist - MIN_DRAG_DIST) / (MAX_DRAG_DIST - MIN_DRAG_DIST));
 
             let nodeBoost = 1.0;
             let momentumVx = 0;
@@ -2115,29 +2189,40 @@
                 return;
             }
 
+            if (drag.active) return; /* ikinci parmak nişanı bozmasın */
             drag.active = true;
+            drag.pointerId = e.pointerId;
+            try { canvas.setPointerCapture(e.pointerId); } catch (_) {}
             drag.startX = e.clientX;
             drag.startY = e.clientY;
             drag.curX = e.clientX;
             drag.curY = e.clientY;
             drag.power = 0;
 
-            if (drop.latchedNode && drop.latchedNode.type === 'jade') {
-                drag.power = 0.85;
-                updateDragVector();
-            }
+            if (drop.latchedNode && drop.latchedNode.type === 'jade') updateDragVector();
         });
 
         window.addEventListener('pointermove', (e) => {
-            if (!drag.active || gameState !== 'PLAYING') return;
+            if (!drag.active || gameState !== 'PLAYING' || e.pointerId !== drag.pointerId) return;
             drag.curX = e.clientX;
             drag.curY = e.clientY;
             updateDragVector();
         });
 
-        window.addEventListener('pointerup', () => {
-            if (!drag.active || gameState !== 'PLAYING') return;
+        /* Dokunma yarıda kesilirse (bildirim çubuğu, sistem hareketi) atış yapmadan nişanı bırak */
+        function cancelDrag(e) {
+            if (!drag.active || (e && e.pointerId !== drag.pointerId)) return;
             drag.active = false;
+            drag.pointerId = null;
+            drag.power = 0;
+        }
+        window.addEventListener('pointercancel', cancelDrag);
+        window.addEventListener('blur', () => cancelDrag());
+
+        window.addEventListener('pointerup', (e) => {
+            if (!drag.active || gameState !== 'PLAYING' || e.pointerId !== drag.pointerId) return;
+            drag.active = false;
+            drag.pointerId = null;
             timeScale = 1.0;
 
             if (drag.power <= 0) return;
@@ -2196,48 +2281,55 @@
         // =====================================================================
         // 10. ANA OYUN FİZİK VE GÜNCELLEME DÖNGÜSÜ
         // =====================================================================
+        /* Üst panel: yalnızca değişen değerleri DOM'a yazar (telefonda her karede onlarca yazım takılma yapar) */
+        const hudCache = {};
+        function hudSet(id, prop, value) {
+            const key = id + '.' + prop;
+            if (hudCache[key] === value) return;
+            hudCache[key] = value;
+            const el = document.getElementById(id);
+            if (prop === 'text') el.textContent = value;
+            else if (prop === 'width') el.style.width = value;
+            else if (prop === 'hidden') el.classList.toggle('hidden', value);
+        }
+
         function updateHUD() {
             const biome = getScrollBiome(currentScore);
-            const skin = getActiveSkin();
-            const skinComMult = skin.id === 'vermilion' ? 1.1 : 1.0;
 
-            document.getElementById('scoreText').textContent = `${currentScore}m`;
-            document.getElementById('scoreText').style.color = biome.isDark ? '#f8fafc' : '#141312';
-            document.getElementById('hudSubRow').className = biome.isDark
-                ? 'flex items-center gap-2 text-xs font-semibold text-slate-300'
-                : 'flex items-center gap-2 text-xs font-semibold text-stone-700';
-
-            document.getElementById('bestScoreHud').textContent = `${saveData.bestScore}m`;
-            document.getElementById('goldCountHud').textContent = `${runGold}`;
-
-            const inkPct = (drop.infInkTimer > 0 || feverTimer > 0) ? 100 : Math.max(0, Math.min(100, (drop.ink / drop.maxInk) * 100));
-            document.getElementById('inkBarFill').style.width = `${inkPct}%`;
-            document.getElementById('inkNumericText').textContent = (drop.infInkTimer > 0 || feverTimer > 0) ? '∞' : Math.round(drop.ink);
-
-            const comboBadge = document.getElementById('comboBadge');
-            if (drop.combo >= 2) {
-                comboBadge.textContent = `KOMBO x${drop.combo}`;
-                comboBadge.classList.remove('hidden');
-            } else {
-                comboBadge.classList.add('hidden');
+            hudSet('hud', 'dark', biome.isDark);
+            if (hudCache['hud.darkApplied'] !== biome.isDark) {
+                hudCache['hud.darkApplied'] = biome.isDark;
+                document.getElementById('hud').classList.toggle('hud-dark', biome.isDark);
             }
 
-            // Durum etiketleri
-            document.getElementById('shieldTag').classList.toggle('hidden', drop.shields <= 0);
-            document.getElementById('shieldCountText').textContent = drop.shields;
+            hudSet('scoreText', 'text', `${currentScore}m`);
+            hudSet('bestScoreHud', 'text', `${saveData.bestScore}m`);
+            hudSet('goldCountHud', 'text', `${runGold}`);
+            hudSet('hunerHud', 'text', `${Math.round(runHuner)}`);
+
+            const infinite = drop.infInkTimer > 0 || feverTimer > 0;
+            const inkPct = infinite ? 100 : Math.max(0, Math.min(100, (drop.ink / drop.maxInk) * 100));
+            hudSet('inkBarFill', 'width', `${Math.round(inkPct)}%`);
+            hudSet('inkNumericText', 'text', infinite ? '∞' : `${Math.round(drop.ink)}`);
+
+            hudSet('comboBadge', 'hidden', drop.combo < 2);
+            if (drop.combo >= 2) hudSet('comboBadge', 'text', `KOMBO x${drop.combo}`);
+
+            hudSet('shieldTag', 'hidden', drop.shields <= 0);
+            hudSet('shieldCountText', 'text', `${drop.shields}`);
 
             const hasPhoenixReady = activeSkillSlots.some(s => s.id === 'phoenix_brush' && s.cd <= 0);
-            document.getElementById('phoenixTag').classList.toggle('hidden', !hasPhoenixReady);
-            document.getElementById('infInkTag').classList.toggle('hidden', drop.infInkTimer <= 0);
+            hudSet('phoenixTag', 'hidden', !hasPhoenixReady);
+            hudSet('infInkTag', 'hidden', drop.infInkTimer <= 0);
 
-            document.getElementById('dragonTag').classList.toggle('hidden', drop.dragonTimer <= 0);
-            if (drop.dragonTimer > 0) document.getElementById('dragonTimerBar').style.width = `${Math.min(100, (drop.dragonTimer / 3.5) * 100)}%`;
+            hudSet('dragonTag', 'hidden', drop.dragonTimer <= 0);
+            if (drop.dragonTimer > 0) hudSet('dragonTimerBar', 'width', `${Math.round(Math.min(100, (drop.dragonTimer / 3.5) * 100))}%`);
 
-            document.getElementById('chronoTag').classList.toggle('hidden', drop.chronoTimer <= 0);
-            if (drop.chronoTimer > 0) document.getElementById('chronoTimerBar').style.width = `${Math.min(100, (drop.chronoTimer / 3.5) * 100)}%`;
+            hudSet('chronoTag', 'hidden', drop.chronoTimer <= 0);
+            if (drop.chronoTimer > 0) hudSet('chronoTimerBar', 'width', `${Math.round(Math.min(100, (drop.chronoTimer / 3.5) * 100))}%`);
 
-            document.getElementById('magnetTag').classList.toggle('hidden', drop.magnetTimer <= 0);
-            if (drop.magnetTimer > 0) document.getElementById('magnetTimerBar').style.width = `${Math.min(100, (drop.magnetTimer / 5.0) * 100)}%`;
+            hudSet('magnetTag', 'hidden', drop.magnetTimer <= 0);
+            if (drop.magnetTimer > 0) hudSet('magnetTimerBar', 'width', `${Math.round(Math.min(100, (drop.magnetTimer / 5.0) * 100))}%`);
         }
 
         function update(rawDt) {
@@ -2269,7 +2361,7 @@
                 p.x += p.vx * dt;
                 p.y += p.vy * dt;
                 p.vy += 300 * dt;
-                p.vx *= 0.95;
+                p.vx *= Math.pow(0.95, rawDt * 60);
                 p.life -= p.decay * rawDt;
                 if (p.life <= 0) inkParticles.splice(i, 1);
             }
@@ -2308,7 +2400,6 @@
             }
 
             // Fever Modu (8x Komboda Mürekkep Taşkını!)
-            const overlay = document.getElementById('screenEffectOverlay');
             const feverBanner = document.getElementById('feverBanner');
             const crisisBanner = document.getElementById('crisisBanner');
 
@@ -2316,14 +2407,14 @@
                 feverTimer = Math.max(0, feverTimer - rawDt);
                 document.getElementById('feverTimerText').textContent = `${feverTimer.toFixed(1)}s`;
                 feverBanner.classList.remove('hidden');
-                overlay.className = 'fixed inset-0 pointer-events-none z-10 fever-frame opacity-100';
+                setOverlayMode('fever');
             } else {
                 feverBanner.classList.add('hidden');
                 if (crisisTimer > 0) {
                     crisisTimer = Math.max(0, crisisTimer - rawDt);
                     document.getElementById('crisisTimerText').textContent = `${crisisTimer.toFixed(1)}s`;
                     crisisBanner.classList.remove('hidden');
-                    overlay.className = 'fixed inset-0 pointer-events-none z-10 crisis-frame opacity-100';
+                    setOverlayMode('crisis');
                     wallNarrowInset = lerp(wallNarrowInset, Math.min(52, width * 0.13), rawDt * 2);
 
                     if (crisisTimer <= 0) {
@@ -2333,7 +2424,7 @@
                     }
                 } else {
                     crisisBanner.classList.add('hidden');
-                    overlay.style.opacity = '0';
+                    setOverlayMode('');
                     wallNarrowInset = lerp(wallNarrowInset, 0, rawDt * 2.5);
                 }
             }
@@ -2432,7 +2523,6 @@
                         runGold++;
                         updateQuestProgress('gold', 1);
                         drop.ink = Math.min(drop.maxInk, drop.ink + 28);
-                        maxAltitude += 12;
                         sfx.playGoldChime();
                         spawnInkSplash(col.x, col.y, '#d49b27', 10, 0.9);
                     } else if (col.kind === 'ink_orb') {
@@ -2467,9 +2557,13 @@
                     const steer = Math.max(-1, Math.min(1, (drag.curX - drop.x) / 130));
                     drop.vx += steer * 540 * rawDt;
                 }
-                drop.vx *= 0.93;
+                drop.vx *= Math.pow(0.93, rawDt * 60);
                 drop.x += drop.vx * rawDt;
                 drop.y += drop.vy * rawDt;
+                /* Uçarken ekran dışına taşma: duvarın hemen içinde tut (uçuş bitince duvara "çarpmış" sayılmasın) */
+                const flyWall = 16 + wallNarrowInset + drop.radius + 2;
+                if (drop.x < flyWall) { drop.x = flyWall; drop.vx = Math.abs(drop.vx) * 0.3; }
+                else if (drop.x > width - flyWall) { drop.x = width - flyWall; drop.vx = -Math.abs(drop.vx) * 0.3; }
             } else if (drop.latchedNode) {
                 const node = drop.latchedNode;
                 drop.x += (node.x - drop.x) * Math.min(1, rawDt * 24);
@@ -2496,10 +2590,10 @@
                         drop.loopBonusAwarded = true;
                         incrementCombo(2);
                         updateQuestProgress('spin', 1);
-                        maxAltitude += 40;
+                        const spinH = addHuner(40);
                         sfx.playGoldChime();
                         spawnRipple(drop.x, drop.y, '#d49b27', 65);
-                        spawnFloatingText(drop.x, drop.y - 26, '360° HAVA DÖNÜŞÜ! +40m', '#b88014', 14);
+                        spawnFloatingText(drop.x, drop.y - 26, `360° HAVA DÖNÜŞÜ! +${spinH} hüner`, '#b88014', 14);
                     }
                 }
 
@@ -2569,13 +2663,13 @@
                     if (drop.dragonTimer > 0 || feverTimer > 0) {
                         seal.broken = true;
                         runGold++;
-                        maxAltitude += 30;
+                        const sealH = addHuner(30);
                         hitStopTimer = 0.025;
                         sfx.playGoldChime();
                         triggerShake(7, 0.16);
                         stampSplatter(seal.x, seal.y, '#d93829', 26);
                         spawnInkSplash(seal.x, seal.y, '#d93829', 16, 1.3);
-                        spawnFloatingText(seal.x, seal.y - 22, 'MÜHÜR PARÇALANDI! +30m', '#b88014', 14);
+                        spawnFloatingText(seal.x, seal.y - 22, `MÜHÜR PARÇALANDI! +${sealH} hüner`, '#b88014', 14);
                     } else if (drop.shields > 0) {
                         drop.shields--;
                         seal.broken = true;
@@ -2594,10 +2688,10 @@
                     seal.nearMissAwarded = true;
                     incrementCombo(1);
                     updateQuestProgress('nearMiss', 1);
-                    maxAltitude += 25;
+                    addHuner(25);
                     hitStopTimer = 0.018;
 
-                    const vampBonus = vampireLvl > 0 ? Math.round(drop.maxInk * (0.15 + vampireLvl * 0.10)) : 16;
+                    const vampBonus = vampireLvl > 0 ? Math.round(drop.maxInk * [0, 0.25, 0.35, 0.50][Math.min(3, vampireLvl)]) : 16;
                     drop.ink = Math.min(drop.maxInk, drop.ink + vampBonus);
                     sfx.playNearMissWhistle(drop.combo);
                     spawnRipple(seal.x, seal.y, '#d93829', 52);
@@ -2674,6 +2768,18 @@
                     triggerGameOver(drop.y > burnLineY ? 'KAĞIT KURUMASI YAKALADI 🔥' : 'PARŞÖMENDEN DÜŞTÜ');
                 }
             }
+        }
+
+        /* Ekran kenarı efekti: '' (yok), 'fever' (altın) ya da 'crisis' (kırmızı). Yalnızca değişince dokunur. */
+        let overlayMode = null;
+        function setOverlayMode(mode) {
+            if (mode === overlayMode) return;
+            overlayMode = mode;
+            const el = document.getElementById('screenEffectOverlay');
+            el.classList.toggle('fever-frame', mode === 'fever');
+            el.classList.toggle('crisis-frame', mode === 'crisis');
+            el.classList.toggle('opacity-100', !!mode);
+            el.classList.toggle('opacity-0', !mode);
         }
 
         function incrementCombo(amount = 1) {
@@ -2817,7 +2923,7 @@
 
                 ctx.save();
                 ctx.translate(node.x, node.y);
-                ctx.strokeStyle = 'rgba(20, 19, 18, 0.18)';
+                ctx.strokeStyle = biome.isDark ? 'rgba(248, 250, 252, 0.22)' : 'rgba(20, 19, 18, 0.18)';
                 ctx.setLineDash([3, 5]);
                 ctx.beginPath();
                 ctx.arc(0, 0, node.captureRadius, 0, Math.PI * 2);
@@ -2831,13 +2937,43 @@
                     bamboo: '#65a30d',
                     porcelain: '#3b6e8c'
                 };
-                ctx.fillStyle = node.type === 'gold' ? '#fcf4dc' : (biome.isDark ? '#334155' : '#e6decb');
+                ctx.fillStyle = node.type === 'gold' ? '#fcf4dc'
+                    : node.type === 'porcelain' ? (biome.isDark ? '#3b5568' : '#e3eef5')
+                    : (biome.isDark ? '#334155' : '#e6decb');
                 ctx.strokeStyle = strokeMap[node.type] || '#2c3545';
                 ctx.lineWidth = 3.5;
                 ctx.beginPath();
                 ctx.arc(0, 0, node.radius, 0, Math.PI * 2);
                 ctx.fill();
                 ctx.stroke();
+
+                if (node.type === 'porcelain') {
+                    /* Porselen: mavi desen; tutununca kalan süre halkası ve büyüyen çatlaklar */
+                    ctx.strokeStyle = 'rgba(59, 110, 140, 0.55)';
+                    ctx.lineWidth = 1.2;
+                    ctx.beginPath();
+                    ctx.arc(0, 0, node.radius * 0.78, 0, Math.PI * 2);
+                    ctx.stroke();
+                    const crack = Math.min(1, node.crackTimer / node.maxCrackTime);
+                    if (crack > 0) {
+                        ctx.strokeStyle = crack > 0.66 ? '#d93829' : '#3b6e8c';
+                        ctx.lineWidth = 3;
+                        ctx.beginPath();
+                        ctx.arc(0, 0, node.radius + 7, -Math.PI / 2, -Math.PI / 2 + (1 - crack) * Math.PI * 2);
+                        ctx.stroke();
+                        ctx.strokeStyle = biome.isDark ? 'rgba(248, 250, 252, 0.85)' : 'rgba(20, 19, 18, 0.75)';
+                        ctx.lineWidth = 1.4;
+                        const n = 1 + Math.floor(crack * 4);
+                        for (let k = 0; k < n; k++) {
+                            const a = k * 2.1 + 0.4;
+                            ctx.beginPath();
+                            ctx.moveTo(Math.cos(a) * 4, Math.sin(a) * 4);
+                            ctx.lineTo(Math.cos(a + 0.35) * node.radius * 0.6, Math.sin(a + 0.35) * node.radius * 0.6);
+                            ctx.lineTo(Math.cos(a) * node.radius, Math.sin(a) * node.radius);
+                            ctx.stroke();
+                        }
+                    }
+                }
 
                 if (node.type === 'jade') {
                     ctx.strokeStyle = '#22c55e';
@@ -2900,6 +3036,9 @@
                     ctx.beginPath();
                     ctx.arc(0, 0, 8, 0, Math.PI * 2);
                     ctx.fill();
+                    ctx.strokeStyle = biome.isDark ? 'rgba(248, 250, 252, 0.75)' : 'rgba(250, 246, 237, 0.9)';
+                    ctx.lineWidth = 1.5;
+                    ctx.stroke();
                 } else {
                     const icons = { shield: '🪷', dragon: '🐉', magnet: '🧲' };
                     ctx.fillStyle = '#faf6ed';
@@ -2947,6 +3086,24 @@
                 ctx.fill();
             }
 
+            if (activeInk.sparkle) {
+                ctx.fillStyle = activeInk.highlight;
+                for (let i = 0; i < drop.trail.length; i += 3) {
+                    const pt = drop.trail[i];
+                    const tw = 0.5 + 0.5 * Math.sin(i * 1.7 + pt.life * 9);
+                    const sz = 1.2 + 2.2 * pt.life * tw;
+                    const ox = Math.sin(i * 2.3) * drop.radius * 0.9, oy = Math.cos(i * 1.9) * drop.radius * 0.9;
+                    ctx.globalAlpha = pt.life * 0.9;
+                    ctx.beginPath();
+                    ctx.moveTo(pt.x + ox, pt.y + oy - sz * 1.8);
+                    ctx.lineTo(pt.x + ox + sz * 0.5, pt.y + oy);
+                    ctx.lineTo(pt.x + ox, pt.y + oy + sz * 1.8);
+                    ctx.lineTo(pt.x + ox - sz * 0.5, pt.y + oy);
+                    ctx.closePath();
+                    ctx.fill();
+                }
+                ctx.globalAlpha = 1;
+            }
             ctx.save();
             ctx.translate(drop.x, drop.y);
             if (drop.shields > 0) {
@@ -2961,6 +3118,16 @@
             ctx.fillStyle = (feverTimer > 0 || drop.dragonTimer > 0) ? '#d49b27' : activeInk.main;
             ctx.beginPath();
             ctx.arc(0, 0, drop.radius, 0, Math.PI * 2);
+            ctx.fill();
+            if (biome.isDark) {
+                /* Koyu zeminde damla kaybolmasın */
+                ctx.strokeStyle = 'rgba(248, 250, 252, 0.8)';
+                ctx.lineWidth = 2 / Math.max(drop.stretchX, drop.stretchY);
+                ctx.stroke();
+            }
+            ctx.fillStyle = activeInk.highlight;
+            ctx.beginPath();
+            ctx.arc(-drop.radius * 0.3, -drop.radius * 0.3, drop.radius * 0.22, 0, Math.PI * 2);
             ctx.fill();
             ctx.restore();
 
@@ -2989,7 +3156,12 @@
                 ctx.globalAlpha = Math.max(0, ft.life);
                 ctx.font = `800 ${ft.size}px Cinzel, serif`;
                 ctx.textAlign = 'center';
-                ctx.fillStyle = ft.color;
+                ctx.lineJoin = 'round';
+                ctx.lineWidth = 4;
+                /* Açık zeminde kâğıt rengi hale; gecede koyu hale ve açılmış yazı rengi */
+                ctx.strokeStyle = biome.isDark ? 'rgba(9, 13, 26, 0.85)' : 'rgba(250, 246, 237, 0.9)';
+                ctx.strokeText(ft.text, ft.x, ft.y);
+                ctx.fillStyle = biome.isDark ? lightenHex(ft.color, 0.55) : ft.color;
                 ctx.fillText(ft.text, ft.x, ft.y);
                 ctx.restore();
             }
