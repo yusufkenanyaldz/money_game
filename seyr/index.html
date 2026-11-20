@@ -198,8 +198,9 @@ requestAnimationFrame(frame);
 window.__s={P,DUMMY,attack,dodge,update,joy,set run(v){running=v}};
 // defter ile bağ: güç → vuruş, defter açıkken oyun durur
 let paused=false,GUCLU={dmg:2};
-window.__oyun={durdur(v){paused=v;},guc(h){GUCLU.dmg=2+(h.L-1)*.08+h.g.alp/1500; /* 1. seviye: 2, 50. seviye: ~6 */},seviye(L){play('vur',1);}};
+window.__oyun={durdur(v){paused=v;},guc(h){GUCLU.dmg=2+(h.L-1)*.08+h.g.alp/1500; /* 1. seviye: 2, 50. seviye: ~6 */},seviye(L){if(window.SES)SES.seviye();}};
 </script>
+<script src="sesler.js"></script>
 <script src="savas.js"></script>
 <script src="defter.js"></script>
 </body>

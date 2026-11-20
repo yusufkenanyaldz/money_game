@@ -24,25 +24,26 @@ function dog(tur,x,y){const T=TUR[tur];E.push({tur,T,x,y,can:T.can*(1+dalga*.08)
 function yeniDalga(){dalga++;const patron=dalga%5===0,n=patron?1:Math.min(4,1+Math.ceil(dalga/2));
   for(let i=0;i<n;i++)dog('golge',P.x+W*.75+i*90,clamp(.2+Math.random()*.6,0,1));
   if(patron)dog('kizildev',P.x+W*.9,.55);
-  mesaj={t:2.2,s:patron?'KIZIL DEV YAKLAŞIYOR':dalga+'. SINAMA'};}
+  mesaj={t:2.2,s:patron?'KIZIL DEV YAKLAŞIYOR':dalga+'. SINAMA'};window.SES&&SES.dalga(patron);}
 
 /* oyuncunun yumruğu isabet anında çağrılır */
 function vurus(){for(const e of E){if(e.durum==='ol')continue;const dx=(e.x-P.x)*P.face,dy=Math.abs(e.y-P.y);
     if(dx>10&&dx<170&&dy<.2){let h=GUCLU.dmg*(1+.25*(e.T.zayif?cig(e.T.zayif):0));
       e.can-=h;e.flas=.15;e.kx=P.face*260;yazi.push({x:e.x,y:e.y,h:H*e.T.boy*scaleAt(e.y),s:'−'+(Math.round(h*10)/10),t:.8,c:'#f6e2a4'});
       for(let i=0;i<10;i++)parts.push({x:e.x,gy:e.y,h:rnd(60,140),vx:P.face*rnd(60,240),vh:rnd(40,220),l:rnd(.3,.6),c:Math.random()<.5?'#6b5a8a':'#2a2236'});
-      if(e.can<=0){e.durum='ol';e.t=0;play('vur',1);}
+      if(e.can<=0){e.durum='ol';e.t=0;window.SES&&SES.olum(!!e.T.patron);}else window.SES&&SES.isabet(!!e.T.patron);
+      if(e.durum==='ol'){}
       // sendeleme kuralı: hazırlanan/saldıran ve patron sendelemez; sendeledikten sonra 1,2 sn bağışık
       else if(!e.T.patron&&e.durum!=='hazir'&&e.durum!=='saldir'&&e.sars<=0){e.durum='darbe';e.t=0;e.sars=1.2;}
       else e.kx*=.25;}}}
 
 function oyuncuVuruldu(e){
   if(P.inv>0||P.hurtT>0)return;
-  if(P.st==='kacin'&&P.act>.12){yazi.push({x:P.x,y:P.y,h:H*.42,s:'kaçtın',t:.7,c:'#a9cfe0'});return;}   // kaçınma = dokunulmazlık
+  if(P.st==='kacin'&&P.act>.12){yazi.push({x:P.x,y:P.y,h:H*.42,s:'kaçtın',t:.7,c:'#a9cfe0'});window.SES&&SES.kacti();return;}   // kaçınma = dokunulmazlık
   P.hp-=e.T.hasar*(1+dalga*.05);P.hurtT=.35;P.inv=.6;P.vx=-P.face*0+Math.sign(P.x-e.x)*260;P.act=0;
-  yazi.push({x:P.x,y:P.y,h:H*.42,s:'−'+Math.round(e.T.hasar*(1+dalga*.05)),t:.8,c:'#e05a4a'});play('durus',.8);
+  yazi.push({x:P.x,y:P.y,h:H*.42,s:'−'+Math.round(e.T.hasar*(1+dalga*.05)),t:.8,c:'#e05a4a'});window.SES&&SES.yara();
   try{navigator.vibrate&&navigator.vibrate(40);}catch(x){}
-  if(P.hp<=0){P.hp=0;olu=3;mesaj={t:3,s:'DÜŞTÜN — yol yeniden açılıyor'};}
+  if(P.hp<=0){P.hp=0;olu=3;window.SES&&SES.dustu();mesaj={t:3,s:'DÜŞTÜN — yol yeniden açılıyor'};}
 }
 
 function update(dt){
@@ -59,8 +60,8 @@ function update(dt){
       e.y+=clamp(dy,-1,1)*.4*dt;
       // sıra kuralı: aynı anda tek düşman saldırır (patron her zaman sırasını alabilir)
       const sira=E.filter(o=>o!==e&&(o.durum==='hazir'||o.durum==='saldir')).length;
-      e.bekle-=dt;if(ux<T.menzil*1.1&&Math.abs(dy)<.15&&e.bekle<=0&&(sira===0||T.patron)){e.durum='hazir';e.t=0;}
-    }else if(e.durum==='hazir'){if(e.t>=T.hazir){e.durum='saldir';e.t=0;e.isabet=false;}}
+      e.bekle-=dt;if(ux<T.menzil*1.1&&Math.abs(dy)<.15&&e.bekle<=0&&(sira===0||T.patron)){e.durum='hazir';e.t=0;window.SES&&SES.hazir(!!T.patron);}
+    }else if(e.durum==='hazir'){if(e.t>=T.hazir){e.durum='saldir';e.t=0;e.isabet=false;window.SES&&SES.saldir(!!T.patron);}}
     else if(e.durum==='saldir'){e.x+=e.yon*T.hiz*2.4*dt*(e.t<.22?1:0);
       if(!e.isabet&&e.t>.12){e.isabet=true;if(Math.abs(P.x-e.x)<T.menzil*1.15&&Math.abs(P.y-e.y)<.16)oyuncuVuruldu(e);}
       if(e.t>.4){e.durum='dinlen';e.t=0;}}

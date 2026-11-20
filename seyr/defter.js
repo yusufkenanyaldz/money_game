@@ -111,7 +111,7 @@ function ust(){const h=hesap();
   if(h.L>sonL){$('#saL').textContent=h.L+'. MAKAM';$('#saU').textContent=h.unvan;const e=$('#seviyeAtla');e.classList.add('on');setTimeout(()=>e.classList.remove('on'),2600);
     if(window.__oyun)window.__oyun.seviye(h.L);}
   sonL=h.L;if(window.__oyun)window.__oyun.guc(h);}
-function ekle(id,n){const g=gun(bugun());g[id]=Math.max(0,(g[id]||0)+n);save();ciz();ust();}
+function ekle(id,n){if(n>0&&window.SES)SES.amel();const g=gun(bugun());g[id]=Math.max(0,(g[id]||0)+n);save();ciz();ust();}
 function ciz(){const G=$('#dfGovde'),g=gun(bugun());G.innerHTML='';
   if(sek==='bugun'){
     for(const e of EMANET){const d=document.createElement('div');d.className='dfs';const n=g[e.id]||0;
@@ -138,7 +138,7 @@ function ciz(){const G=$('#dfGovde'),g=gun(bugun());G.innerHTML='';
   }
 }
 function zikirmatik(e){const z=$('#zm');let n=0;$('#zmSay').textContent='0';$('#zmAlt').textContent=e.ad.toLocaleUpperCase('tr-TR');z.classList.add('on');
-  $('#zmDaire').onpointerdown=ev=>{ev.preventDefault();n++;$('#zmSay').textContent=n;try{navigator.vibrate&&navigator.vibrate(n%33===0?60:8);}catch(x){}};
+  $('#zmDaire').onpointerdown=ev=>{ev.preventDefault();n++;$('#zmSay').textContent=n;if(window.SES)SES.tesbih(n);try{navigator.vibrate&&navigator.vibrate(n%33===0?60:8);}catch(x){}};
   $('#zmKapat').onclick=()=>{z.classList.remove('on');if(n)ekle(e.id,n);};}
 $('#dfBtn').onclick=()=>{$('#df').classList.add('on');ciz();ust();if(window.__oyun)window.__oyun.durdur(true);};
 $('#dfKapat').onclick=()=>{$('#df').classList.remove('on');anahtar=false;if(window.__oyun)window.__oyun.durdur(false);};

@@ -37,6 +37,7 @@ Her görünüm için gereken hareketler (Garip'tekilerle aynı): bekleme, yürü
 ## 2. Arka plan
 - [ ] Bölgeler (ör. Gaflet Ovası, Öfke Dağları, Kibir Sarayı…) — minyatür tarzı, katmanlı (uzak dağlar / orta / ön plan) ki kaydırırken derinlik olsun.
 - [ ] Ön plan süsleri: servi, çeşme, kemer, taş yol.
+- [x] Savaş/defter sesleri (sentez: davul, kanun teli, hırıltı, rüzgâr — `sesler.js`)
 - [ ] Ambiyans sesleri ve müzik (ney, kanun havası) — video aracından alınabilir.
 
 ## 3. Emanetler, silahlar, yadigârlar
