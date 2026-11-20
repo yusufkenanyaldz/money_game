@@ -85,6 +85,11 @@ const css=`
 .not{font-size:12.5px;font-style:italic;color:#b9a77c;line-height:1.5;padding:10px 4px}
 .guc{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;padding:8px 0}
 .guc div{border:1px solid rgba(201,162,74,.4);border-radius:6px;padding:10px;background:rgba(20,33,61,.5)}.guc b{display:block;font-weight:400;font-size:22px;color:#e8cf8a}
+.gunsec{display:flex;gap:6px;padding:6px 0 4px}.gunsec button{font:inherit;font-size:12.5px;color:#f3e6c4;background:rgba(20,33,61,.6);border:1px solid rgba(201,162,74,.45);border-radius:14px;padding:5px 12px}
+.gunsec button.on{background:linear-gradient(180deg,#2a4a82,#1d3461);border-color:#e8cf8a}
+.yedek{margin-top:10px;border-top:1px solid rgba(201,162,74,.35);padding-top:10px}.yedek b{font-weight:400;letter-spacing:.3em;color:#e8cf8a;font-size:13px}
+.yedek .ik{display:flex;gap:8px;margin:6px 0}.yedek button{flex:1;font:inherit;padding:9px;color:#f3e6c4;background:rgba(29,52,97,.8);border:1px solid rgba(201,162,74,.55);border-radius:4px}
+.yedek textarea{width:100%;font:12px monospace;color:#f3e6c4;background:rgba(8,14,30,.7);border:1px solid rgba(201,162,74,.4);border-radius:4px;padding:8px;resize:none}
 #zm{position:fixed;inset:0;z-index:30;display:none;place-items:center;background:rgba(8,14,30,.94)}
 #zm.on{display:grid}
 #zm .daire{width:min(56vh,56vw);height:min(56vh,56vw);border-radius:50%;border:3px double #c9a24a;display:grid;place-items:center;text-align:center;
@@ -102,7 +107,10 @@ document.body.insertAdjacentHTML('beforeend',`
 <div id="zm"><button class="kapat" id="zmKapat">Tamam</button><div class="daire" id="zmDaire"><div><b id="zmSay">0</b><small id="zmAlt">GEVHER</small></div></div></div>
 <div id="seviyeAtla"><b id="saL"></b><span id="saU"></span></div>`);
 const $=s=>document.querySelector(s);
-let sek='bugun',anahtar=false,sonL=hesap().L;
+let sek='bugun',anahtar=false,sonL=hesap().L,geri=0;      // geri: 0 bugün, 1 dün, 2 evvelki gün
+const secili=()=>{const d=new Date();d.setDate(d.getDate()-geri);return bugun(d);};
+const GUNAD=['Bugün','Dün','Evvelki gün'];
+function gunSecici(){return `<div class="gunsec">${GUNAD.map((a,i)=>`<button data-g="${i}" class="${i===geri?'on':''}">${a}</button>`).join('')}</div>`;}
 
 function ust(){const h=hesap();
   $('#hud').innerHTML=`${h.unvan.toLocaleUpperCase('tr-TR')} · ${h.L}<small>seri ${h.seri} gün${h.seri?` · +%${Math.round(Math.min(.5,h.seri*.02)*100)}`:''}</small>`;
@@ -111,8 +119,9 @@ function ust(){const h=hesap();
   if(h.L>sonL){$('#saL').textContent=h.L+'. MAKAM';$('#saU').textContent=h.unvan;const e=$('#seviyeAtla');e.classList.add('on');setTimeout(()=>e.classList.remove('on'),2600);
     if(window.__oyun)window.__oyun.seviye(h.L);}
   sonL=h.L;if(window.__oyun)window.__oyun.guc(h);}
-function ekle(id,n){if(n>0&&window.SES)SES.amel();const g=gun(bugun());g[id]=Math.max(0,(g[id]||0)+n);save();ciz();ust();}
-function ciz(){const G=$('#dfGovde'),g=gun(bugun());G.innerHTML='';
+function ekle(id,n){if(n>0&&window.SES)SES.amel();const g=gun(secili());g[id]=Math.max(0,(g[id]||0)+n);save();ciz();ust();}
+function ciz(){const G=$('#dfGovde'),g=gun(secili());G.innerHTML='';
+  if(sek!=='guc'){G.insertAdjacentHTML('beforeend',gunSecici());G.querySelectorAll('.gunsec button').forEach(b=>b.onclick=()=>{geri=+b.dataset.g;ciz();});}
   if(sek==='bugun'){
     for(const e of EMANET){const d=document.createElement('div');d.className='dfs';const n=g[e.id]||0;
       d.innerHTML=`<div class="ad"><b>${e.ad}</b><small>${anahtar?e.gizli+' · ':''}${e.birim}</small></div>
@@ -123,7 +132,7 @@ function ciz(){const G=$('#dfGovde'),g=gun(bugun());G.innerHTML='';
       G.appendChild(d);}
     G.insertAdjacentHTML('beforeend','<p class="not">Ölçü: 10 sayfa okuma = 30 dakika. Her gün az da olsa bir şey girmek seriyi büyütür; boş geçen gün seriyi silmez, yarıya indirir.</p>');
   }else if(sek==='yildiz'){
-    const df=D.defter[bugun()]||(D.defter[bugun()]={});
+    const df=D.defter[secili()]||(D.defter[secili()]={});
     for(const a of AHLAK){const d=document.createElement('div');d.className='soru';const v=df[a.id];
       d.innerHTML=`<p>${a.soru}${anahtar?` <small style="color:#b9a77c">(${a.gizli})</small>`:''}</p><div class="ik"><button data-v="k" class="${v==='k'?'on':''}">Hayır, sağlam kaldı</button><button data-v="i" class="${v==='i'?'on':''}">Evet, itiraf ediyorum</button></div>`;
       d.querySelectorAll('button').forEach(b=>b.onclick=()=>{const eski=df[a.id];df[a.id]=b.dataset.v;
@@ -135,6 +144,11 @@ function ciz(){const G=$('#dfGovde'),g=gun(bugun());G.innerHTML='';
     G.insertAdjacentHTML('beforeend',`<div class="guc">${Object.keys(GUC).map(k=>`<div><small>${GUC[k].toLocaleUpperCase('tr-TR')}</small><b>${Math.floor(h.g[k])}</b></div>`).join('')}</div>`);
     const c=AHLAK.filter(a=>D.cig[a.id]).map(a=>`${a.ad}: ${D.cig[a.id]} çiy → ${a.canavar}`).join('<br>');
     G.insertAdjacentHTML('beforeend',`<p class="not">Seher Çiyi<br>${c||'Henüz yok.'}</p><p class="not">Toplam tecrübe: ${Math.floor(h.xp)} · Seri: ${h.seri} gün</p>`);
+    G.insertAdjacentHTML('beforeend',`<div class="yedek"><b>YEDEK</b>
+      <p class="not">Bütün kayıtların yalnızca bu telefonda. Ara sıra yedek kodunu kopyalayıp güvenli bir yere (Notlar, kendine mesaj) yapıştır. Telefon değişirse ya da uygulama silinirse bu kodla geri dönersin.</p>
+      <div class="ik"><button id="ykAl">Yedek kodunu kopyala</button><button id="ykYukle">Yedekten geri yükle</button></div>
+      <textarea id="ykAlan" rows="3" placeholder="Geri yüklemek için yedek kodunu buraya yapıştır" spellcheck="false"></textarea><p class="not" id="ykDurum"></p></div>`);
+    $('#ykAl').onclick=yedekAl;$('#ykYukle').onclick=yedekYukle;
   }
 }
 function zikirmatik(e){const z=$('#zm');let n=0;$('#zmSay').textContent='0';$('#zmAlt').textContent=e.ad.toLocaleUpperCase('tr-TR');z.classList.add('on');
@@ -146,6 +160,21 @@ document.querySelectorAll('#df .sek button').forEach(b=>b.onclick=()=>{sek=b.dat
 // gizli anahtar: başlığa 1,5 sn bas
 {let t=null;const h=$('#dfBaslik');h.addEventListener('pointerdown',()=>{t=setTimeout(()=>{anahtar=!anahtar;ciz();try{navigator.vibrate&&navigator.vibrate(30);}catch(x){}},1500);});
  for(const ev of['pointerup','pointerleave','pointercancel'])h.addEventListener(ev,()=>clearTimeout(t));}
-window.__defter={hesap,ekle,D,need,levelOf};
+/* ---------- YEDEK ---------- */
+const IMZA='SEYR1:';
+function kodla(o){const j=JSON.stringify(o);return IMZA+btoa(unescape(encodeURIComponent(j)));}
+function coz(k){k=(k||'').replace(/\s+/g,'');if(!k.startsWith(IMZA))throw new Error('imza');return JSON.parse(decodeURIComponent(escape(atob(k.slice(IMZA.length)))));}
+function yedekAl(){const k=kodla({surum:1,tarih:new Date().toISOString(),D});const a=$('#ykAlan');a.value=k;a.focus();a.select();
+  let tamam=false;try{tamam=document.execCommand('copy');}catch(e){}
+  if(!tamam&&navigator.clipboard)navigator.clipboard.writeText(k).then(()=>durum('Kopyalandı. Şimdi güvenli bir yere yapıştır.')).catch(()=>durum('Kod aşağıda seçili; uzun basıp kopyala.'));
+  else durum(tamam?'Kopyalandı. Şimdi güvenli bir yere yapıştır.':'Kod aşağıda seçili; uzun basıp kopyala.');
+  D.sonYedek=Date.now();save();}
+function yedekYukle(){let o;try{o=coz($('#ykAlan').value);}catch(e){durum('Bu bir Seyr yedek kodu değil ya da eksik kopyalanmış.');return;}
+  const Y=o.D||{};if(!Y.gun||!Y.defter){durum('Yedek kodu bozuk görünüyor.');return;}
+  const gunSay=Object.keys(Y.gun).length;
+  if(!confirm(`Bu yedek ${new Date(o.tarih).toLocaleDateString('tr-TR')} tarihli ve ${gunSay} günlük kayıt içeriyor.\nŞu anki kayıtların bu yedekle DEĞİŞTİRİLECEK. Devam edilsin mi?`))return;
+  for(const k of Object.keys(D))delete D[k];Object.assign(D,Y);save();sonL=hesap().L;durum('Yedek geri yüklendi.');ust();setTimeout(ciz,1200);}
+function durum(t){const e=$('#ykDurum');if(e)e.textContent=t;}
+window.__defter={hesap,ekle,D,need,levelOf,kodla,coz};
 ust();
 })();

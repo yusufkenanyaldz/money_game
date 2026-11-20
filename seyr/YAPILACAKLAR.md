@@ -62,6 +62,11 @@ Her görünüm için gereken hareketler (Garip'tekilerle aynı): bekleme, yürü
 - [x] Vuruş gücü seviyeye ve Alp gücüne bağlı (ilk adım)
 
 ## 6. Gerçek hayat bağlantıları
+- [x] Geçmiş güne giriş (bugün, dün, evvelki gün — daha eskisi dürüstlük ilkesi gereği kapalı)
+- [x] Yedekleme: kopyalanabilir yedek kodu + geri yükleme (WebView'de dosya indirme çalışmadığı için)
+- [ ] Geçmiş/takvim görünümü, haftalık özet
+- [ ] Ayarlar ekranı (ses, titreşim, düğme boyutu, joystick tarafı)
+- [ ] Oyun ilerlemesinin kaydı (sınama/dalga)
 - [x] **Kitap okuma:** elle sayfa girişi. Ölçü: **10 sayfa = 30 dakika** (Risale-i Nur temposu). Süre tutmaya gerek yok.
 - [ ] **Adım / yürüyüş:** Android **Health Connect**. ⚠ Not: Health Connect, şu anki basit APK yönteminin yetmediği Android kütüphaneleri gerektirir; bu aşamada derleme düzenini büyütmemiz gerekecek (ya da ilk sürümde elle giriş).
 - [ ] **Zikir:** kullanıcının kullandığı zikir uygulamasından veri alma. Önce uygulamanın adı öğrenilecek; dışa veri veriyor mu bakılacak. Vermiyorsa: oyun içi zikirmatik ya da elle giriş.
