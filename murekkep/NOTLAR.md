@@ -20,3 +20,4 @@
 13. Yuvadaki yeteneğe dokununca çıkar; yuvalar doluyken yenisi rastgele birini atmaz.
 14. Üst panel yalnızca değişen değerleri yazar.
 15. Ekran döndürülünce dünya yeni genişliğe yayılır. Ses tercihi hatırlanır; uygulama arka plana atılınca kayıt yazılır.
+16. Kendi kendine uçuş döngüsü kırıldı: uçarken (Ejderha / Taşkın) yeni ejderha tılsımı alınmaz (soluk görünür), Girdap yalnızca varak ve mürekkep çeker, dokunulmazken mühür yanından geçmek kıl payı sayılmaz, Taşkın başlarken kombo sıfırlanır. Ölçüm (hiç dokunmadan, 40 deneme): en uzun kesintisiz uçuş 58 sn → 3 sn; hokka yakalayan otomatik oyuncuyla 42 sn → 5 sn.

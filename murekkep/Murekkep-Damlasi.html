@@ -516,7 +516,7 @@
                 icon: '🌀',
                 price: 80,
                 cooldown: 12.0,
-                desc: '5 saniye boyunca tüm varakları, mürekkep kürelerini ve hokkaları kendine çeker.'
+                desc: '5 saniye boyunca yakındaki tüm varakları ve mürekkep kürelerini kendine çeker.'
             }
         ];
 
@@ -2511,11 +2511,16 @@
                 const dy = drop.y - col.y;
                 const dist = Math.hypot(dx, dy);
 
-                if (dist < magnetRadius && dist > 1) {
+                /* Girdap yalnızca varak ve mürekkep çeker; tılsımları çekseydi uçuş kendini besliyordu */
+                const pullable = col.kind === 'gold' || col.kind === 'ink_orb';
+                if (pullable && dist < magnetRadius && dist > 1) {
                     const pullSpd = drop.magnetTimer > 0 ? 580 : 240;
                     col.x += (dx / dist) * pullSpd * dt;
                     col.y += (dy / dist) * pullSpd * dt;
                 }
+
+                /* Uçarken (Ejderha / Taşkın) yeni ejderha tılsımı alınmaz: uçuş kendini uzatıp oyunu kendi kendine oynatıyordu */
+                if (col.kind === 'dragon' && (drop.dragonTimer > 0 || feverTimer > 0)) continue;
 
                 if (dist < drop.radius + 18) {
                     col.collected = true;
@@ -2684,7 +2689,8 @@
                         triggerGameOver('KIRMIZI MÜHÜRE ÇARPTI');
                         return;
                     }
-                } else if (!drop.latchedNode && !seal.nearMissAwarded && dist < hitDist + 30) {
+                } else if (!drop.latchedNode && drop.dragonTimer <= 0 && feverTimer <= 0 && !seal.nearMissAwarded && dist < hitDist + 30) {
+                    /* Dokunulmazken mührün yanından geçmek hüner değil: kıl payı yalnızca serbest uçuşta */
                     seal.nearMissAwarded = true;
                     incrementCombo(1);
                     updateQuestProgress('nearMiss', 1);
@@ -2802,6 +2808,7 @@
             // 8x Komboda FEVER / COŞKU MODU (Mürekkep Taşkını!)
             if (drop.combo >= 8 && feverTimer <= 0) {
                 feverTimer = 5.0;
+                drop.combo = 1; /* Taşkın komboyu harcar: yeniden 8x'e çıkmadan tekrar gelmez */
                 sfx.playTaikoDrum();
                 sfx.playGoldChime();
                 triggerShake(10, 0.25);
@@ -3024,6 +3031,7 @@
                 if (col.collected) continue;
                 const by = col.y + Math.sin(col.bobPhase) * 4.5;
                 ctx.save();
+                if (col.kind === 'dragon' && (drop.dragonTimer > 0 || feverTimer > 0)) ctx.globalAlpha = 0.3;
                 ctx.translate(col.x, by);
                 if (col.kind === 'gold') {
                     ctx.fillStyle = '#d49b27';
