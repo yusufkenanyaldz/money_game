@@ -334,10 +334,19 @@ const IMG={};
 for(const k of['fener','kasa','fici','vazo','tabure','dikilitas','samdan','sandik']){const i=new Image();i.src='assets/'+k+'.webp';IMG[k]=i;}
 const ok=k=>IMG[k]&&IMG[k].complete&&IMG[k].naturalWidth>0;
 const PLACE={hut:['kulube',.9],well:['kuyu',.85],grave:['mezarlik',.85],mill:['degirmen',1.3],mine:['maden',.95],abbey:['manastir',1.25],tower:['kule',1.55],cathedral:['katedral',1.55],gate:['kapi',1.4]};
-const DARK={},ANIM={"grave": [24, 308, 220], "hut": [24, 256, 220], "well": [24, 149, 220], "mine": [24, 239, 220], "abbey": [24, 126, 220], "tower": [24, 62, 220], "cathedral": [24, 145, 220], "mill": [24, 120, 220], "gate": [24, 182, 220]},ASH={};
-for(const k in ANIM){const i=new Image();i.onload=()=>{const [n,fw,fh]=ANIM[k];ASH[k]=i;
-  DARK[k]=mk(fw,fh,g=>{g.drawImage(i,0,0,fw,fh,0,0,fw,fh);g.globalCompositeOperation='saturation';g.fillStyle='#808080';g.fillRect(0,0,fw,fh);
-  g.globalCompositeOperation='source-atop';g.fillStyle='rgba(8,14,22,.62)';g.fillRect(0,0,fw,fh);g.globalCompositeOperation='destination-in';g.drawImage(i,0,0,fw,fh,0,0,fw,fh);});};i.src='assets/anim-'+k+'.webp';}
+const DARK={},ANIM={"anim-well-1": [24, 122, 180], "anim-hut-2": [24, 147, 180], "anim-grave-2": [24, 195, 180], "anim-mine-3": [24, 191, 180], "anim-fx-halka": [24, 188, 200], "anim-fx-patlama": [32, 210, 200], "anim-hut-1": [24, 151, 180], "anim-mill-1": [24, 98, 180], "anim-grave-1": [24, 281, 180], "anim-mine-1": [24, 195, 180], "anim-abbey-1": [24, 103, 180], "anim-tower-1": [24, 50, 180], "anim-cathedral-1": [24, 119, 180], "anim-gate-1": [24, 148, 180], "anim-abbey-2": [24, 113, 180], "anim-tower-2": [24, 62, 180], "anim-cathedral-2": [24, 122, 180], "anim-gate-2": [24, 150, 180], "anim-mill-2": [24, 99, 180], "anim-mine-2": [24, 192, 180], "anim-well-2": [24, 118, 180], "anim-grave-3": [24, 177, 180], "anim-mill-3": [24, 95, 180], "anim-well-3": [24, 112, 180], "anim-hut-3": [24, 140, 180], "anim-abbey-3": [24, 110, 180], "anim-tower-3": [24, 80, 180], "anim-cathedral-3": [24, 119, 180], "anim-gate-3": [24, 150, 180]},SHEET={},DARKS={};
+const AURL=n=>'assets/'+n+'.webp';
+const tierOf=lv=>lv>=100?3:lv>=25?2:1;
+function sheet(n){
+  if(!ANIM[n])return null;
+  if(!SHEET[n]){const i=new Image();SHEET[n]=i;i.onload=()=>{const [N,fw,fh]=ANIM[n];
+    DARKS[n]=mk(fw,fh,g=>{g.drawImage(i,0,0,fw,fh,0,0,fw,fh);g.globalCompositeOperation='saturation';g.fillStyle='#808080';g.fillRect(0,0,fw,fh);
+    g.globalCompositeOperation='source-atop';g.fillStyle='rgba(8,14,22,.62)';g.fillRect(0,0,fw,fh);g.globalCompositeOperation='destination-in';g.drawImage(i,0,0,fw,fh,0,0,fw,fh);});};i.src=AURL(n);}
+  const i=SHEET[n];return i.complete&&i.naturalWidth?i:null;
+}
+sheet('anim-fx-halka');sheet('anim-fx-patlama');
+const FX=[];
+function fx(i,k){FX.push({i,k,t:(performance.now()-t0)/1000});}
 for(const k in PLACE){const i=new Image();i.onload=()=>{if(!ANIM[k])DARK[k]=mk(i.width,i.height,g=>{g.drawImage(i,0,0);g.globalCompositeOperation='saturation';g.fillStyle='#808080';g.fillRect(0,0,i.width,i.height);
   g.globalCompositeOperation='source-atop';g.fillStyle='rgba(8,14,22,.62)';g.fillRect(0,0,i.width,i.height);g.globalCompositeOperation='destination-in';g.drawImage(i,0,0);});};i.src='assets/yer-'+PLACE[k][0]+'.webp';IMG['p_'+k]=i;}
 const PROP={fici:{h:.55,w:3},kasa:{h:.5,w:3},tabure:{h:.42,w:2},vazo:{h:.62,w:2},samdan:{h:.78,w:2,lit:[[.5,.12]]},dikilitas:{h:.95,w:1.4,rune:1},sandik:{h:.52,w:1}};
@@ -438,16 +447,25 @@ function draw(now){
     if(ok('p_'+L.kind)){const im=l.dark?DARK[L.kind]||IMG['p_'+L.kind]:IMG['p_'+L.kind],h=clamp(zoom*2,30,130)*PLACE[L.kind][1],w=h*im.width/im.height;
       ctx.fillStyle='rgba(0,0,0,.5)';ctx.beginPath();ctx.ellipse(x,y,w*.48,h*.07,0,0,TAU);ctx.fill();
       if(l.lv<=0&&!l.dark)ctx.globalAlpha=.55;
-      const A=ANIM[L.kind],sh=ASH[L.kind];
-      if(A&&sh){const [n,fw,fh]=A,w2=h*fw/fh;
-        if(l.dark&&DARK[L.kind])ctx.drawImage(DARK[L.kind],x-w2/2,y-h*.94,w2,h);
-        else{const f=Math.floor(t*10+i*7)%n;ctx.drawImage(sh,f*fw,0,fw,fh,x-w2/2,y-h*.94,w2,h);}}
+      const tr=tierOf(l.lv);let nm=null,sh=null;
+      for(let q=tr;q>=1&&!sh;q--){nm='anim-'+L.kind+'-'+q;sh=sheet(nm);}
+      const hh=h*(1+.07*(tr-1));
+      for(const e of FX){if(e.i!==i||e.k!=='halka')continue;const age=t-e.t,ri=sheet('anim-fx-halka');if(age>1.6||!ri)continue;
+        const [N,fw,fh]=ANIM['anim-fx-halka'],rw=hh*1.25,a=Math.min(1,age*5,(1.6-age)*2.5);ctx.save();ctx.globalAlpha=a;ctx.globalCompositeOperation='lighter';
+        ctx.drawImage(ri,(Math.floor(age*12)%N)*fw,0,fw,fh,x-rw/2,y-rw*.22,rw,rw*.44);ctx.restore();}
+      if(sh){const [n,fw,fh]=ANIM[nm],w2=hh*fw/fh;
+        if(l.dark&&DARKS[nm])ctx.drawImage(DARKS[nm],x-w2/2,y-hh*.94,w2,hh);
+        else{const f=Math.floor(t*10+i*7)%n;ctx.drawImage(sh,f*fw,0,fw,fh,x-w2/2,y-hh*.94,w2,hh);}}
       else ctx.drawImage(im,x-w/2,y-h*.94,w,h);
-      ctx.globalAlpha=1;ly=y+17;}
+      ctx.globalAlpha=1;
+      for(const e of FX){if(e.i!==i||e.k!=='patlama')continue;const pi=sheet('anim-fx-patlama'),[N,fw,fh]=ANIM['anim-fx-patlama'],f=Math.floor((t-e.t)*12);if(!pi||f>=N)continue;
+        const ph=hh*1.7,pw=ph*fw/fh;ctx.drawImage(pi,f*fw,0,fw,fh,x-pw/2,y-ph*.97,pw,ph);}
+      ly=y+17;}
     else drawPlace(L.kind,x,y,s,l.dark?2:l.lv>0?1:0,t);
     ctx.font=`${clamp(s*.42,10.5,13)}px Georgia,serif`;ctx.textAlign='center';ctx.fillStyle=l.dark?'rgba(125,157,179,.75)':'rgba(216,207,191,.8)';
     const nm=W-PW>=560?l.name+' · ':'';ctx.strokeStyle='rgba(0,0,0,.85)';ctx.lineWidth=3;const tx=l.dark?nm+'söndü':l.lv>0?nm+l.lv:(nm?l.name:'·');ctx.strokeText(tx,x,ly);ctx.fillText(tx,x,ly);
   }
+  {const now=(performance.now()-t0)/1000;for(let k=FX.length-1;k>=0;k--)if(now-FX[k].t>3)FX.splice(k,1);}
   // karanlık
   lx.globalCompositeOperation='source-over';lx.clearRect(0,0,lc.width,lc.height);
   lx.fillStyle=run.dawn?'rgba(40,24,12,.55)':run.phase==='wave'?'rgba(2,1,1,.985)':'rgba(3,2,2,.975)';lx.fillRect(0,0,lc.width,lc.height);
@@ -530,7 +548,7 @@ function resolveWave(offline,noEsc){
   if(r.held){
     r.reward=offline?0:prod()*15*(1+rl('sowilo'));gain(r.reward);S.held++;
     const dk=run.locs.map((l,i)=>i).filter(i=>run.locs[i].dark).sort((a,b)=>LOCS[a].d-LOCS[b].d);
-    if(dk.length){run.locs[dk[0]].dark=false;r.healed=run.locs[dk[0]].name;}
+    if(dk.length){run.locs[dk[0]].dark=false;r.healed=run.locs[dk[0]].name;if(!offline)fx(dk[0],'patlama');}
   }else{
     S.fell++;
     const lit=run.locs.map((l,i)=>i).filter(i=>revealed(i)&&run.locs[i].lv>0&&!run.locs[i].dark).sort((a,b)=>LOCS[b].d-LOCS[a].d);
@@ -623,13 +641,13 @@ function specsFor(){
       if(!revealed(i))continue;const L=LOCS[i],l=run.locs[i];
       if(l.dark){const c=()=>locCost(i,l.lv)*.3;
         out.push({icon:icon(L.rune,'#7d9db3'),dark:1,red:1,tt:()=>`${l.name} <i>${l.lv}</i>`,sb:()=>'Karanlığa düştü, üretmiyor. Yeniden yak ya da bir geceyi savuştur.',
-          can:()=>S.kor>=c(),buy:()=>{S.kor-=c();l.dark=false;},bt:()=>`Yeniden Yak<small>${fmt(c())}</small>`});continue;}
+          can:()=>S.kor>=c(),buy:()=>{S.kor-=c();l.dark=false;fx(i,'patlama');},bt:()=>`Yeniden Yak<small>${fmt(c())}</small>`});continue;}
       const nb=()=>mode==='max'?Math.max(1,maxBuy(i)[0]):mode;
       const cost=()=>{if(mode==='max'){const [n,c]=maxBuy(i);return n?c:locCost(i,l.lv);}return bulk(i,mode);};
       out.push({icon:icon(L.rune,'#e0a050'),
         tt:()=>`${l.name} <i>${l.lv||''}</i>`,
         sb:()=>{if(!l.lv)return`Henüz yakılmadı. Yanınca <b>${fmt(L.base*gmult())}/sn</b> kor verir.`;const nm=nextMile(l.lv);return`<b>${fmt(locProd(i))}/sn</b>${nm?` · ${nm}. derecede üretim iki katı`:''}`;},
-        can:()=>S.kor>=cost(),buy:()=>{const n=nb();S.kor-=cost();l.lv+=n;},bt:()=>`${l.lv?'+'+nb():'Yak'}<small>${fmt(cost())}</small>`});
+        can:()=>S.kor>=cost(),buy:()=>{const n=nb(),o=l.lv;S.kor-=cost();l.lv+=n;if(o===0||tierOf(l.lv)>tierOf(o))fx(i,'patlama');if(o>0)fx(i,'halka');if(o>0&&tierOf(l.lv)>tierOf(o))toast(l.name.toLocaleUpperCase('tr-TR'),'Yeni bir görünüme büründü.');},bt:()=>`${l.lv?'+'+nb():'Yak'}<small>${fmt(cost())}</small>`});
     }
   }else if(tab==='run'){
     for(const k in RUNE_UP){const U=RUNE_UP[k];
