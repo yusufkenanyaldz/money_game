@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#14213d">
+<title>Seyr — Karakter Vitrini</title>
+<style>
+:root{--lapis:#14213d;--lapis2:#1d3461;--gold:#c9a24a;--gold2:#e8cf8a;--ink:#f3e6c4;--dim:#b9a77c;--paper:#efe0b9;--verm:#b23a1e;
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{background:radial-gradient(ellipse at 50% 30%,var(--lapis2),var(--lapis) 70%);color:var(--ink);font-family:var(--serif);display:flex;flex-direction:column;align-items:center;
+  padding:calc(16px + env(safe-area-inset-top)) 16px calc(16px + env(safe-area-inset-bottom));min-height:100%}
+h1{font-weight:400;letter-spacing:.3em;font-size:clamp(22px,6vw,30px);color:var(--gold2);padding-left:.3em;text-align:center}
+.sub{font-style:italic;color:var(--dim);margin-top:4px;font-size:14px;text-align:center}
+.frame{position:relative;width:min(100%,440px);aspect-ratio:3/4;margin:16px 0;border:3px double var(--gold);border-radius:6px;
+  background:radial-gradient(ellipse at 50% 85%,#f6ead0 0%,var(--paper) 45%,#d9c38f 100%);box-shadow:0 0 0 6px var(--lapis),0 0 0 7px var(--gold),0 20px 50px rgba(0,0,0,.5);overflow:hidden}
+.frame::before,.frame::after{content:"";position:absolute;left:10px;right:10px;height:14px;background:repeating-linear-gradient(90deg,var(--gold) 0 2px,transparent 2px 10px);opacity:.35}
+.frame::before{top:8px}.frame::after{bottom:8px}
+canvas{display:block;width:100%;height:100%}
+.row{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;width:min(100%,460px)}
+.row button{font:inherit;font-size:14px;letter-spacing:.08em;color:var(--ink);background:rgba(20,33,61,.7);border:1px solid rgba(201,162,74,.55);border-radius:4px;padding:9px 14px;cursor:pointer}
+.row button.on{background:linear-gradient(180deg,#2a4a82,#1d3461);border-color:var(--gold2);color:#fff}
+.note{margin-top:14px;font-size:12.5px;color:var(--dim);font-style:italic;text-align:center;max-width:440px;line-height:1.5}
+</style>
+</head>
+<body>
+<h1>GARİP</h1>
+<p class="sub">Birinci makam · yolun başındaki yolcu</p>
+<div class="frame"><canvas id="c"></canvas></div>
+<div class="row" id="btns"></div>
+<p class="note">Hareketler senin videolarından üretildi: 15 kare/sn, şeffaf zemin. Oyunda karakter bu boyutta ve bu sahne tonunda görünecek.</p>
+<script>
+'use strict';
+const ANIM={"anim-garip-durus":[36,321,420,6,834],"anim-garip-yuru":[36,231,420,6,802],"anim-garip-yumruk":[36,345,420,6,804],"anim-garip-arka":[36,170,420,6,808],"anim-garip-kos":[36,297,420,6,790],"anim-garip-bekle":[36,200,420,6,806],"anim-garip-kacin":[36,265,420,6,792],"anim-garip-yuru2":[36,245,420,6,802]};
+const LIST=[['bekle','Bekleme'],['yuru','Yürüme'],['yuru2','Yürüme II'],['kos','Koşma'],['arka','Ufka yürüyüş'],['durus','Dövüş duruşu'],['yumruk','Yumruk'],['kacin','Kaçınma']];
+const AURL=n=>'assets/'+n+'.webp';
+const IMG={};for(const [k] of LIST){const i=new Image();i.src=AURL('anim-garip-'+k);IMG[k]=i;}
+let cur='bekle',t0=performance.now();
+const box=document.getElementById('btns');
+for(const [k,n] of LIST){const b=document.createElement('button');b.textContent=n;b.onclick=()=>{cur=k;t0=performance.now();for(const x of box.children)x.classList.toggle('on',x===b);};if(k===cur)b.classList.add('on');box.appendChild(b);}
+const cv=document.getElementById('c'),ctx=cv.getContext('2d');
+function frame(now){
+  const r=cv.getBoundingClientRect(),d=Math.min(2,devicePixelRatio||1);
+  if(cv.width!==Math.round(r.width*d)){cv.width=Math.round(r.width*d);cv.height=Math.round(r.height*d);}
+  const W=cv.width,H=cv.height;ctx.clearRect(0,0,W,H);
+  const gy=H*.86;
+  ctx.fillStyle='rgba(90,60,20,.22)';ctx.beginPath();ctx.ellipse(W/2,gy,W*.2,H*.025,0,0,Math.PI*2);ctx.fill();
+  const im=IMG[cur],[N,fw,fh,C,src]=ANIM['anim-garip-'+cur];
+  if(im.complete&&im.naturalWidth){
+    const f=Math.floor((now-t0)/1000*15)%N,h=H*.72*src/806,w=h*fw/fh;
+    ctx.drawImage(im,(f%C)*fw,Math.floor(f/C)*fh,fw,fh,W/2-w/2,gy-h*.985,w,h);
+  }
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
