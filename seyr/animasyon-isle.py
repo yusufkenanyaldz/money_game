@@ -30,13 +30,20 @@ meta=json.load(open(T+'meta.json')) if os.path.exists(T+'meta.json') else {}
 for (kind,lv),(vid,st) in V.items():
     name=f'anim-{kind}-{lv}'
     if only and name not in only:continue
-    once=lv=='patlama';FPS=15;N=48 if once else 36;K=0 if once else 9;H=420;COLS=6
+    FPS=15;H=420;COLS=6
     d=T+name;shutil.rmtree(d,ignore_errors=True);os.makedirs(d)
     src=glob.glob(U+vid+'-*.mp4')[0]
-    subprocess.run(['ffmpeg','-v','error','-ss',str(st),'-i',src,'-vf',f'fps={FPS}','-frames:v',str(N+K),d+'/%03d.png'],check=True)
+    subprocess.run(['ffmpeg','-v','error','-ss',str(st),'-i',src,'-vf',f'fps={FPS}','-frames:v','75',d+'/%03d.png'],check=True)
     F=[np.asarray(Image.open(f).convert('RGB')) for f in sorted(glob.glob(d+'/*.png'))]
-    Rr=[key(f,'glow' if kind=='lantern' else kind=='fx') for f in F]
-    out=[(Rr[i]*(i/K)+Rr[N+i]*(1-i/K)) if i<K else Rr[i] for i in range(N)]
+    small=[np.asarray(Image.fromarray(f).resize((96,96))).astype(float) for f in F]
+    once=lv in ('yumruk','kacin')
+    if once:N=min(len(F),30)
+    else:
+        sc=[(np.abs(small[0]-small[j]).mean(),j) for j in range(22,len(F))]
+        err,N=min(sc);print(name,'döngü noktası',N,'kare, fark',round(err,1))
+    Rr=[key(f) for f in F[:N]]
+    K=0 if once else 3
+    out=[(Rr[i]*(i/K)+key(F[N+i])*(1-i/K)) if (i<K and N+i<len(F)) else Rr[i] for i in range(N)]
     al=np.stack([o[...,3] for o in out]).max(0)
     ys,xs=np.where(al>.08);x0,x1,y0,y1=xs.min()-3,xs.max()+4,ys.min()-3,ys.max()+4
     fh=H;fw=round((x1-x0)*H/(y1-y0))

@@ -39,7 +39,7 @@ canvas{display:block;width:100%;height:100%}
 <p class="note">Hareketler senin videolarından üretildi: 15 kare/sn, şeffaf zemin. Oyunda karakter bu boyutta ve bu sahne tonunda görünecek.</p>
 <script>
 'use strict';
-const ANIM={"anim-garip-durus":[36,321,420,6,834],"anim-garip-yuru":[36,231,420,6,802],"anim-garip-yumruk":[36,345,420,6,804],"anim-garip-arka":[36,170,420,6,808],"anim-garip-kos":[36,297,420,6,790],"anim-garip-bekle":[36,200,420,6,806],"anim-garip-kacin":[36,265,420,6,792],"anim-garip-yuru2":[36,245,420,6,802]};
+const ANIM={"anim-garip-durus": [63, 320, 420, 6, 838], "anim-garip-yuru": [56, 231, 420, 6, 802], "anim-garip-yumruk": [30, 346, 420, 6, 800], "anim-garip-arka": [32, 170, 420, 6, 808], "anim-garip-kos": [29, 297, 420, 6, 790], "anim-garip-bekle": [36, 186, 420, 6, 806], "anim-garip-kacin": [30, 265, 420, 6, 792], "anim-garip-yuru2": [30, 246, 420, 6, 800]};
 const LIST=[['bekle','Bekleme'],['yuru','Yürüme'],['yuru2','Yürüme II'],['kos','Koşma'],['arka','Ufka yürüyüş'],['durus','Dövüş duruşu'],['yumruk','Yumruk'],['kacin','Kaçınma']];
 const AURL=n=>'assets/'+n+'.webp';
 const IMG={};for(const [k] of LIST){const i=new Image();i.src=AURL('anim-garip-'+k);IMG[k]=i;}
