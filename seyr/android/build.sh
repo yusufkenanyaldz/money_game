@@ -2,7 +2,7 @@
 # Seyr APK derleyicisi. Android SDK gerektirmez; araçları Maven Central'dan indirir.
 # Kullanım: KEYSTORE=/yol/anahtar.p12 KEYPASS=sifre ./build.sh [cikti.apk]
 set -euo pipefail
-cd "$(dirname "$0")"; HERE=$PWD; T=${TOOLS:-$HERE/../../fener/android/.tools}; W=$(mktemp -d); OUT=${1:-$HERE/Seyr.apk}
+cd "$(dirname "$0")"; HERE=$PWD; T=${TOOLS:-$HERE/.tools}; W=$(mktemp -d); OUT=${1:-$HERE/Seyr.apk}
 mkdir -p "$T"
 if [ ! -x "$T/aapt2" ]; then
   curl -fsSL -o "$T/apktool-lib.jar" https://repo1.maven.org/maven2/org/apktool/apktool-lib/3.0.3/apktool-lib-3.0.3.jar
@@ -14,6 +14,9 @@ if [ ! -x "$T/aapt2" ]; then
 P
   (cd "$T" && mvn -q dependency:copy-dependencies -DoutputDirectory=lib)
 fi
+# Java derlemesi için Android sınıf imzaları (Robolectric android-all, API 34) ve dx
+[ -f "$T/android-all.jar" ] || curl -fsSL -o "$T/android-all.jar" https://repo1.maven.org/maven2/org/robolectric/android-all/14-robolectric-10818077/android-all-14-robolectric-10818077.jar
+[ -f "$T/dx.jar" ] || curl -fsSL -o "$T/dx.jar" https://repo1.maven.org/maven2/com/jakewharton/android/repackaged/dalvik-dx/14.0.0_r21/dalvik-dx-14.0.0_r21.jar
 CP="$T/lib/*"
 # 1) oyun dosyaları
 mkdir -p "$W/assets" && cp ../index.html ../defter.js ../savas.js ../sesler.js "$W/assets/" && cp -r ../assets "$W/assets/assets"
@@ -25,7 +28,8 @@ cp -r res/values "$W/res/"
 "$T/aapt2" link -o "$W/base.apk" -I "$T/android-framework.jar" --manifest AndroidManifest.xml \
   --min-sdk-version 24 --target-sdk-version 34 --version-code ${VCODE:-1} --version-name ${VNAME:-1.0} -A "$W/assets" "$W/res.zip"
 # 4) kod
-java -cp "$CP" org.jf.smali.Main assemble --api 24 -o "$W/classes.dex" MainActivity.smali
+mkdir -p "$W/cls" && javac -nowarn -Xlint:-options --release 8 -cp "$T/android-all.jar" -d "$W/cls" MainActivity.java
+java -cp "$T/dx.jar" com.android.dx.command.Main --dex --min-sdk-version=24 --output="$W/classes.dex" "$W/cls"
 (cd "$W" && zip -q -j base.apk classes.dex)
 # 5) hizala + imzala
 python3 align.py "$W/base.apk" "$W/aligned.apk"

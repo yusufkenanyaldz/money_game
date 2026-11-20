@@ -22,6 +22,7 @@ const AHLAK=[
   {id:'su',    ad:'Âb-ı Hayat Damlası',    gizli:'Sakin kalmak',       soru:'Âb-ı Hayat Damlası bugün dalgalandı mı?',  canavar:'Kızıl Dev'},
 ];
 const AHLAK_DK=20;
+const ADIM_DK=100;   /* adım ölçüsü: 100 adım = 1 dakika yürüyüş */
 const UNVAN=['Garip','Yolcu','Er','Alp','Bahadır','Ulu','Bilge','Kutlu','Nurlu','Simurg'];
 const GUC={kut:'Kut',hikmet:'Hikmet',alp:'Alp',cevher:'Cevher'};
 
@@ -49,7 +50,7 @@ function hesap(){
     const v=D.gun[k]||{},has=Object.values(v).some(x=>x>0);
     if(has){if(prev){const f=Math.round((new Date(k)-new Date(prev))/864e5);for(let i=1;i<f;i++)s=Math.floor(s/2);}s++;prev=k;}
     const carp=1+Math.min(.5,s*.02);
-    for(const e of EMANET){const n=v[e.id]||0;if(!n)continue;const dk=n*e.dk*carp;xp+=dk;for(const gg in e.guc)g[gg]+=dk*e.guc[gg];}
+    for(const e of EMANET){const n=v[e.id]||0;const dk=(n+(e.id==='nal'?(v.adimSay||0)/ADIM_DK:0))*e.dk*carp;if(!dk)continue;xp+=dk;for(const gg in e.guc)g[gg]+=dk*e.guc[gg];}
     const df=D.defter[k]||{};
     // dürüstlük ilkesi: korunsa da kusur itiraf edilse de aynı tecrübe; itiraf ayrıca Seher Çiyi verir
     for(const a of AHLAK)if(df[a.id]){xp+=AHLAK_DK*carp;g.cevher+=AHLAK_DK*carp;}
@@ -124,13 +125,14 @@ function ciz(){const G=$('#dfGovde'),g=gun(secili());G.innerHTML='';
   if(sek!=='guc'){G.insertAdjacentHTML('beforeend',gunSecici());G.querySelectorAll('.gunsec button').forEach(b=>b.onclick=()=>{geri=+b.dataset.g;ciz();});}
   if(sek==='bugun'){
     for(const e of EMANET){const d=document.createElement('div');d.className='dfs';const n=g[e.id]||0;
-      d.innerHTML=`<div class="ad"><b>${e.ad}</b><small>${anahtar?e.gizli+' · ':''}${e.birim}</small></div>
+      d.innerHTML=`<div class="ad"><b>${e.ad}</b><small>${anahtar?e.gizli+' · ':''}${e.birim}${e.id==='nal'?adimYazi(g):''}</small></div>
         <button data-n="-${e.adim[0]}">−</button><span class="say">${n}${e.gunluk?' / '+e.gunluk:''}</span>`+
         e.adim.map((a,i)=>`<button data-n="${a}" class="${i===e.adim.length-1?'ana':''}">+${a}</button>`).join('')+(e.zikirmatik?'<button data-z="1" class="ana">◎</button>':'');
       d.querySelectorAll('button[data-n]').forEach(b=>b.onclick=()=>{let v=+b.dataset.n;if(e.gunluk)v=Math.min(v,e.gunluk-(g[e.id]||0));ekle(e.id,v);});
       const z=d.querySelector('[data-z]');if(z)z.onclick=()=>zikirmatik(e);
+      const iz=d.querySelector('[data-izin]');if(iz)iz.onclick=()=>{try{SeyrAndroid.izinIste();}catch(x){}};
       G.appendChild(d);}
-    G.insertAdjacentHTML('beforeend','<p class="not">Ölçü: 10 sayfa okuma = 30 dakika. Her gün az da olsa bir şey girmek seriyi büyütür; boş geçen gün seriyi silmez, yarıya indirir.</p>');
+    G.insertAdjacentHTML('beforeend','<p class="not">Ölçü: 10 sayfa okuma = 30 dakika, 100 adım = 1 dakika. Her gün az da olsa bir şey girmek seriyi büyütür; boş geçen gün seriyi silmez, yarıya indirir.</p>');
   }else if(sek==='yildiz'){
     const df=D.defter[secili()]||(D.defter[secili()]={});
     for(const a of AHLAK){const d=document.createElement('div');d.className='soru';const v=df[a.id];
@@ -160,6 +162,33 @@ document.querySelectorAll('#df .sek button').forEach(b=>b.onclick=()=>{sek=b.dat
 // gizli anahtar: başlığa 1,5 sn bas
 {let t=null;const h=$('#dfBaslik');h.addEventListener('pointerdown',()=>{t=setTimeout(()=>{anahtar=!anahtar;ciz();try{navigator.vibrate&&navigator.vibrate(30);}catch(x){}},1500);});
  for(const ev of['pointerup','pointerleave','pointercancel'])h.addEventListener(ev,()=>clearTimeout(t));}
+/* ---------- ADIM SENSÖRÜ ----------
+   Android kabuğu telefonun adım sayacını verir (telefon açıldığından beri toplam adım).
+   Son okumadan bu yana atılan adımlar bugünün Tozkoparan Nalı'na yazılır.
+   Sayaç küçülürse ya da açılış anı değişirse telefon yeniden başlamıştır: o zaman sayacın tamamı yeni adımdır. */
+let adimDurum=window.SeyrAndroid?'bekle':'';
+function adimYazi(g){const a=g.adimSay||0;
+  let t=a?` · ${a} adım (${Math.floor(a/ADIM_DK)} dk)`:'';
+  if(geri===0&&adimDurum==='izin')t+=' <button data-izin="1" class="ana" style="margin-left:6px">Adım izni ver</button>';
+  else if(geri===0&&adimDurum==='yok')t+=' · adım sensörü yok';
+  else if(geri===0&&adimDurum==='acik'&&!a)t+=' · adımlar sayılıyor';
+  return t;}
+function adimSensor(v,boot,durum){
+  const eski=adimDurum;if(durum)adimDurum=durum;
+  v=+v;boot=+boot;
+  if(!(v>=0)){if(eski!==adimDurum&&$('#df').classList.contains('on'))ciz();return;}
+  const A=D.adim;
+  if(!A){D.adim={son:v,boot};save();if($('#df').classList.contains('on'))ciz();return;}  /* ilk okuma: yalnızca başlangıç noktası */
+  const yeniden=Math.abs(boot-A.boot)>10*60e3||v<A.son;
+  const fark=yeniden?v:v-A.son;
+  A.son=v;A.boot=boot;
+  if(fark>0){const g=gun(bugun());g.adimSay=(g.adimSay||0)+fark;}
+  save();
+  if(fark>0||eski!==adimDurum){ust();if($('#df').classList.contains('on')&&sek==='bugun')ciz();}
+}
+window.SeyrAdim={sensor:adimSensor};
+if(window.SeyrAndroid){try{const p=String(SeyrAndroid.adim()).split(',');adimSensor(p[0],p[1],p[2]);}catch(e){}}
+
 /* ---------- YEDEK ---------- */
 const IMZA='SEYR1:';
 function kodla(o){const j=JSON.stringify(o);return IMZA+btoa(unescape(encodeURIComponent(j)));}
@@ -173,7 +202,7 @@ function yedekYukle(){let o;try{o=coz($('#ykAlan').value);}catch(e){durum('Bu bi
   const Y=o.D||{};if(!Y.gun||!Y.defter){durum('Yedek kodu bozuk görünüyor.');return;}
   const gunSay=Object.keys(Y.gun).length;
   if(!confirm(`Bu yedek ${new Date(o.tarih).toLocaleDateString('tr-TR')} tarihli ve ${gunSay} günlük kayıt içeriyor.\nŞu anki kayıtların bu yedekle DEĞİŞTİRİLECEK. Devam edilsin mi?`))return;
-  for(const k of Object.keys(D))delete D[k];Object.assign(D,Y);save();sonL=hesap().L;durum('Yedek geri yüklendi.');ust();setTimeout(ciz,1200);}
+  const adimNokta=D.adim;for(const k of Object.keys(D))delete D[k];Object.assign(D,Y);if(adimNokta)D.adim=adimNokta;else delete D.adim;save();sonL=hesap().L;durum('Yedek geri yüklendi.');ust();setTimeout(ciz,1200);}
 function durum(t){const e=$('#ykDurum');if(e)e.textContent=t;}
 window.__defter={hesap,ekle,D,need,levelOf,kodla,coz};
 ust();

@@ -68,9 +68,10 @@ Her görünüm için gereken hareketler (Garip'tekilerle aynı): bekleme, yürü
 - [ ] Ayarlar ekranı (ses, titreşim, düğme boyutu, joystick tarafı)
 - [ ] Oyun ilerlemesinin kaydı (sınama/dalga)
 - [x] **Kitap okuma:** elle sayfa girişi. Ölçü: **10 sayfa = 30 dakika** (Risale-i Nur temposu). Süre tutmaya gerek yok.
-- [ ] **Adım / yürüyüş — telefonun kendi adım sensörü (Health Connect yerine):**
+- [x] **Adım / yürüyüş — telefonun kendi adım sensörü** (APK 1.6, telefonda denenecek). Ölçü onaylandı: 100 adım = 1 dk. Adımlar `gun[tarih].adimSay` içinde; yedek geri yüklenince adım başlangıç noktası korunur.
+  - Bilinen sınır: oyun gece yarısından sonra açılırsa, dünden kalan adımlar bugüne yazılır.
   - Android'in standart `TYPE_STEP_COUNTER` sensörü; ek kütüphane gerekmez, uygulama kapalıyken de sayar.
-  - Oyun açılınca "son açılıştan beri atılan adım" Tozkoparan Nalı'na otomatik yazılır. Ölçü önerisi: **100 adım = 1 dakika** (kullanıcı onaylayacak).
+  - Oyun açılınca "son açılıştan beri atılan adım" Tozkoparan Nalı'na otomatik yazılır. Ölçü önerisi: **100 adım = 1 dakika** (onaylandı).
   - Gerekenler: `ACTIVITY_RECOGNITION` izni (ilk açılışta sorulur), Java kabuk (sensör + WebView'e JavaScript köprüsü).
   - Derleme: Java → `javac` (android-framework.jar'a karşı) → dex için Maven Central'daki `com.jakewharton.android.repackaged:dalvik-dx`. Google Maven bu ortamda kapalı.
   - Sınırlar: telefon yeniden başlarsa sayaç sıfırlanır (son açılış–yeniden başlatma arası kaybolabilir; sayaç küçülürse yeniden başlatma say). Eski Samsung Health kayıtları gelmez.
