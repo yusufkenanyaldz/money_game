@@ -1,0 +1,3033 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mürekkep Damlası - Roguelite Kaligrafi Arcade</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+            touch-action: none;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #f5efe2;
+            font-family: 'Inter', sans-serif;
+            color: #141312;
+        }
+
+        .font-calligraphy {
+            font-family: 'Cinzel', serif;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        .hanko-seal {
+            border: 2px solid #d93829;
+            color: #d93829;
+            background: rgba(217, 56, 41, 0.09);
+            box-shadow: inset 0 0 0 1px rgba(217, 56, 41, 0.25);
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { transform: scale(1); filter: brightness(1); }
+            50% { transform: scale(1.03); filter: brightness(1.08); }
+        }
+        .animate-pulse-glow {
+            animation: pulseGlow 2s infinite ease-in-out;
+        }
+
+        @keyframes feverBorder {
+            0%, 100% { box-shadow: inset 0 0 38px rgba(217, 56, 41, 0.75), inset 0 0 70px rgba(212, 155, 39, 0.55); }
+            50% { box-shadow: inset 0 0 60px rgba(212, 155, 39, 0.9), inset 0 0 95px rgba(217, 56, 41, 0.7); }
+        }
+        .fever-frame {
+            animation: feverBorder 0.7s infinite ease-in-out;
+        }
+
+        @keyframes crisisBorder {
+            0%, 100% { box-shadow: inset 0 0 40px rgba(217, 56, 41, 0.65); }
+            50% { box-shadow: inset 0 0 75px rgba(153, 27, 27, 0.85); }
+        }
+        .crisis-frame {
+            animation: crisisBorder 0.9s infinite ease-in-out;
+        }
+
+        .custom-scroll::-webkit-scrollbar {
+            width: 5px;
+        }
+        .custom-scroll::-webkit-scrollbar-track {
+            background: rgba(20, 19, 18, 0.06);
+            border-radius: 99px;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: rgba(20, 19, 18, 0.28);
+            border-radius: 99px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Oyun Tuvali -->
+    <canvas id="gameCanvas"></canvas>
+
+    <!-- Ekran Kenarı Efekt Çerçevesi (Fever Modu / Kriz Dalgası) -->
+    <div id="screenEffectOverlay" class="fixed inset-0 pointer-events-none z-10 transition-opacity duration-300 opacity-0"></div>
+
+    <!-- Kriz Dalgası (Mühür Fırtınası) Üst Banner -->
+    <div id="crisisBanner" class="fixed top-20 left-1/2 -translate-x-1/2 z-20 pointer-events-none hidden">
+        <div class="px-4 py-1.5 rounded-full bg-[#991b1b]/95 border-2 border-[#fca5a5] text-white font-calligraphy text-xs sm:text-sm font-black tracking-widest shadow-xl flex items-center gap-2">
+            <span>⚡ MÜHÜR FIRTINASI</span>
+            <span id="crisisTimerText" class="px-2 py-0.5 rounded bg-black/40 text-amber-300">15.0s</span>
+        </div>
+    </div>
+
+    <!-- Fever (Mürekkep Taşkını) Üst Banner -->
+    <div id="feverBanner" class="fixed top-20 left-1/2 -translate-x-1/2 z-20 pointer-events-none hidden">
+        <div class="px-4 py-1.5 rounded-full bg-gradient-to-r from-[#b91c1c] via-[#d49b27] to-[#b91c1c] border-2 border-amber-200 text-white font-calligraphy text-xs sm:text-sm font-black tracking-widest shadow-xl flex items-center gap-2">
+            <span>🔥 MÜREKKEP TAŞKINI (DOKUNULMAZ)</span>
+            <span id="feverTimerText" class="px-2 py-0.5 rounded bg-black/40 text-amber-200">5.0s</span>
+        </div>
+    </div>
+
+    <!-- Oyun İçi Üst Bilgi Paneli (HUD) -->
+    <div id="hud" class="fixed top-0 left-0 w-full p-3 sm:p-4 flex justify-between items-start pointer-events-none z-10 hidden">
+        <!-- Sol: Yükseklik, Kombo, Altın Varak & Aktif Tılsımlar -->
+        <div class="flex flex-col gap-1">
+            <div class="flex items-center gap-2">
+                <span id="scoreText" class="font-calligraphy text-3xl sm:text-4xl font-black tracking-tight text-[#141312]">0m</span>
+                <span id="comboBadge" class="hidden font-calligraphy text-xs sm:text-sm font-extrabold px-2.5 py-0.5 rounded-md hanko-seal tracking-wider shadow-sm">
+                    KOMBO x2
+                </span>
+                <span id="diffBadgeHud" class="font-calligraphy text-[10px] font-bold px-2 py-0.5 rounded bg-stone-800/15 text-stone-700 border border-stone-800/20">
+                    ÇIRAK 1.0x
+                </span>
+            </div>
+
+            <div id="hudSubRow" class="flex items-center gap-2 text-xs font-semibold text-stone-700">
+                <span>🏆 <span id="bestScoreHud" class="font-calligraphy">0m</span></span>
+                <span class="opacity-40">•</span>
+                <span class="flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#d49b27]/20 border border-[#d49b27]/50 text-[#8a600c]">
+                    <span>✦</span> <span id="goldCountHud" class="font-calligraphy font-bold">0</span>
+                </span>
+            </div>
+
+            <!-- Aktif Durum / Tılsım Etiketleri -->
+            <div class="flex flex-wrap gap-1 mt-0.5 max-w-[230px] sm:max-w-xs">
+                <div id="shieldTag" class="hidden inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-900/90 border border-emerald-400 text-emerald-100 font-calligraphy text-[10px] font-bold shadow">
+                    <span>🪷 YEŞİM KALKAN x<span id="shieldCountText">1</span></span>
+                </div>
+                <div id="phoenixTag" class="hidden inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-orange-950/90 border border-orange-400 text-orange-200 font-calligraphy text-[10px] font-bold shadow">
+                    <span>🔥 ANKA HAZIR</span>
+                </div>
+                <div id="infInkTag" class="hidden inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-indigo-950/90 border border-indigo-400 text-indigo-200 font-calligraphy text-[10px] font-bold shadow">
+                    <span>♾️ SONSUZ MÜREKKEP</span>
+                </div>
+                <div id="dragonTag" class="hidden inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-amber-950/90 border border-amber-400 text-amber-200 font-calligraphy text-[10px] font-bold shadow">
+                    <span>🐉 EJDERHA</span>
+                    <div class="w-10 h-1.5 bg-black/50 rounded-full overflow-hidden">
+                        <div id="dragonTimerBar" class="h-full bg-amber-400 w-full"></div>
+                    </div>
+                </div>
+                <div id="chronoTag" class="hidden inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-sky-950/90 border border-sky-400 text-sky-200 font-calligraphy text-[10px] font-bold shadow">
+                    <span>⏳ ZAMAN MÜHRÜ</span>
+                    <div class="w-10 h-1.5 bg-black/50 rounded-full overflow-hidden">
+                        <div id="chronoTimerBar" class="h-full bg-sky-400 w-full"></div>
+                    </div>
+                </div>
+                <div id="magnetTag" class="hidden inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-stone-900/90 border border-amber-300/70 text-amber-200 font-calligraphy text-[10px] font-bold shadow">
+                    <span>🧲 GİRDAP</span>
+                    <div class="w-10 h-1.5 bg-black/50 rounded-full overflow-hidden">
+                        <div id="magnetTimerBar" class="h-full bg-amber-300 w-full"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sağ: Mürekkep Haznesi & Ses Butonu -->
+        <div class="flex items-start gap-2 pointer-events-auto">
+            <div id="inkCard" class="flex flex-col items-end gap-1 bg-[#ede4d1]/92 backdrop-blur-sm px-2.5 py-2 rounded-xl border border-stone-800/20 shadow-sm">
+                <div class="flex items-center gap-1 text-[10px] font-calligraphy font-bold tracking-wider">
+                    <span>💧 MÜREKKEP</span>
+                    <span id="inkNumericText" class="opacity-75">100</span>
+                </div>
+                <div class="w-24 sm:w-32 h-2.5 bg-stone-400/40 rounded-full overflow-hidden border border-stone-500/40 p-0.5">
+                    <div id="inkBarFill" class="h-full bg-[#141312] rounded-full transition-all duration-75" style="width: 100%;"></div>
+                </div>
+            </div>
+
+            <button id="soundToggleBtn" class="p-2.5 rounded-xl bg-[#ede4d1]/92 border border-stone-800/20 text-stone-800 hover:brightness-95 transition shadow-sm" title="Sesi Aç/Kapat">
+                <svg id="soundOnIcon" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                    <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                    <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+                </svg>
+                <svg id="soundOffIcon" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 hidden text-[#d93829]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                    <line x1="23" y1="9" x2="17" y2="15"></line>
+                    <line x1="17" y1="9" x2="23" y2="15"></line>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Alt Oyun İçi Aktif Yetenek (Skill) Butonları -->
+    <div id="skillBarHud" class="fixed bottom-4 left-0 w-full px-4 flex justify-between items-end pointer-events-none z-20 hidden">
+        <!-- Sol Aktif Skill Slotu (Q / 1 / Dokun) -->
+        <button id="skillSlotBtn0" class="pointer-events-auto relative overflow-hidden flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl bg-[#faf6ed]/95 border-2 border-stone-800/35 shadow-lg active:scale-95 transition min-w-[132px]">
+            <div id="skillCdOverlay0" class="absolute inset-0 bg-stone-900/65 origin-bottom transition-transform duration-75" style="transform: scaleY(0);"></div>
+            <span id="skillIcon0" class="text-2xl relative z-10">⚡</span>
+            <div class="text-left relative z-10">
+                <div id="skillName0" class="font-calligraphy text-xs font-extrabold text-[#141312] leading-tight">Gölge Sıçrayışı</div>
+                <div id="skillStatus0" class="text-[10px] font-bold text-emerald-700">HAZIR [Q]</div>
+            </div>
+        </button>
+
+        <!-- Orta Kısayol İpucu -->
+        <div class="hidden md:block text-[11px] font-medium px-3 py-1 rounded-full bg-black/25 text-white/90 backdrop-blur-sm">
+            Geri Çek & Fırlat • [Q] Yetenek 1 • [E / Boşluk] Yetenek 2
+        </div>
+
+        <!-- Sağ Aktif Skill Slotu (E / 2 / Dokun) -->
+        <button id="skillSlotBtn1" class="pointer-events-auto relative overflow-hidden flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl bg-[#faf6ed]/95 border-2 border-stone-800/35 shadow-lg active:scale-95 transition min-w-[132px]">
+            <div id="skillCdOverlay1" class="absolute inset-0 bg-stone-900/65 origin-bottom transition-transform duration-75" style="transform: scaleY(0);"></div>
+            <span id="skillIcon1" class="text-2xl relative z-10">⏳</span>
+            <div class="text-left relative z-10">
+                <div id="skillName1" class="font-calligraphy text-xs font-extrabold text-[#141312] leading-tight">Zaman Mührü</div>
+                <div id="skillStatus1" class="text-[10px] font-bold text-emerald-700">HAZIR [E]</div>
+            </div>
+        </button>
+    </div>
+
+    <!-- ANA MENÜ / HATTAT LOBİSİ -->
+    <div id="startScreen" class="fixed inset-0 bg-[#f5efe2]/90 backdrop-blur-sm flex flex-col items-center justify-center p-3 sm:p-4 z-30 overflow-y-auto">
+        <div class="max-w-xl w-full bg-[#faf6ed] border-2 border-stone-800/25 rounded-3xl p-4 sm:p-6 shadow-[0_24px_60px_rgba(20,19,18,0.2)] my-auto">
+            <!-- Üst Bakiye, Rekor & Mürekkep Özü Sandık Çubuğu -->
+            <div class="flex flex-wrap justify-between items-center gap-2 mb-3">
+                <div class="flex items-center gap-2 text-xs font-calligraphy font-bold">
+                    <span class="px-2.5 py-1 rounded-full bg-[#efe7d6] border border-stone-800/15 text-stone-800">
+                        🏆 <span id="startBestScore">0m</span>
+                    </span>
+                    <span class="px-2.5 py-1 rounded-full bg-[#d49b27]/20 border border-[#d49b27]/50 text-[#8a600c]">
+                        ✦ <span id="bankGoldStart">0</span>
+                    </span>
+                </div>
+
+                <!-- Hattat Sandığı / Mürekkep Özü Göstergesi -->
+                <button id="openChestBtn" class="flex items-center gap-2 px-3 py-1 rounded-full bg-[#efe7d6] border border-stone-800/20 hover:brightness-95 transition text-xs font-calligraphy font-bold">
+                    <span>🎁</span>
+                    <div class="flex flex-col items-start">
+                        <span id="chestStatusText" class="text-[10px] leading-none text-stone-700">ÖZ: 0/100</span>
+                        <div class="w-16 h-1.5 bg-stone-300 rounded-full overflow-hidden mt-0.5">
+                            <div id="essenceBarFill" class="h-full bg-[#d93829]" style="width: 0%;"></div>
+                        </div>
+                    </div>
+                </button>
+            </div>
+
+            <!-- Başlık -->
+            <div class="text-center mb-3">
+                <div class="hanko-seal inline-block px-2.5 py-0.5 rounded font-calligraphy text-[10px] font-extrabold tracking-widest mb-1">
+                    墨 滴 • ROGUELITE SUMI-E ARCADE
+                </div>
+                <h1 class="font-calligraphy text-2xl sm:text-3xl font-black tracking-tight text-[#141312]">
+                    MÜREKKEP DAMLASI
+                </h1>
+            </div>
+
+            <!-- 4 Zorluk Katmanı Seçici -->
+            <div class="mb-3">
+                <div class="text-[10px] font-calligraphy font-bold text-stone-500 uppercase tracking-wider mb-1 text-center">
+                    Zorluk Katmanı Seç (Altın Varak Çarpanı)
+                </div>
+                <div id="difficultySelector" class="grid grid-cols-4 gap-1.5"></div>
+                <div id="difficultyDescText" class="text-[11px] text-center text-stone-600 mt-1 bg-[#efe7d6]/65 py-1 px-2 rounded-lg border border-stone-800/10">
+                    Standart hız, bol mürekkep ve affedici kenar sekmesi.
+                </div>
+            </div>
+
+            <!-- Ana Lobi Sekmeleri: Koşu & Görevler vs Hattat Mağazası -->
+            <div class="grid grid-cols-2 gap-1.5 p-1 rounded-2xl bg-[#efe7d6] border border-stone-800/15 mb-3 text-xs font-calligraphy font-bold">
+                <button id="mainTabLobbyBtn" class="py-2 rounded-xl bg-[#141312] text-[#f5efe2] transition">
+                    📜 GÖREVLER & DİZİLİM
+                </button>
+                <button id="mainTabShopBtn" class="py-2 rounded-xl text-stone-700 hover:text-[#141312] transition">
+                    🏮 HATTAT MAĞAZASI
+                </button>
+            </div>
+
+            <!-- PANEL 1: AKTİF GÖREVLER & KUŞANILAN DİZİLİM ÖZETİ -->
+            <div id="lobbyPanel" class="space-y-3 mb-4">
+                <!-- Kuşanılan Yetenekler, Rünler ve İksirler Özeti -->
+                <div class="p-2.5 rounded-2xl bg-[#efe7d6]/75 border border-stone-800/15">
+                    <div class="flex justify-between items-center mb-1.5">
+                        <span class="font-calligraphy text-[11px] font-bold text-stone-700">KUŞANILAN DİZİLİM</span>
+                        <button id="quickEditLoadoutBtn" class="text-[10px] font-calligraphy font-bold text-[#d93829] underline">Mağazada Düzenle →</button>
+                    </div>
+                    <div id="loadoutSummaryGrid" class="grid grid-cols-3 gap-1.5 text-[10px]"></div>
+                </div>
+
+                <!-- 3 Aktif Koşu Görevi -->
+                <div class="p-2.5 rounded-2xl bg-[#efe7d6]/75 border border-stone-800/15">
+                    <div class="flex justify-between items-center mb-1.5">
+                        <span class="font-calligraphy text-[11px] font-bold text-stone-700">🎯 AKTİF HATTAT GÖREVLERİ</span>
+                        <span class="text-[10px] text-stone-500">Tamamla & Ödülü Al</span>
+                    </div>
+                    <div id="questsContainer" class="space-y-1.5"></div>
+                </div>
+            </div>
+
+            <!-- PANEL 2: 4 SEKMELİ DEV HATTAT MAĞAZASI -->
+            <div id="shopPanel" class="hidden mb-4">
+                <!-- 4 Mağaza Alt Sekmesi -->
+                <div class="grid grid-cols-4 gap-1 p-1 rounded-xl bg-[#efe7d6] border border-stone-800/15 mb-2.5 text-[10px] sm:text-xs font-calligraphy font-bold">
+                    <button data-shoptab="skills" class="shop-subtab py-1.5 rounded-lg bg-[#141312] text-[#f5efe2] transition">⚡ Yetenek</button>
+                    <button data-shoptab="runes" class="shop-subtab py-1.5 rounded-lg text-stone-700 hover:text-[#141312] transition">🔮 Rünler</button>
+                    <button data-shoptab="items" class="shop-subtab py-1.5 rounded-lg text-stone-700 hover:text-[#141312] transition">🧪 İksirler</button>
+                    <button data-shoptab="skins" class="shop-subtab py-1.5 rounded-lg text-stone-700 hover:text-[#141312] transition">🎨 Fırçalar</button>
+                </div>
+
+                <div id="shopSlotInfoBar" class="text-[11px] font-calligraphy font-bold text-center text-stone-700 bg-[#efe7d6]/60 py-1 px-2 rounded-lg mb-2 border border-stone-800/10">
+                    Kuşanılan Yetenek Slotu: 2 / 2
+                </div>
+
+                <div id="shopItemsContainer" class="max-h-56 overflow-y-auto custom-scroll pr-1 space-y-2"></div>
+            </div>
+
+            <!-- Oyuna Başla Butonu -->
+            <button id="startBtn" class="w-full py-3.5 rounded-2xl font-calligraphy font-extrabold text-base sm:text-lg tracking-widest text-[#f5efe2] bg-[#141312] hover:bg-stone-800 shadow-[0_8px_22px_rgba(20,19,18,0.3)] transition transform active:scale-95 animate-pulse-glow">
+                PARŞÖMENE ATIL
+            </button>
+        </div>
+    </div>
+
+    <!-- HATTAT GİZEMLİ SANDIĞI (GACHA / ÖDÜL MODALI) -->
+    <div id="chestModal" class="fixed inset-0 bg-stone-950/80 backdrop-blur-md flex items-center justify-center p-4 z-40 hidden">
+        <div class="max-w-sm w-full bg-[#faf6ed] border-2 border-[#d49b27] rounded-3xl p-6 text-center shadow-2xl">
+            <div class="hanko-seal inline-block px-3 py-0.5 rounded font-calligraphy text-xs font-extrabold mb-2">
+                HATTAT HAZİNE SANDIĞI
+            </div>
+            <div id="chestVisualIcon" class="text-6xl my-4 transition-transform duration-300">🎁</div>
+            <h3 id="chestTitle" class="font-calligraphy text-xl font-black text-[#141312] mb-1">GİZEMLİ SANDIK HAZIR!</h3>
+            <p id="chestRewardDesc" class="text-xs text-stone-600 mb-5">Mürekkep Özü doldu! İçinden Altın Varak, iksir veya rün enerjisi çıkar.</p>
+
+            <button id="claimChestBtn" class="w-full py-3.5 rounded-2xl font-calligraphy font-extrabold text-base tracking-wider text-[#f5efe2] bg-gradient-to-r from-[#b88014] to-[#d93829] shadow-lg active:scale-95 transition">
+                SANDIĞI MÜHÜRLE VE AÇ
+            </button>
+        </div>
+    </div>
+
+    <!-- OYUN BİTTİ EKRANI -->
+    <div id="gameOverScreen" class="fixed inset-0 bg-[#f5efe2]/88 backdrop-blur-md flex flex-col items-center justify-center p-4 z-30 hidden">
+        <div class="max-w-sm w-full bg-[#faf6ed] border-2 border-stone-800/25 rounded-3xl p-6 text-center shadow-[0_20px_50px_rgba(20,19,18,0.2)]">
+            <div id="gameOverReason" class="hanko-seal inline-block px-3 py-0.5 rounded font-calligraphy text-[11px] font-extrabold tracking-widest uppercase mb-2">
+                PARŞÖMENDEN DÜŞTÜ
+            </div>
+            <h2 class="font-calligraphy text-3xl font-black text-[#141312] mb-4">ESER TAMAMLANDI</h2>
+
+            <div class="grid grid-cols-3 gap-2 mb-3">
+                <div class="bg-[#efe7d6] p-2.5 rounded-2xl border border-stone-800/15">
+                    <div class="text-[10px] text-stone-500 font-semibold uppercase">Yükseklik</div>
+                    <div id="finalScoreText" class="font-calligraphy text-xl font-black text-[#141312]">0m</div>
+                </div>
+                <div class="bg-[#efe7d6] p-2.5 rounded-2xl border border-stone-800/15">
+                    <div class="text-[10px] text-stone-500 font-semibold uppercase">Max Kombo</div>
+                    <div id="finalComboText" class="font-calligraphy text-xl font-black text-[#d93829]">x1</div>
+                </div>
+                <div class="bg-[#efe7d6] p-2.5 rounded-2xl border border-stone-800/15">
+                    <div class="text-[10px] text-stone-500 font-semibold uppercase">Altın Varak</div>
+                    <div id="finalGoldText" class="font-calligraphy text-xl font-black text-[#b88014]">+0 ✦</div>
+                </div>
+            </div>
+
+            <div id="diceLuckBanner" class="hidden mb-3 py-1.5 px-3 rounded-xl bg-amber-500/20 border border-amber-500 text-[#8a600c] font-calligraphy text-xs font-extrabold">
+                🎲 ŞANS ZARI TUTTU! VARAKLAR 2'YE KATLANDI!
+            </div>
+
+            <div id="newRecordBadge" class="hidden mb-3 py-1.5 px-3 rounded-xl bg-[#d49b27]/20 border border-[#d49b27] text-[#8a600c] font-calligraphy text-xs font-extrabold">
+                ✦ YENİ YÜKSEKLİK REKORU! ✦
+            </div>
+
+            <!-- Mürekkep Özü İlerleme Çubuğu -->
+            <div class="bg-[#efe7d6]/80 p-2.5 rounded-xl border border-stone-800/15 mb-4 text-left">
+                <div class="flex justify-between text-[11px] font-calligraphy font-bold text-stone-700 mb-1">
+                    <span>🎁 MÜREKKEP ÖZÜ (SANDIK)</span>
+                    <span id="overEssenceText">0 / 100</span>
+                </div>
+                <div class="w-full h-2 bg-stone-300 rounded-full overflow-hidden">
+                    <div id="overEssenceBar" class="h-full bg-[#d93829] transition-all duration-300" style="width: 0%;"></div>
+                </div>
+            </div>
+
+            <div class="flex gap-2.5">
+                <button id="backToLobbyBtn" class="px-4 py-3.5 rounded-2xl font-calligraphy font-bold text-xs tracking-wider text-[#141312] bg-[#efe7d6] hover:bg-[#e5dac2] border border-stone-800/25 transition">
+                    🏮 MAĞAZA
+                </button>
+                <button id="restartBtn" class="flex-1 py-3.5 rounded-2xl font-calligraphy font-extrabold text-base tracking-widest text-[#f5efe2] bg-[#141312] hover:bg-stone-800 shadow-lg transition transform active:scale-95">
+                    TEKRAR ATIL
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * MÜREKKEP DAMLASI (INK SHOT) - ROGUELITE KALİGRAFİ ARCADE MOTORU
+         * Tek dosya HTML5 Canvas, 4 Zorluk Katmanı, Mühür Fırtınası Kriz Dalgaları,
+         * 5 Aktif Skill, 6 Yükseltilebilir Antik Rün, 4 Taktiksel İksir, 6 Fırça Stili,
+         * Görev Sistemi, Gizemli Sandık, Fever Modu & Prosedürel Web Audio API Synth
+         */
+
+        // =====================================================================
+        // 1. OYUN VERİ TABANI (ZORLUKLAR, SKILLER, RÜNLER, EŞYALAR, GÖRÜNÜMLER)
+        // =====================================================================
+
+        const DIFFICULTIES = [
+            {
+                id: 'apprentice',
+                name: 'Çırak',
+                mult: 1.0,
+                badge: 'ÇIRAK 1.0x',
+                desc: 'Standart hız, bol mürekkep ve affedici kenar sekmesi.',
+                burnBaseSpeed: 28,
+                burnMaxSpeed: 65,
+                porcelainTime: 1.55,
+                sealDensity: 0.34,
+                movingSealChance: 0.25,
+                spikyWalls: false,
+                headwindChance: 0.0,
+                bulletTimeScale: 0.20,
+                color: '#15803d'
+            },
+            {
+                id: 'master',
+                name: 'Usta',
+                mult: 1.5,
+                badge: 'USTA 1.5x',
+                desc: 'Hızlanan kağıt kuruması çizgisi, hareketli mühürler ve dikenli duvarlar.',
+                burnBaseSpeed: 48,
+                burnMaxSpeed: 105,
+                porcelainTime: 1.15,
+                sealDensity: 0.50,
+                movingSealChance: 0.52,
+                spikyWalls: true,
+                headwindChance: 0.12,
+                bulletTimeScale: 0.25,
+                color: '#b88014'
+            },
+            {
+                id: 'grandmaster',
+                name: 'Büyük Hattat',
+                mult: 2.2,
+                badge: 'B.HATTAT 2.2x',
+                desc: 'Kısıtlı ağır çekim, ikili mühür zincirleri, 0.8s porselen ömrü.',
+                burnBaseSpeed: 68,
+                burnMaxSpeed: 140,
+                porcelainTime: 0.80,
+                sealDensity: 0.65,
+                movingSealChance: 0.68,
+                spikyWalls: true,
+                headwindChance: 0.24,
+                bulletTimeScale: 0.36,
+                color: '#d93829'
+            },
+            {
+                id: 'nightmare',
+                name: 'Kabus',
+                mult: 3.5,
+                badge: 'KABUS 3.5x',
+                desc: 'Ekstrem kuruma hızı, devriye bekçi mühürleri ve ters rüzgar akımları!',
+                burnBaseSpeed: 92,
+                burnMaxSpeed: 185,
+                porcelainTime: 0.62,
+                sealDensity: 0.80,
+                movingSealChance: 0.85,
+                spikyWalls: true,
+                headwindChance: 0.38,
+                bulletTimeScale: 0.45,
+                color: '#7f1d1d'
+            }
+        ];
+
+        const SKILLS_CATALOG = [
+            {
+                id: 'shadow_dash',
+                name: 'Gölge Sıçrayışı',
+                icon: '⚡',
+                price: 0,
+                cooldown: 8.5,
+                desc: 'Yukarı yönde ışık hızıyla atılır ve yol üzerindeki kırmızı mühürleri parçalar.'
+            },
+            {
+                id: 'chrono_seal',
+                name: 'Zaman Mührü',
+                icon: '⏳',
+                price: 0,
+                cooldown: 11.0,
+                desc: '3.5 saniye boyunca mürekkep harcamadan tam ağır çekim ve geniş nişan sağlar.'
+            },
+            {
+                id: 'ink_nova',
+                name: 'Mürekkep Patlaması',
+                icon: '💥',
+                price: 60,
+                cooldown: 13.0,
+                desc: 'Ekrandaki tüm kırmızı mühürleri silip toplanabilir Altın Varaklara dönüştürür!'
+            },
+            {
+                id: 'phoenix_brush',
+                name: 'Anka Dirilişi',
+                icon: '🔥',
+                price: 95,
+                cooldown: 22.0,
+                desc: 'Anında alev dalgasıyla 120m göğe fırlar (veya hazırsa ölümden otomatik kurtarır).'
+            },
+            {
+                id: 'vortex_pull',
+                name: 'Manyetik Girdap',
+                icon: '🌀',
+                price: 80,
+                cooldown: 12.0,
+                desc: '5 saniye boyunca tüm varakları, mürekkep kürelerini ve hokkaları kendine çeker.'
+            }
+        ];
+
+        const RUNES_CATALOG = [
+            {
+                id: 'vampire_ink',
+                name: 'Vampir Mürekkep Rünü',
+                icon: '🩸',
+                maxLvl: 3,
+                basePrice: 45,
+                desc: 'Kıl payı geçişlerde maksimum mürekkebin %25 / %35 / %50 kadarını yeniler.'
+            },
+            {
+                id: 'sharpshooter',
+                name: 'Keskin Nişancı Rünü',
+                icon: '🎯',
+                maxLvl: 3,
+                basePrice: 50,
+                desc: 'Nişan yayını %45 uzatır ve hokkaların yakalama mıknatısını güçlendirir.'
+            },
+            {
+                id: 'combo_alchemist',
+                name: 'Kombo Simyacısı Rünü',
+                icon: '⚗️',
+                maxLvl: 3,
+                basePrice: 65,
+                desc: 'Zincir süresini iki katına çıkarır ve her 5x komboda rastgele tılsım verir.'
+            },
+            {
+                id: 'unbreakable_porcelain',
+                name: 'Kırılmaz Porselen Rünü',
+                icon: '🏺',
+                maxLvl: 3,
+                basePrice: 45,
+                desc: 'Porselen hokkaların kırılma süresini uzatır ve kırılınca yukarı patlama itişi verir.'
+            },
+            {
+                id: 'greedy_dragon',
+                name: 'Açgözlü Ejder Rünü',
+                icon: '🐉',
+                maxLvl: 3,
+                basePrice: 70,
+                desc: 'Altın Varak değerini %40 artırır ve her 100m yükseklikte varak yağmuru başlatır.'
+            },
+            {
+                id: 'wall_ricochet',
+                name: 'Duvar Sekmesi Rünü',
+                icon: '🛡️',
+                maxLvl: 3,
+                basePrice: 55,
+                desc: 'Dikenli duvar hasarını engeller, kenardan sekerken hız ve mürekkep kazandırır.'
+            }
+        ];
+
+        const ITEMS_CATALOG = [
+            {
+                id: 'start_rocket',
+                name: 'Kağıt Ejderi Roketi',
+                icon: '🚀',
+                price: 35,
+                desc: 'Koşuya 150m yükseklikten ve Ejderha Fırçası aktif olarak başlarsın.'
+            },
+            {
+                id: 'pure_jade',
+                name: 'Saf Yeşim Tılsımı',
+                icon: '🪷',
+                price: 30,
+                desc: 'Koşuya ekstra +2 Yeşim Kalkan katmanı ile başlarsın.'
+            },
+            {
+                id: 'infinite_ink_vial',
+                name: 'Sonsuz Mürekkep Şişesi',
+                icon: '🧪',
+                price: 40,
+                desc: 'Koşunun ilk 20 saniyesi boyunca sınırsız mürekkep sağlar.'
+            },
+            {
+                id: 'fate_dice',
+                name: 'Kader Mührü (Şans Zarı)',
+                icon: '🎲',
+                price: 45,
+                desc: 'Koşu sonunda kazanılan Altın Varakları %50 ihtimalle 2x (yoksa %25 ekstra) yapar.'
+            }
+        ];
+
+        const SKINS_CATALOG = [
+            {
+                id: 'sumi',
+                name: 'Sumi Siyahı',
+                price: 0,
+                bonusDesc: 'Klasik denge (+%0)',
+                main: '#141312',
+                trailRgb: '20, 19, 18',
+                highlight: 'rgba(245, 239, 226, 0.8)',
+                sparkle: false
+            },
+            {
+                id: 'vermilion',
+                name: 'Kızıl İmparator Mührü',
+                price: 50,
+                bonusDesc: '+%10 Kombo Puanı',
+                main: '#b91c1c',
+                trailRgb: '185, 28, 28',
+                highlight: 'rgba(254, 226, 226, 0.88)',
+                sparkle: false
+            },
+            {
+                id: 'gold_leaf',
+                name: 'Saf Altın Varak',
+                price: 90,
+                bonusDesc: '+%15 Altın Varak Kazancı',
+                main: '#d49b27',
+                trailRgb: '212, 155, 39',
+                highlight: 'rgba(254, 249, 195, 0.92)',
+                sparkle: true
+            },
+            {
+                id: 'cobalt',
+                name: 'Gök Mavisi Çini',
+                price: 120,
+                bonusDesc: '+15 Maksimum Mürekkep',
+                main: '#1d4ed8',
+                trailRgb: '29, 78, 216',
+                highlight: 'rgba(219, 234, 254, 0.9)',
+                sparkle: true
+            },
+            {
+                id: 'emerald_dragon',
+                name: 'Zümrüt Ejderha Ateşi',
+                price: 160,
+                bonusDesc: '+%10 Fırlatma Hızı',
+                main: '#059669',
+                trailRgb: '5, 150, 105',
+                highlight: 'rgba(209, 250, 229, 0.92)',
+                sparkle: true
+            },
+            {
+                id: 'cosmic_ink',
+                name: 'Kozmik Gece Mürekkebi',
+                price: 220,
+                bonusDesc: '+%20 Mürekkep Özü & Yıldız İzi',
+                main: '#6d28d9',
+                trailRgb: '109, 40, 217',
+                highlight: 'rgba(237, 233, 254, 0.95)',
+                sparkle: true
+            }
+        ];
+
+        const QUEST_TEMPLATES = [
+            { id: 'q_nearmiss', type: 'nearMiss', target: 6, reward: 45, text: 'Tek koşuda 6 Kıl Payı geçiş yap' },
+            { id: 'q_alt500', type: 'altitude', target: 450, reward: 55, text: '450m yüksekliğe ulaş' },
+            { id: 'q_spin3', type: 'spin', target: 2, reward: 50, text: 'Havada 2 kez 360° tam dönüş yap' },
+            { id: 'q_combo6', type: 'combo', target: 6, reward: 60, text: '6x Kombo zincirine ulaş' },
+            { id: 'q_gold12', type: 'gold', target: 12, reward: 50, text: 'Tek koşuda 12 Altın Varak topla' },
+            { id: 'q_skill3', type: 'skill', target: 3, reward: 40, text: 'Koşu içinde 3 kez Aktif Yetenek kullan' }
+        ];
+
+        // =====================================================================
+        // 2. KALICI KAYIT (LOCALSTORAGE) YÖNETİMİ
+        // =====================================================================
+        let saveData = {
+            bestScore: 0,
+            gold: 80, // Yeni oyuncuya mağazayı keşfetmesi için başlangıç varakı
+            essence: 40,
+            difficulty: 'apprentice',
+            unlockedSkills: ['shadow_dash', 'chrono_seal'],
+            equippedSkills: ['shadow_dash', 'chrono_seal'],
+            runeLevels: {}, // { vampire_ink: 1, ... }
+            equippedRunes: [], // Maksimum 3 rün ID'si
+            itemInventory: { start_rocket: 0, pure_jade: 0, infinite_ink_vial: 0, fate_dice: 0 },
+            equippedItems: [], // Koşu öncesi aktif edilecek eşyalar
+            unlockedSkins: ['sumi'],
+            selectedSkin: 'sumi',
+            activeQuests: []
+        };
+
+        function generateRandomQuests() {
+            const shuffled = [...QUEST_TEMPLATES].sort(() => Math.random() - 0.5);
+            return shuffled.slice(0, 3).map(q => ({
+                ...q,
+                progress: 0,
+                claimed: false
+            }));
+        }
+
+        function loadSaveData() {
+            try {
+                const raw = localStorage.getItem('ink_shot_roguelite_v3');
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    saveData = {
+                        ...saveData,
+                        ...parsed,
+                        runeLevels: { ...(parsed.runeLevels || {}) },
+                        itemInventory: { ...saveData.itemInventory, ...(parsed.itemInventory || {}) }
+                    };
+                }
+            } catch (e) {}
+            if (!saveData.activeQuests || saveData.activeQuests.length < 3) {
+                saveData.activeQuests = generateRandomQuests();
+            }
+        }
+
+        function persistSaveData() {
+            try {
+                localStorage.setItem('ink_shot_roguelite_v3', JSON.stringify(saveData));
+            } catch (e) {}
+        }
+
+        loadSaveData();
+
+        function getDifficulty() {
+            return DIFFICULTIES.find(d => d.id === saveData.difficulty) || DIFFICULTIES[0];
+        }
+
+        function getActiveSkin() {
+            return SKINS_CATALOG.find(s => s.id === saveData.selectedSkin) || SKINS_CATALOG[0];
+        }
+
+        function getRuneLevel(runeId) {
+            if (!saveData.equippedRunes.includes(runeId)) return 0;
+            return saveData.runeLevels[runeId] || 0;
+        }
+
+        // =====================================================================
+        // 3. PROSEDÜREL WEB AUDIO API SES MOTORU (KOTO, DAVUL, FIRÇA, KOMBO)
+        // =====================================================================
+        class ZenSoundEngine {
+            constructor() {
+                this.ctx = null;
+                this.enabled = true;
+            }
+
+            init() {
+                if (!this.ctx) {
+                    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                    this.ctx = new AudioCtx();
+                }
+                if (this.ctx.state === 'suspended') {
+                    this.ctx.resume();
+                }
+            }
+
+            toggle() {
+                this.enabled = !this.enabled;
+                document.getElementById('soundOnIcon').classList.toggle('hidden', !this.enabled);
+                document.getElementById('soundOffIcon').classList.toggle('hidden', this.enabled);
+            }
+
+            playBrushWhoosh(power = 0.7, isBoosted = false) {
+                if (!this.enabled) return;
+                try {
+                    this.init();
+                    const dur = isBoosted ? 0.28 : 0.19;
+                    const len = Math.floor(this.ctx.sampleRate * dur);
+                    const buf = this.ctx.createBuffer(1, len, this.ctx.sampleRate);
+                    const data = buf.getChannelData(0);
+                    for (let i = 0; i < len; i++) {
+                        data[i] = (Math.random() * 2 - 1) * Math.sin((i / len) * Math.PI);
+                    }
+                    const src = this.ctx.createBufferSource();
+                    src.buffer = buf;
+
+                    const filter = this.ctx.createBiquadFilter();
+                    filter.type = 'bandpass';
+                    filter.frequency.setValueAtTime(280 + power * 240, this.ctx.currentTime);
+                    filter.frequency.exponentialRampToValueAtTime(isBoosted ? 1650 : 1120, this.ctx.currentTime + dur);
+
+                    const gain = this.ctx.createGain();
+                    gain.gain.setValueAtTime(0.22 * power + 0.05, this.ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + dur);
+
+                    src.connect(filter);
+                    filter.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    src.start();
+                } catch (e) {}
+            }
+
+            // Kombo seviyesine göre tizleşen pentatonik koto/çan notası
+            playKotoNote(combo = 1, nodeType = 'stone') {
+                if (!this.enabled) return;
+                try {
+                    this.init();
+                    const scale = [293.66, 329.63, 392.00, 440.00, 523.25, 587.33, 659.25, 783.99, 880.00, 1046.50];
+                    const idx = Math.min(scale.length - 1, Math.max(0, combo - 1));
+                    const freq = scale[idx] * (nodeType === 'gold' ? 1.25 : 1);
+
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = nodeType === 'jade' ? 'triangle' : 'sine';
+                    osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(freq * 1.015, this.ctx.currentTime + 0.24);
+
+                    gain.gain.setValueAtTime(0.16, this.ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.25);
+
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start();
+                    osc.stop(this.ctx.currentTime + 0.25);
+                } catch (e) {}
+            }
+
+            playNearMissWhistle(combo = 1) {
+                if (!this.enabled) return;
+                try {
+                    this.init();
+                    const base = 620 + Math.min(combo * 45, 450);
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(base, this.ctx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(base * 1.45, this.ctx.currentTime + 0.14);
+
+                    gain.gain.setValueAtTime(0.14, this.ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.14);
+
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start();
+                    osc.stop(this.ctx.currentTime + 0.14);
+                } catch (e) {}
+            }
+
+            playTaikoDrum() {
+                if (!this.enabled) return;
+                try {
+                    this.init();
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(145, this.ctx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(42, this.ctx.currentTime + 0.45);
+
+                    gain.gain.setValueAtTime(0.32, this.ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.48);
+
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start();
+                    osc.stop(this.ctx.currentTime + 0.48);
+                } catch (e) {}
+            }
+
+            playGoldChime() {
+                if (!this.enabled) return;
+                try {
+                    this.init();
+                    [587.33, 880, 1174.66].forEach((freq, i) => {
+                        const osc = this.ctx.createOscillator();
+                        const gain = this.ctx.createGain();
+                        osc.type = 'triangle';
+                        const t = this.ctx.currentTime + i * 0.035;
+                        osc.frequency.setValueAtTime(freq, t);
+                        gain.gain.setValueAtTime(0.12, t);
+                        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.22);
+                        osc.connect(gain);
+                        gain.connect(this.ctx.destination);
+                        osc.start(t);
+                        osc.stop(t + 0.22);
+                    });
+                } catch (e) {}
+            }
+
+            playSkillCast() {
+                if (!this.enabled) return;
+                try {
+                    this.init();
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(240, this.ctx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(920, this.ctx.currentTime + 0.26);
+                    gain.gain.setValueAtTime(0.16, this.ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.28);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start();
+                    osc.stop(this.ctx.currentTime + 0.28);
+                } catch (e) {}
+            }
+
+            playImpact(isSave = false) {
+                if (!this.enabled) return;
+                try {
+                    this.init();
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = isSave ? 'triangle' : 'sawtooth';
+                    osc.frequency.setValueAtTime(isSave ? 420 : 160, this.ctx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(isSave ? 880 : 40, this.ctx.currentTime + 0.34);
+                    gain.gain.setValueAtTime(0.24, this.ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.35);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start();
+                    osc.stop(this.ctx.currentTime + 0.35);
+                } catch (e) {}
+            }
+        }
+
+        const sfx = new ZenSoundEngine();
+
+        // =====================================================================
+        // 4. LOBİ, ZORLUK SEÇİCİ, GÖREVLER, SANDIK VE 4 SEKMELİ MAĞAZA UI
+        // =====================================================================
+        let currentShopTab = 'skills';
+
+        function renderLobbyUI() {
+            document.getElementById('startBestScore').textContent = `${saveData.bestScore}m`;
+            document.getElementById('bankGoldStart').textContent = saveData.gold;
+
+            // Mürekkep Özü Sandık Göstergesi
+            const essPct = Math.min(100, saveData.essence);
+            document.getElementById('essenceBarFill').style.width = `${essPct}%`;
+            const chestBtn = document.getElementById('openChestBtn');
+            if (saveData.essence >= 100) {
+                document.getElementById('chestStatusText').textContent = 'SANDIK AÇ!';
+                chestBtn.classList.add('border-[#d93829]', 'bg-amber-100', 'animate-pulse-glow');
+            } else {
+                document.getElementById('chestStatusText').textContent = `ÖZ: ${saveData.essence}/100`;
+                chestBtn.classList.remove('border-[#d93829]', 'bg-amber-100', 'animate-pulse-glow');
+            }
+
+            // 4 Zorluk Kartı
+            const diffContainer = document.getElementById('difficultySelector');
+            diffContainer.innerHTML = '';
+            DIFFICULTIES.forEach(d => {
+                const active = saveData.difficulty === d.id;
+                const btn = document.createElement('button');
+                btn.className = `py-2 px-1.5 rounded-xl border text-center transition ${
+                    active
+                        ? 'bg-[#141312] text-[#f5efe2] border-[#141312] shadow-md'
+                        : 'bg-[#efe7d6]/80 text-[#141312] border-stone-800/20 hover:bg-[#e5dac2]'
+                }`;
+                btn.innerHTML = `
+                    <div class="font-calligraphy text-[11px] font-extrabold leading-tight">${d.name}</div>
+                    <div class="text-[10px] font-bold ${active ? 'text-amber-300' : 'text-[#8a600c]'}">${d.mult}x ✦</div>
+                `;
+                btn.addEventListener('click', () => {
+                    sfx.init();
+                    saveData.difficulty = d.id;
+                    sfx.playKotoNote(2);
+                    persistSaveData();
+                    renderLobbyUI();
+                });
+                diffContainer.appendChild(btn);
+            });
+            document.getElementById('difficultyDescText').textContent = getDifficulty().desc;
+
+            // Kuşanılan Dizilim Özeti
+            const loadoutGrid = document.getElementById('loadoutSummaryGrid');
+            const eqSkills = saveData.equippedSkills.map(id => SKILLS_CATALOG.find(s => s.id === id)?.icon || '').join(' ');
+            const eqRunes = saveData.equippedRunes.map(id => RUNES_CATALOG.find(r => r.id === id)?.icon || '').join(' ') || 'Boş';
+            const eqItems = saveData.equippedItems.map(id => ITEMS_CATALOG.find(i => i.id === id)?.icon || '').join(' ') || 'Yok';
+
+            loadoutGrid.innerHTML = `
+                <div class="p-1.5 rounded-xl bg-[#faf6ed] border border-stone-800/15 text-center">
+                    <div class="text-stone-500 font-semibold">Yetenekler (2)</div>
+                    <div class="text-sm mt-0.5">${eqSkills || 'Seçilmedi'}</div>
+                </div>
+                <div class="p-1.5 rounded-xl bg-[#faf6ed] border border-stone-800/15 text-center">
+                    <div class="text-stone-500 font-semibold">Rünler (${saveData.equippedRunes.length}/3)</div>
+                    <div class="text-sm mt-0.5">${eqRunes}</div>
+                </div>
+                <div class="p-1.5 rounded-xl bg-[#faf6ed] border border-stone-800/15 text-center">
+                    <div class="text-stone-500 font-semibold">İksirler (${saveData.equippedItems.length})</div>
+                    <div class="text-sm mt-0.5">${eqItems}</div>
+                </div>
+            `;
+
+            // 3 Aktif Koşu Görevi
+            const questsEl = document.getElementById('questsContainer');
+            questsEl.innerHTML = '';
+            saveData.activeQuests.forEach((q, idx) => {
+                const done = q.progress >= q.target;
+                const pct = Math.min(100, Math.round((q.progress / q.target) * 100));
+                const row = document.createElement('div');
+                row.className = 'p-2 rounded-xl bg-[#faf6ed] border border-stone-800/15 flex items-center justify-between gap-2';
+                row.innerHTML = `
+                    <div class="flex-1 min-w-0">
+                        <div class="text-[11px] font-bold text-[#141312] truncate">${q.text}</div>
+                        <div class="flex items-center gap-2 mt-1">
+                            <div class="flex-1 h-1.5 bg-stone-200 rounded-full overflow-hidden">
+                                <div class="h-full ${done ? 'bg-emerald-600' : 'bg-[#141312]'}" style="width:${pct}%"></div>
+                            </div>
+                            <span class="text-[10px] font-calligraphy font-bold text-stone-600">${Math.min(q.progress, q.target)}/${q.target}</span>
+                        </div>
+                    </div>
+                    <button class="px-2.5 py-1 rounded-lg font-calligraphy text-[10px] font-extrabold shrink-0 ${
+                        done
+                            ? 'bg-emerald-600 text-white animate-pulse-glow'
+                            : 'bg-[#efe7d6] text-[#8a600c] border border-[#d49b27]/40'
+                    }">
+                        ${done ? `AL +${q.reward}✦` : `+${q.reward}✦`}
+                    </button>
+                `;
+                const btn = row.querySelector('button');
+                if (done) {
+                    btn.addEventListener('click', () => {
+                        sfx.init();
+                        saveData.gold += q.reward;
+                        saveData.essence = Math.min(100, saveData.essence + 25);
+                        // Tamamlanan görevin yerine yeni görev üret
+                        const usedIds = saveData.activeQuests.map(x => x.id);
+                        const candidates = QUEST_TEMPLATES.filter(t => !usedIds.includes(t.id));
+                        const nextQ = candidates[Math.floor(Math.random() * candidates.length)] || QUEST_TEMPLATES[0];
+                        saveData.activeQuests[idx] = { ...nextQ, progress: 0, claimed: false };
+                        sfx.playGoldChime();
+                        persistSaveData();
+                        renderLobbyUI();
+                    });
+                }
+                questsEl.appendChild(row);
+            });
+
+            renderShopTabContent();
+        }
+
+        function renderShopTabContent() {
+            const container = document.getElementById('shopItemsContainer');
+            const infoBar = document.getElementById('shopSlotInfoBar');
+            container.innerHTML = '';
+
+            if (currentShopTab === 'skills') {
+                infoBar.textContent = `Aktif Yetenek Slotu: ${saveData.equippedSkills.length} / 2 (Oyun içi Q ve E butonları)`;
+                SKILLS_CATALOG.forEach(sk => {
+                    const unlocked = saveData.unlockedSkills.includes(sk.id);
+                    const equippedIdx = saveData.equippedSkills.indexOf(sk.id);
+                    const isEquipped = equippedIdx !== -1;
+
+                    const card = document.createElement('div');
+                    card.className = `p-2.5 rounded-2xl border flex items-center justify-between gap-2.5 ${
+                        isEquipped ? 'bg-stone-900 text-[#f5efe2] border-[#141312]' : 'bg-[#efe7d6]/85 text-[#141312] border-stone-800/15'
+                    }`;
+                    card.innerHTML = `
+                        <div class="flex items-start gap-2.5 min-w-0">
+                            <span class="text-2xl shrink-0 mt-0.5">${sk.icon}</span>
+                            <div class="min-w-0">
+                                <div class="font-calligraphy text-xs font-extrabold flex items-center gap-1.5">
+                                    <span>${sk.name}</span>
+                                    <span class="text-[9px] px-1.5 py-0.2 rounded bg-black/15 opacity-80">${sk.cooldown}s</span>
+                                </div>
+                                <p class="text-[10px] opacity-80 leading-snug mt-0.5">${sk.desc}</p>
+                            </div>
+                        </div>
+                        <button class="px-3 py-1.5 rounded-xl font-calligraphy text-[11px] font-extrabold shrink-0 transition ${
+                            isEquipped
+                                ? 'bg-emerald-500 text-stone-950'
+                                : unlocked
+                                    ? 'bg-[#141312] text-[#f5efe2]'
+                                    : saveData.gold >= sk.price
+                                        ? 'bg-[#d49b27] text-stone-950'
+                                        : 'bg-stone-300 text-stone-500'
+                        }">
+                            ${isEquipped ? `SLOT ${equippedIdx + 1}` : unlocked ? 'KUŞAN' : `✦ ${sk.price}`}
+                        </button>
+                    `;
+
+                    card.querySelector('button').addEventListener('click', () => {
+                        sfx.init();
+                        if (!unlocked) {
+                            if (saveData.gold >= sk.price) {
+                                saveData.gold -= sk.price;
+                                saveData.unlockedSkills.push(sk.id);
+                                if (saveData.equippedSkills.length < 2) saveData.equippedSkills.push(sk.id);
+                                sfx.playGoldChime();
+                            } else {
+                                sfx.playImpact(false);
+                            }
+                        } else if (!isEquipped) {
+                            if (saveData.equippedSkills.length >= 2) saveData.equippedSkills.shift();
+                            saveData.equippedSkills.push(sk.id);
+                            sfx.playKotoNote(4);
+                        }
+                        persistSaveData();
+                        renderLobbyUI();
+                    });
+                    container.appendChild(card);
+                });
+            } else if (currentShopTab === 'runes') {
+                infoBar.textContent = `Antik Rün Slotu: ${saveData.equippedRunes.length} / 3 (Pasif Sinerji Taşları)`;
+                RUNES_CATALOG.forEach(rn => {
+                    const lvl = saveData.runeLevels[rn.id] || 0;
+                    const isEquipped = saveData.equippedRunes.includes(rn.id);
+                    const isMax = lvl >= rn.maxLvl;
+                    const cost = rn.basePrice * (lvl + 1);
+
+                    const card = document.createElement('div');
+                    card.className = `p-2.5 rounded-2xl border flex items-center justify-between gap-2 ${
+                        isEquipped ? 'bg-stone-900 text-[#f5efe2] border-[#141312]' : 'bg-[#efe7d6]/85 text-[#141312] border-stone-800/15'
+                    }`;
+                    card.innerHTML = `
+                        <div class="flex items-start gap-2 min-w-0">
+                            <span class="text-2xl shrink-0">${rn.icon}</span>
+                            <div class="min-w-0">
+                                <div class="font-calligraphy text-xs font-extrabold">
+                                    ${rn.name} <span class="text-amber-500">Sv.${lvl}/${rn.maxLvl}</span>
+                                </div>
+                                <p class="text-[10px] opacity-80 leading-snug mt-0.5">${rn.desc}</p>
+                            </div>
+                        </div>
+                        <div class="flex flex-col gap-1 shrink-0">
+                            ${lvl > 0 ? `
+                                <button data-act="equip" class="px-2.5 py-1 rounded-lg font-calligraphy text-[10px] font-extrabold ${
+                                    isEquipped ? 'bg-emerald-500 text-stone-950' : 'bg-stone-700 text-white'
+                                }">
+                                    ${isEquipped ? 'TAKILI ✓' : 'TAK'}
+                                </button>
+                            ` : ''}
+                            <button data-act="upgrade" class="px-2.5 py-1 rounded-lg font-calligraphy text-[10px] font-extrabold ${
+                                isMax
+                                    ? 'bg-stone-600 text-amber-300'
+                                    : saveData.gold >= cost
+                                        ? 'bg-[#d49b27] text-stone-950'
+                                        : 'bg-stone-300 text-stone-500'
+                            }">
+                                ${isMax ? 'MAX' : (lvl === 0 ? `AÇ ✦${cost}` : `YÜKSELT ✦${cost}`)}
+                            </button>
+                        </div>
+                    `;
+
+                    const equipBtn = card.querySelector('[data-act="equip"]');
+                    if (equipBtn) {
+                        equipBtn.addEventListener('click', () => {
+                            sfx.init();
+                            if (isEquipped) {
+                                saveData.equippedRunes = saveData.equippedRunes.filter(id => id !== rn.id);
+                            } else {
+                                if (saveData.equippedRunes.length >= 3) saveData.equippedRunes.shift();
+                                saveData.equippedRunes.push(rn.id);
+                            }
+                            sfx.playKotoNote(3);
+                            persistSaveData();
+                            renderLobbyUI();
+                        });
+                    }
+
+                    card.querySelector('[data-act="upgrade"]').addEventListener('click', () => {
+                        sfx.init();
+                        if (!isMax && saveData.gold >= cost) {
+                            saveData.gold -= cost;
+                            saveData.runeLevels[rn.id] = lvl + 1;
+                            if (!saveData.equippedRunes.includes(rn.id) && saveData.equippedRunes.length < 3) {
+                                saveData.equippedRunes.push(rn.id);
+                            }
+                            sfx.playGoldChime();
+                            persistSaveData();
+                            renderLobbyUI();
+                        } else if (!isMax) {
+                            sfx.playImpact(false);
+                        }
+                    });
+
+                    container.appendChild(card);
+                });
+            } else if (currentShopTab === 'items') {
+                infoBar.textContent = 'Tek Kullanımlık İksirler: Satın al ve bir sonraki koşu için kuşan!';
+                ITEMS_CATALOG.forEach(it => {
+                    const count = saveData.itemInventory[it.id] || 0;
+                    const isEquipped = saveData.equippedItems.includes(it.id);
+
+                    const card = document.createElement('div');
+                    card.className = `p-2.5 rounded-2xl border flex items-center justify-between gap-2 ${
+                        isEquipped ? 'bg-amber-950 text-amber-100 border-amber-500' : 'bg-[#efe7d6]/85 text-[#141312] border-stone-800/15'
+                    }`;
+                    card.innerHTML = `
+                        <div class="flex items-start gap-2 min-w-0">
+                            <span class="text-2xl shrink-0">${it.icon}</span>
+                            <div class="min-w-0">
+                                <div class="font-calligraphy text-xs font-extrabold">
+                                    ${it.name} <span class="px-1.5 py-0.2 rounded bg-black/15 text-[10px]">Stok: ${count}</span>
+                                </div>
+                                <p class="text-[10px] opacity-80 leading-snug mt-0.5">${it.desc}</p>
+                            </div>
+                        </div>
+                        <div class="flex flex-col gap-1 shrink-0">
+                            <button data-act="buy" class="px-2.5 py-1 rounded-lg font-calligraphy text-[10px] font-extrabold ${
+                                saveData.gold >= it.price ? 'bg-[#d49b27] text-stone-950' : 'bg-stone-300 text-stone-500'
+                            }">
+                                AL ✦${it.price}
+                            </button>
+                            ${count > 0 ? `
+                                <button data-act="use" class="px-2.5 py-1 rounded-lg font-calligraphy text-[10px] font-extrabold ${
+                                    isEquipped ? 'bg-emerald-500 text-stone-950' : 'bg-[#141312] text-[#f5efe2]'
+                                }">
+                                    ${isEquipped ? 'KUŞANILDI ✓' : 'KOŞUDA KULLAN'}
+                                </button>
+                            ` : ''}
+                        </div>
+                    `;
+
+                    card.querySelector('[data-act="buy"]').addEventListener('click', () => {
+                        sfx.init();
+                        if (saveData.gold >= it.price) {
+                            saveData.gold -= it.price;
+                            saveData.itemInventory[it.id] = count + 1;
+                            if (!saveData.equippedItems.includes(it.id)) {
+                                saveData.equippedItems.push(it.id);
+                            }
+                            sfx.playGoldChime();
+                            persistSaveData();
+                            renderLobbyUI();
+                        } else {
+                            sfx.playImpact(false);
+                        }
+                    });
+
+                    const useBtn = card.querySelector('[data-act="use"]');
+                    if (useBtn) {
+                        useBtn.addEventListener('click', () => {
+                            sfx.init();
+                            if (isEquipped) {
+                                saveData.equippedItems = saveData.equippedItems.filter(id => id !== it.id);
+                            } else {
+                                saveData.equippedItems.push(it.id);
+                            }
+                            sfx.playKotoNote(3);
+                            persistSaveData();
+                            renderLobbyUI();
+                        });
+                    }
+
+                    container.appendChild(card);
+                });
+            } else if (currentShopTab === 'skins') {
+                infoBar.textContent = 'Kaligrafi Fırçaları: Her fırça özel iz efekti ve pasif bonus verir!';
+                SKINS_CATALOG.forEach(sk => {
+                    const unlocked = saveData.unlockedSkins.includes(sk.id);
+                    const selected = saveData.selectedSkin === sk.id;
+
+                    const card = document.createElement('div');
+                    card.className = `p-2.5 rounded-2xl border flex items-center justify-between gap-2.5 ${
+                        selected ? 'bg-[#141312] text-[#f5efe2] border-[#141312]' : 'bg-[#efe7d6]/85 text-[#141312] border-stone-800/15'
+                    }`;
+                    card.innerHTML = `
+                        <div class="flex items-center gap-2.5 min-w-0">
+                            <div class="w-8 h-8 rounded-full shrink-0 border-2 border-white/50 shadow flex items-center justify-center" style="background:${sk.main}">
+                                <span class="w-2 h-2 rounded-full bg-white/80 -translate-x-1 -translate-y-1"></span>
+                            </div>
+                            <div class="min-w-0">
+                                <div class="font-calligraphy text-xs font-extrabold truncate">${sk.name}</div>
+                                <div class="text-[10px] font-semibold ${selected ? 'text-amber-300' : 'text-emerald-800'}">${sk.bonusDesc}</div>
+                            </div>
+                        </div>
+                        <button class="px-3 py-1.5 rounded-xl font-calligraphy text-[11px] font-extrabold shrink-0 ${
+                            selected
+                                ? 'bg-emerald-500 text-stone-950'
+                                : unlocked
+                                    ? 'bg-stone-700 text-white'
+                                    : saveData.gold >= sk.price
+                                        ? 'bg-[#d49b27] text-stone-950'
+                                        : 'bg-stone-300 text-stone-500'
+                        }">
+                            ${selected ? 'SEÇİLİ' : unlocked ? 'SEÇ' : `✦ ${sk.price}`}
+                        </button>
+                    `;
+
+                    card.querySelector('button').addEventListener('click', () => {
+                        sfx.init();
+                        if (unlocked) {
+                            saveData.selectedSkin = sk.id;
+                            sfx.playKotoNote(5);
+                        } else if (saveData.gold >= sk.price) {
+                            saveData.gold -= sk.price;
+                            saveData.unlockedSkins.push(sk.id);
+                            saveData.selectedSkin = sk.id;
+                            sfx.playGoldChime();
+                        } else {
+                            sfx.playImpact(false);
+                        }
+                        persistSaveData();
+                        renderLobbyUI();
+                    });
+                    container.appendChild(card);
+                });
+            }
+        }
+
+        // Lobi Sekme Geçişleri
+        document.getElementById('mainTabLobbyBtn').addEventListener('click', () => {
+            document.getElementById('lobbyPanel').classList.remove('hidden');
+            document.getElementById('shopPanel').classList.add('hidden');
+            document.getElementById('mainTabLobbyBtn').className = 'py-2 rounded-xl bg-[#141312] text-[#f5efe2] transition';
+            document.getElementById('mainTabShopBtn').className = 'py-2 rounded-xl text-stone-700 hover:text-[#141312] transition';
+        });
+
+        document.getElementById('mainTabShopBtn').addEventListener('click', () => {
+            document.getElementById('lobbyPanel').classList.add('hidden');
+            document.getElementById('shopPanel').classList.remove('hidden');
+            document.getElementById('mainTabShopBtn').className = 'py-2 rounded-xl bg-[#141312] text-[#f5efe2] transition';
+            document.getElementById('mainTabLobbyBtn').className = 'py-2 rounded-xl text-stone-700 hover:text-[#141312] transition';
+            renderShopTabContent();
+        });
+
+        document.getElementById('quickEditLoadoutBtn').addEventListener('click', () => {
+            document.getElementById('mainTabShopBtn').click();
+        });
+
+        document.querySelectorAll('.shop-subtab').forEach(btn => {
+            btn.addEventListener('click', () => {
+                currentShopTab = btn.dataset.shoptab;
+                document.querySelectorAll('.shop-subtab').forEach(b => {
+                    b.className = b === btn
+                        ? 'shop-subtab py-1.5 rounded-lg bg-[#141312] text-[#f5efe2] transition'
+                        : 'shop-subtab py-1.5 rounded-lg text-stone-700 hover:text-[#141312] transition';
+                });
+                renderShopTabContent();
+            });
+        });
+
+        // Hattat Sandığı Açma Modalı
+        document.getElementById('openChestBtn').addEventListener('click', () => {
+            sfx.init();
+            if (saveData.essence < 100) {
+                sfx.playImpact(false);
+                return;
+            }
+            document.getElementById('chestVisualIcon').textContent = '🎁';
+            document.getElementById('chestTitle').textContent = 'GİZEMLİ SANDIK HAZIR!';
+            document.getElementById('chestRewardDesc').textContent = 'İçinden Altın Varak, iksir veya rün enerjisi çıkar!';
+            document.getElementById('claimChestBtn').textContent = 'SANDIĞI MÜHÜRLE VE AÇ';
+            document.getElementById('claimChestBtn').dataset.state = 'ready';
+            document.getElementById('chestModal').classList.remove('hidden');
+        });
+
+        document.getElementById('claimChestBtn').addEventListener('click', (e) => {
+            const btn = e.currentTarget;
+            if (btn.dataset.state === 'opened') {
+                document.getElementById('chestModal').classList.add('hidden');
+                renderLobbyUI();
+                return;
+            }
+
+            sfx.init();
+            sfx.playTaikoDrum();
+            sfx.playGoldChime();
+            saveData.essence = Math.max(0, saveData.essence - 100);
+
+            // Rastgele Gacha Ödülü
+            const roll = Math.random();
+            let rewardTitle = '';
+            let rewardDesc = '';
+            let icon = '✨';
+
+            if (roll < 0.45) {
+                const goldPrize = 60 + Math.floor(Math.random() * 65);
+                saveData.gold += goldPrize;
+                icon = '💰';
+                rewardTitle = `+${goldPrize} ALTIN VARAK!`;
+                rewardDesc = 'Hattat hazinene saf altın varaklar eklendi.';
+            } else if (roll < 0.80) {
+                const randomItem = ITEMS_CATALOG[Math.floor(Math.random() * ITEMS_CATALOG.length)];
+                saveData.itemInventory[randomItem.id] = (saveData.itemInventory[randomItem.id] || 0) + 1;
+                icon = randomItem.icon;
+                rewardTitle = `1x ${randomItem.name}!`;
+                rewardDesc = randomItem.desc;
+            } else {
+                const unmaxedRunes = RUNES_CATALOG.filter(r => (saveData.runeLevels[r.id] || 0) < r.maxLvl);
+                if (unmaxedRunes.length > 0) {
+                    const chosen = unmaxedRunes[Math.floor(Math.random() * unmaxedRunes.length)];
+                    saveData.runeLevels[chosen.id] = (saveData.runeLevels[chosen.id] || 0) + 1;
+                    icon = chosen.icon;
+                    rewardTitle = `${chosen.name} SEVİYE ATLADI!`;
+                    rewardDesc = `Yeni seviye: Sv.${saveData.runeLevels[chosen.id]}`;
+                } else {
+                    saveData.gold += 140;
+                    icon = '👑';
+                    rewardTitle = '+140 BÜYÜK VARAK ÖDÜLÜ!';
+                    rewardDesc = 'Tüm rünlerin maksimum seviyede olduğu için büyük altın kazandın.';
+                }
+            }
+
+            persistSaveData();
+            document.getElementById('chestVisualIcon').textContent = icon;
+            document.getElementById('chestTitle').textContent = rewardTitle;
+            document.getElementById('chestRewardDesc').textContent = rewardDesc;
+            btn.textContent = 'HARİKA! KAPAT';
+            btn.dataset.state = 'opened';
+        });
+
+        // =====================================================================
+        // 5. TUVAL, DİNAMİK PARŞÖMEN BİYOMLARI & OYUN DEĞİŞKENLERİ
+        // =====================================================================
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        let width = window.innerWidth;
+        let height = window.innerHeight;
+        let dpr = Math.min(window.devicePixelRatio || 1, 2);
+        let grainPattern = null;
+
+        function createPaperGrain() {
+            const off = document.createElement('canvas');
+            off.width = 140;
+            off.height = 140;
+            const octx = off.getContext('2d');
+            for (let i = 0; i < 380; i++) {
+                const x = Math.random() * 140;
+                const y = Math.random() * 140;
+                octx.fillStyle = Math.random() < 0.5 ? 'rgba(110, 90, 65, 0.035)' : 'rgba(255, 255, 255, 0.05)';
+                octx.fillRect(x, y, 1.5, 1.5);
+            }
+            grainPattern = ctx.createPattern(off, 'repeat');
+        }
+
+        function resizeCanvas() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            dpr = Math.min(window.devicePixelRatio || 1, 2);
+            canvas.width = width * dpr;
+            canvas.height = height * dpr;
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            if (!grainPattern) createPaperGrain();
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        function lerp(a, b, t) { return a + (b - a) * t; }
+        function lerpColor(hex1, hex2, t) {
+            const c1 = parseInt(hex1.slice(1), 16);
+            const c2 = parseInt(hex2.slice(1), 16);
+            const r1 = (c1 >> 16) & 255, g1 = (c1 >> 8) & 255, b1 = c1 & 255;
+            const r2 = (c2 >> 16) & 255, g2 = (c2 >> 8) & 255, b2 = c2 & 255;
+            return `rgb(${Math.round(lerp(r1, r2, t))}, ${Math.round(lerp(g1, g2, t))}, ${Math.round(lerp(b1, b2, t))})`;
+        }
+
+        function getScrollBiome(alt) {
+            const zones = [
+                { alt: 0, bgTop: '#efe6d5', bgBot: '#f7f2e7', isDark: false },
+                { alt: 350, bgTop: '#e7cca0', bgBot: '#f5e2bf', isDark: false },
+                { alt: 700, bgTop: '#1b2436', bgBot: '#2f3c52', isDark: true },
+                { alt: 1100, bgTop: '#090d1a', bgBot: '#161f36', isDark: true }
+            ];
+            if (alt >= 1100) return zones[3];
+            let z1 = zones[0], z2 = zones[1];
+            for (let i = 0; i < zones.length - 1; i++) {
+                if (alt >= zones[i].alt && alt <= zones[i + 1].alt) {
+                    z1 = zones[i]; z2 = zones[i + 1]; break;
+                }
+            }
+            const t = (alt - z1.alt) / Math.max(1, z2.alt - z1.alt);
+            return {
+                bgTop: lerpColor(z1.bgTop, z2.bgTop, t),
+                bgBot: lerpColor(z1.bgBot, z2.bgBot, t),
+                isDark: (z1.alt + (z2.alt - z1.alt) * t) >= 560
+            };
+        }
+
+        // --- Oyun Durumu ---
+        let gameState = 'START';
+        let currentScore = 0;
+        let maxAltitude = 0;
+        let startY = 0;
+        let runGold = 0;
+        let maxCombo = 1;
+        let lastDragonMilestone = 0;
+
+        let cameraY = 0;
+        let burnLineY = 0; // Alttan yükselen Kağıt Kuruması / Ateş Sınırı
+        let wallNarrowInset = 0; // Kriz dalgasında daralan duvar payı
+        let timeScale = 1.0;
+        let shakeTime = 0;
+        let shakeIntensity = 0;
+        let hitStopTimer = 0;
+
+        // Kriz Dalgası (Her 250m'de bir Mühür Fırtınası)
+        let crisisTimer = 0;
+        let nextCrisisAlt = 250;
+
+        // Fever Modu (8x Komboda Mürekkep Taşkını)
+        let feverTimer = 0;
+
+        const GRAVITY = 850;
+        const MAX_DRAG_DIST = 165;
+        const MIN_DRAG_DIST = 18;
+
+        const drop = {
+            x: 0,
+            y: 0,
+            vx: 0,
+            vy: 0,
+            radius: 13,
+            latchedNode: null,
+            ink: 100,
+            maxInk: 100,
+            shields: 0,
+            dragonTimer: 0,
+            chronoTimer: 0,
+            magnetTimer: 0,
+            infInkTimer: 0,
+            hasDiceActive: false,
+            combo: 1,
+            comboDecayTimer: 0,
+            lastNodeId: null,
+            lastVelAngle: 0,
+            airRotationAccum: 0,
+            loopBonusAwarded: false,
+            wobblePhase: 0,
+            stretchX: 1,
+            stretchY: 1,
+            stretchAngle: 0,
+            trail: []
+        };
+
+        // Aktif Skill Bekleme Süreleri
+        let activeSkillSlots = [
+            { id: 'shadow_dash', cd: 0, maxCd: 8.5 },
+            { id: 'chrono_seal', cd: 0, maxCd: 11.0 }
+        ];
+
+        const drag = {
+            active: false,
+            startX: 0,
+            startY: 0,
+            curX: 0,
+            curY: 0,
+            launchVx: 0,
+            launchVy: 0,
+            power: 0,
+            inkCost: 0
+        };
+
+        let nodes = [];
+        let seals = [];
+        let windZones = [];
+        let collectibles = [];
+        let inkSplatters = [];
+        let inkRipples = [];
+        let inkParticles = [];
+        let floatingTexts = [];
+        let highestGenY = 0;
+        let nextId = 1;
+
+        function triggerShake(intensity, duration = 0.16) {
+            shakeIntensity = Math.max(shakeIntensity, intensity);
+            shakeTime = Math.max(shakeTime, duration);
+        }
+
+        function spawnInkSplash(x, y, color, count = 14, speedMult = 1) {
+            for (let i = 0; i < count; i++) {
+                const ang = Math.random() * Math.PI * 2;
+                const spd = (Math.random() * 175 + 45) * speedMult;
+                inkParticles.push({
+                    x, y,
+                    vx: Math.cos(ang) * spd,
+                    vy: Math.sin(ang) * spd,
+                    size: Math.random() * 4.5 + 1.8,
+                    life: 1.0,
+                    decay: Math.random() * 1.6 + 1.1,
+                    color
+                });
+            }
+        }
+
+        function spawnRipple(x, y, color, maxR = 58) {
+            inkRipples.push({ x, y, r: 12, maxR, color, life: 1.0 });
+        }
+
+        function stampSplatter(x, y, color, r = 18) {
+            const blobs = [];
+            for (let i = 0; i < 5; i++) {
+                const a = Math.random() * Math.PI * 2;
+                const d = Math.random() * r * 0.8;
+                blobs.push({ ox: Math.cos(a) * d, oy: Math.sin(a) * d, r: (Math.random() * 0.5 + 0.3) * r });
+            }
+            inkSplatters.push({ x, y, color, blobs, alpha: 0.15 });
+            if (inkSplatters.length > 50) inkSplatters.shift();
+        }
+
+        function spawnFloatingText(x, y, text, color, size = 14) {
+            floatingTexts.push({
+                x: Math.max(90, Math.min(width - 90, x)),
+                y,
+                vy: -54,
+                text,
+                color,
+                size,
+                life: 1.0
+            });
+        }
+
+        function updateQuestProgress(type, amount = 1, isAbsolute = false) {
+            let updated = false;
+            saveData.activeQuests.forEach(q => {
+                if (q.progress >= q.target) return;
+                if (q.type === type) {
+                    q.progress = isAbsolute ? Math.max(q.progress, amount) : (q.progress + amount);
+                    if (q.progress >= q.target) {
+                        spawnFloatingText(width * 0.5, drop.y - 60, `🎯 GÖREV TAMAM: ${q.text}!`, '#15803d', 13);
+                        sfx.playGoldChime();
+                    }
+                    updated = true;
+                }
+            });
+            if (updated) persistSaveData();
+        }
+
+        // =====================================================================
+        // 6. AKTİF YETENEKLER (SKILLS) TETİKLEME SİSTEMİ
+        // =====================================================================
+        function triggerSkillSlot(slotIndex) {
+            if (gameState !== 'PLAYING') return;
+            const slot = activeSkillSlots[slotIndex];
+            if (!slot || slot.cd > 0) {
+                sfx.playImpact(false);
+                return;
+            }
+
+            const skDef = SKILLS_CATALOG.find(s => s.id === slot.id);
+            if (!skDef) return;
+
+            slot.cd = skDef.cooldown;
+            sfx.playSkillCast();
+            updateQuestProgress('skill', 1);
+
+            if (skDef.id === 'shadow_dash') {
+                drop.latchedNode = null;
+                drop.vy = -1080;
+                drop.vx *= 0.4;
+                drop.dragonTimer = Math.max(drop.dragonTimer, 1.3);
+                hitStopTimer = 0.03;
+                triggerShake(8, 0.18);
+                spawnRipple(drop.x, drop.y, '#141312', 95);
+                spawnInkSplash(drop.x, drop.y, '#141312', 22, 1.4);
+                spawnFloatingText(drop.x, drop.y - 24, '⚡ GÖLGE SIÇRAYIŞI!', '#141312', 15);
+            } else if (skDef.id === 'chrono_seal') {
+                drop.chronoTimer = 3.5;
+                drop.ink = Math.min(drop.maxInk, drop.ink + 35);
+                spawnRipple(drop.x, drop.y, '#0284c7', 85);
+                spawnFloatingText(drop.x, drop.y - 24, '⏳ ZAMAN MÜHRÜ (3.5s)', '#0369a1', 15);
+            } else if (skDef.id === 'ink_nova') {
+                let converted = 0;
+                seals.forEach(s => {
+                    if (!s.broken && Math.abs(s.y - drop.y) < height * 0.65) {
+                        s.broken = true;
+                        converted++;
+                        collectibles.push({
+                            id: nextId++,
+                            x: s.x,
+                            y: s.y,
+                            kind: 'gold',
+                            bobPhase: 0,
+                            collected: false
+                        });
+                        spawnInkSplash(s.x, s.y, '#d49b27', 12, 1.0);
+                    }
+                });
+                triggerShake(9, 0.2);
+                spawnRipple(drop.x, drop.y, '#d93829', 150);
+                spawnFloatingText(drop.x, drop.y - 26, `💥 MÜREKKEP PATLAMASI! (${converted} VARAK)`, '#d93829', 14);
+            } else if (skDef.id === 'phoenix_brush') {
+                drop.latchedNode = null;
+                drop.dragonTimer = 3.2;
+                drop.vy = -980;
+                triggerShake(9, 0.22);
+                spawnRipple(drop.x, drop.y, '#ea580c', 110);
+                spawnFloatingText(drop.x, drop.y - 26, '🔥 ANKA YÜKSELİŞİ!', '#c2410c', 15);
+            } else if (skDef.id === 'vortex_pull') {
+                drop.magnetTimer = 5.0;
+                spawnRipple(drop.x, drop.y, '#d49b27', 110);
+                spawnFloatingText(drop.x, drop.y - 26, '🌀 MANYETİK GİRDAP (5s)!', '#8a600c', 15);
+            }
+
+            updateSkillButtonsUI();
+        }
+
+        document.getElementById('skillSlotBtn0').addEventListener('pointerdown', (e) => {
+            e.stopPropagation();
+            triggerSkillSlot(0);
+        });
+        document.getElementById('skillSlotBtn1').addEventListener('pointerdown', (e) => {
+            e.stopPropagation();
+            triggerSkillSlot(1);
+        });
+
+        window.addEventListener('keydown', (e) => {
+            if (e.repeat || gameState !== 'PLAYING') return;
+            if (e.code === 'KeyQ' || e.code === 'Digit1') triggerSkillSlot(0);
+            if (e.code === 'KeyE' || e.code === 'Digit2' || e.code === 'Space') {
+                e.preventDefault();
+                triggerSkillSlot(1);
+            }
+        });
+
+        function updateSkillButtonsUI() {
+            activeSkillSlots.forEach((slot, idx) => {
+                const skDef = SKILLS_CATALOG.find(s => s.id === slot.id);
+                const overlay = document.getElementById(`skillCdOverlay${idx}`);
+                const status = document.getElementById(`skillStatus${idx}`);
+                if (!skDef) return;
+
+                if (slot.cd > 0) {
+                    const ratio = Math.min(1, slot.cd / slot.maxCd);
+                    overlay.style.transform = `scaleY(${ratio})`;
+                    status.textContent = `${slot.cd.toFixed(1)}s`;
+                    status.className = 'text-[10px] font-bold text-rose-700';
+                } else {
+                    overlay.style.transform = 'scaleY(0)';
+                    status.textContent = idx === 0 ? 'HAZIR [Q]' : 'HAZIR [E]';
+                    status.className = 'text-[10px] font-bold text-emerald-700';
+                }
+            });
+        }
+
+        // =====================================================================
+        // 7. PROSEDÜREL DÜNYA ÜRETİMİ (ZORLUK & KRİZ DALGASI UYUMLU)
+        // =====================================================================
+        function generateWorldUpTo(targetY) {
+            const diff = getDifficulty();
+            const sharpLvl = getRuneLevel('sharpshooter');
+            const captureBonus = sharpLvl * 9;
+            const margin = Math.min(72, width * 0.16) + wallNarrowInset;
+            const spanX = Math.max(120, width - margin * 2);
+
+            while (highestGenY > targetY) {
+                const altProgress = Math.min(currentScore / 1200, 1);
+                const stepY = 148 + Math.random() * 52 + altProgress * 28;
+                highestGenY -= stepY;
+
+                let nx = margin + Math.random() * spanX;
+                if (nodes.length > 0) {
+                    const prev = nodes[nodes.length - 1];
+                    if (Math.abs(nx - prev.x) < spanX * 0.28) {
+                        nx = prev.x > width * 0.5
+                            ? margin + Math.random() * (spanX * 0.45)
+                            : width - margin - Math.random() * (spanX * 0.45);
+                    }
+                }
+
+                // Hokka Türleri: stone, gold, porcelain, jade, bamboo
+                let type = 'stone';
+                const r = Math.random();
+                if (r < 0.20) type = 'gold';
+                else if (r < 0.38) type = 'jade';
+                else if (r < 0.55) type = 'bamboo';
+                else if (r < 0.72) type = 'porcelain';
+
+                const porcRuneLvl = getRuneLevel('unbreakable_porcelain');
+                const maxCrack = diff.porcelainTime + porcRuneLvl * 0.45;
+                const railRange = 45 + Math.random() * 40;
+                const clampedX = Math.max(margin + railRange, Math.min(width - margin - railRange, nx));
+
+                nodes.push({
+                    id: nextId++,
+                    x: clampedX,
+                    baseX: clampedX,
+                    y: highestGenY,
+                    type,
+                    radius: 17,
+                    captureRadius: 44 + captureBonus,
+                    crackTimer: 0,
+                    maxCrackTime: maxCrack,
+                    shattered: false,
+                    cooldown: 0,
+                    pulsePhase: Math.random() * Math.PI * 2,
+                    swirlAngle: -Math.PI * 0.5,
+                    swirlDir: Math.random() < 0.5 ? 1 : -1,
+                    railRange,
+                    moveDir: Math.random() < 0.5 ? 1 : -1,
+                    moveSpeed: 75 + Math.random() * 45,
+                    vx: 0
+                });
+
+                // Kırmızı Mühür Engelleri (Kriz dalgasında ekstra yoğun!)
+                const effectiveSealDensity = crisisTimer > 0 ? Math.min(0.95, diff.sealDensity + 0.32) : diff.sealDensity;
+                if (currentScore > 25 && Math.random() < effectiveSealDensity) {
+                    const sealX = clampedX > width * 0.5
+                        ? margin + Math.random() * (spanX * 0.42)
+                        : width - margin - Math.random() * (spanX * 0.42);
+                    const isMoving = Math.random() < diff.movingSealChance;
+
+                    seals.push({
+                        id: nextId++,
+                        x: sealX,
+                        baseX: sealX,
+                        y: highestGenY - stepY * 0.48,
+                        size: 20,
+                        shape: Math.random() < 0.55 ? 'square' : 'circle',
+                        isMoving,
+                        moveDir: Math.random() < 0.5 ? 1 : -1,
+                        moveRange: 45 + Math.random() * 45,
+                        moveSpeed: (62 + Math.random() * 55) * (diff.id === 'nightmare' ? 1.35 : 1),
+                        nearMissAwarded: false,
+                        broken: false
+                    });
+                }
+
+                // Ters Rüzgar Akımları (Büyük Hattat & Kabus Modu)
+                if (diff.headwindChance > 0 && Math.random() < diff.headwindChance) {
+                    windZones.push({
+                        x: width * 0.5 + (Math.random() - 0.5) * (width * 0.4),
+                        y: highestGenY - stepY * 0.5,
+                        w: Math.min(200, width * 0.5),
+                        h: 54,
+                        vy: 260, // Aşağı doğru bastıran ters rüzgar
+                        phase: 0
+                    });
+                }
+
+                // Altın Varak, Mürekkep Küresi & Tılsımlar
+                if (Math.random() < 0.68) {
+                    const roll = Math.random();
+                    let kind = 'gold';
+                    if (roll < 0.24) kind = 'ink_orb';
+                    else if (roll < 0.31) kind = 'shield';
+                    else if (roll < 0.38) kind = 'dragon';
+                    else if (roll < 0.45) kind = 'magnet';
+
+                    collectibles.push({
+                        id: nextId++,
+                        x: margin + Math.random() * spanX,
+                        y: highestGenY - stepY * 0.45,
+                        kind,
+                        bobPhase: Math.random() * Math.PI * 2,
+                        collected: false
+                    });
+                }
+            }
+        }
+
+        function spawnGoldRain(centerY) {
+            for (let i = 0; i < 8; i++) {
+                collectibles.push({
+                    id: nextId++,
+                    x: 45 + Math.random() * (width - 90),
+                    y: centerY - 60 - Math.random() * 240,
+                    kind: 'gold',
+                    bobPhase: Math.random() * Math.PI * 2,
+                    collected: false
+                });
+            }
+            spawnFloatingText(width * 0.5, centerY - 50, '🐉 ALTIN VARAK YAĞMURU!', '#b88014', 15);
+        }
+
+        // =====================================================================
+        // 8. OYUN BAŞLATMA, BİTİRME & EŞYA TÜKETİMİ
+        // =====================================================================
+        function startGame() {
+            sfx.init();
+            resizeCanvas();
+
+            nodes = [];
+            seals = [];
+            windZones = [];
+            collectibles = [];
+            inkSplatters = [];
+            inkRipples = [];
+            inkParticles = [];
+            floatingTexts = [];
+            nextId = 1;
+
+            const diff = getDifficulty();
+            const skin = getActiveSkin();
+            const sharpLvl = getRuneLevel('sharpshooter');
+
+            startY = height * 0.74;
+            const startNode = {
+                id: nextId++,
+                x: width * 0.5,
+                baseX: width * 0.5,
+                y: startY,
+                type: 'stone',
+                radius: 20,
+                captureRadius: 48 + sharpLvl * 9,
+                crackTimer: 0,
+                maxCrackTime: 1.5,
+                shattered: false,
+                cooldown: 0,
+                pulsePhase: 0,
+                swirlAngle: -Math.PI * 0.5,
+                swirlDir: 1,
+                railRange: 0,
+                moveDir: 1,
+                moveSpeed: 0,
+                vx: 0
+            };
+            nodes.push(startNode);
+
+            drop.x = startNode.x;
+            drop.y = startNode.y;
+            drop.vx = 0;
+            drop.vy = 0;
+            drop.latchedNode = startNode;
+            drop.maxInk = 100 + (skin.id === 'cobalt' ? 15 : 0);
+            drop.ink = drop.maxInk;
+            drop.shields = 0;
+            drop.dragonTimer = 0;
+            drop.chronoTimer = 0;
+            drop.magnetTimer = 0;
+            drop.infInkTimer = 0;
+            drop.hasDiceActive = false;
+            drop.combo = 1;
+            drop.comboDecayTimer = 0;
+            drop.lastNodeId = startNode.id;
+            drop.airRotationAccum = 0;
+            drop.loopBonusAwarded = false;
+            drop.trail = [];
+            drop.stretchX = 1;
+            drop.stretchY = 1;
+
+            // Kuşanılan Tek Kullanımlık Eşyaları Tüket ve Aktifleştir
+            let startBoostAlt = 0;
+            const consumedNow = [];
+            saveData.equippedItems.forEach(itemId => {
+                if ((saveData.itemInventory[itemId] || 0) > 0) {
+                    saveData.itemInventory[itemId]--;
+                    consumedNow.push(itemId);
+
+                    if (itemId === 'start_rocket') {
+                        startBoostAlt = 150;
+                        drop.dragonTimer = 3.5;
+                        drop.latchedNode = null;
+                        drop.vy = -880;
+                    } else if (itemId === 'pure_jade') {
+                        drop.shields += 2;
+                    } else if (itemId === 'infinite_ink_vial') {
+                        drop.infInkTimer = 20.0;
+                    } else if (itemId === 'fate_dice') {
+                        drop.hasDiceActive = true;
+                    }
+                }
+            });
+            // Stokta kalmayan eşyaları kuşanılanlardan çıkar
+            saveData.equippedItems = saveData.equippedItems.filter(id => (saveData.itemInventory[id] || 0) > 0);
+            persistSaveData();
+
+            // Aktif Yetenek Slotlarını Yükle
+            activeSkillSlots = saveData.equippedSkills.slice(0, 2).map(id => {
+                const def = SKILLS_CATALOG.find(s => s.id === id) || SKILLS_CATALOG[0];
+                return { id: def.id, cd: 0, maxCd: def.cooldown };
+            });
+            activeSkillSlots.forEach((slot, idx) => {
+                const def = SKILLS_CATALOG.find(s => s.id === slot.id);
+                document.getElementById(`skillIcon${idx}`).textContent = def.icon;
+                document.getElementById(`skillName${idx}`).textContent = def.name;
+            });
+            updateSkillButtonsUI();
+
+            // Başlangıç Roketi aktifse 150m yukarı taşı
+            if (startBoostAlt > 0) {
+                drop.y = startY - startBoostAlt * 11;
+            }
+
+            cameraY = drop.y - height * 0.55;
+            burnLineY = drop.y + height * 0.55;
+            wallNarrowInset = 0;
+            maxAltitude = startBoostAlt;
+            currentScore = startBoostAlt;
+            runGold = 0;
+            maxCombo = 1;
+            lastDragonMilestone = 0;
+            crisisTimer = 0;
+            nextCrisisAlt = 250;
+            feverTimer = 0;
+
+            drag.active = false;
+            timeScale = 1.0;
+
+            highestGenY = Math.min(startY, drop.y);
+            generateWorldUpTo(cameraY - height * 1.5);
+
+            document.getElementById('diffBadgeHud').textContent = diff.badge;
+            document.getElementById('startScreen').classList.add('hidden');
+            document.getElementById('gameOverScreen').classList.add('hidden');
+            document.getElementById('hud').classList.remove('hidden');
+            document.getElementById('skillBarHud').classList.remove('hidden');
+
+            gameState = 'PLAYING';
+            updateHUD();
+        }
+
+        function triggerGameOver(reason = 'PARŞÖMENDEN DÜŞTÜ') {
+            if (gameState === 'GAMEOVER') return;
+
+            // Eğer Anka Dirilişi skilli kuşanılmış ve bekleme süresi dolmuşsa OTOMATİK KURTAR!
+            const phoenixSlot = activeSkillSlots.find(s => s.id === 'phoenix_brush' && s.cd <= 0);
+            if (phoenixSlot) {
+                phoenixSlot.cd = phoenixSlot.maxCd;
+                drop.latchedNode = null;
+                drop.dragonTimer = 3.5;
+                drop.vy = -980;
+                drop.y = Math.min(drop.y, burnLineY - 90);
+                sfx.playTaikoDrum();
+                sfx.playSkillCast();
+                triggerShake(10, 0.25);
+                spawnRipple(drop.x, drop.y, '#ea580c', 120);
+                spawnFloatingText(drop.x, drop.y - 30, '🔥 ANKA DİRİLİŞİ KURTARDI!', '#c2410c', 16);
+                updateSkillButtonsUI();
+                return;
+            }
+
+            gameState = 'GAMEOVER';
+            drag.active = false;
+            timeScale = 1.0;
+            crisisTimer = 0;
+            feverTimer = 0;
+
+            sfx.playImpact(false);
+            triggerShake(11, 0.32);
+            spawnInkSplash(drop.x, drop.y, getActiveSkin().main, 26, 1.3);
+
+            // Zorluk, Fırça Stili ve Rün Çarpanlarını Uygula
+            const diff = getDifficulty();
+            const skin = getActiveSkin();
+            const dragonRuneLvl = getRuneLevel('greedy_dragon');
+
+            let totalMult = diff.mult;
+            if (skin.id === 'gold_leaf') totalMult += 0.15;
+            if (dragonRuneLvl > 0) totalMult += dragonRuneLvl * 0.20;
+
+            let finalGoldEarned = Math.round(runGold * totalMult + (currentScore / 35) * diff.mult);
+
+            // Kader Mührü (Şans Zarı) Etkisi
+            let diceDoubled = false;
+            if (drop.hasDiceActive) {
+                if (Math.random() < 0.5) {
+                    finalGoldEarned *= 2;
+                    diceDoubled = true;
+                } else {
+                    finalGoldEarned = Math.round(finalGoldEarned * 1.25);
+                }
+            }
+
+            const isNewRecord = currentScore > saveData.bestScore;
+            if (isNewRecord) saveData.bestScore = currentScore;
+
+            saveData.gold += finalGoldEarned;
+            const essenceGain = Math.min(100, Math.round((currentScore / 15 + maxCombo * 3) * (skin.id === 'cosmic_ink' ? 1.2 : 1)));
+            saveData.essence = Math.min(100, saveData.essence + essenceGain);
+            persistSaveData();
+
+            // Game Over UI Güncelle
+            document.getElementById('gameOverReason').textContent = reason;
+            document.getElementById('finalScoreText').textContent = `${currentScore}m`;
+            document.getElementById('finalComboText').textContent = `x${maxCombo}`;
+            document.getElementById('finalGoldText').textContent = `+${finalGoldEarned} ✦`;
+            document.getElementById('diceLuckBanner').classList.toggle('hidden', !diceDoubled);
+            document.getElementById('newRecordBadge').classList.toggle('hidden', !(isNewRecord && currentScore > 0));
+            document.getElementById('overEssenceText').textContent = `${saveData.essence} / 100`;
+            document.getElementById('overEssenceBar').style.width = `${saveData.essence}%`;
+
+            document.getElementById('hud').classList.add('hidden');
+            document.getElementById('skillBarHud').classList.add('hidden');
+            document.getElementById('crisisBanner').classList.add('hidden');
+            document.getElementById('feverBanner').classList.add('hidden');
+            document.getElementById('screenEffectOverlay').style.opacity = '0';
+            document.getElementById('gameOverScreen').classList.remove('hidden');
+        }
+
+        // =====================================================================
+        // 9. SÜRÜKLE-FIRLAT (SLINGSHOT) FİZİĞİ VE GİRDİ KONTROLÜ
+        // =====================================================================
+        function updateDragVector() {
+            const dx = drag.startX - drag.curX;
+            const dy = drag.startY - drag.curY;
+            const rawDist = Math.hypot(dx, dy);
+
+            if (rawDist < MIN_DRAG_DIST) {
+                drag.power = 0;
+                drag.launchVx = 0;
+                drag.launchVy = 0;
+                drag.inkCost = 0;
+                return;
+            }
+
+            const clampedDist = Math.min(rawDist, MAX_DRAG_DIST);
+            drag.power = Math.max(0.18, (clampedDist - MIN_DRAG_DIST) / (MAX_DRAG_DIST - MIN_DRAG_DIST));
+
+            let nodeBoost = 1.0;
+            let momentumVx = 0;
+            if (drop.latchedNode) {
+                if (drop.latchedNode.type === 'gold') nodeBoost = 1.5;
+                else if (drop.latchedNode.type === 'jade') nodeBoost = 1.72;
+                else if (drop.latchedNode.type === 'bamboo') {
+                    nodeBoost = 1.25;
+                    momentumVx = drop.latchedNode.vx * 1.15;
+                }
+            }
+
+            const skinBonus = getActiveSkin().id === 'emerald_dragon' ? 1.10 : 1.0;
+            const speed = drag.power * 1060 * nodeBoost * skinBonus;
+
+            let dirX, dirY;
+            if (drop.latchedNode && drop.latchedNode.type === 'jade') {
+                dirX = Math.cos(drop.latchedNode.swirlAngle);
+                dirY = Math.sin(drop.latchedNode.swirlAngle);
+            } else {
+                dirX = dx / rawDist;
+                dirY = dy / rawDist;
+            }
+
+            drag.launchVx = dirX * speed + momentumVx;
+            drag.launchVy = dirY * speed;
+
+            if (drop.latchedNode || drop.infInkTimer > 0 || drop.chronoTimer > 0 || feverTimer > 0) {
+                drag.inkCost = 0;
+            } else {
+                drag.inkCost = Math.round(15 + drag.power * 20);
+            }
+        }
+
+        canvas.addEventListener('pointerdown', (e) => {
+            if (gameState !== 'PLAYING') return;
+            sfx.init();
+
+            if (!drop.latchedNode && drop.ink < 10 && drop.infInkTimer <= 0 && drop.chronoTimer <= 0 && feverTimer <= 0) {
+                spawnFloatingText(drop.x, drop.y - 24, 'MÜREKKEP YETERSİZ!', '#d93829', 13);
+                sfx.playImpact(false);
+                return;
+            }
+
+            drag.active = true;
+            drag.startX = e.clientX;
+            drag.startY = e.clientY;
+            drag.curX = e.clientX;
+            drag.curY = e.clientY;
+            drag.power = 0;
+
+            if (drop.latchedNode && drop.latchedNode.type === 'jade') {
+                drag.power = 0.85;
+                updateDragVector();
+            }
+        });
+
+        window.addEventListener('pointermove', (e) => {
+            if (!drag.active || gameState !== 'PLAYING') return;
+            drag.curX = e.clientX;
+            drag.curY = e.clientY;
+            updateDragVector();
+        });
+
+        window.addEventListener('pointerup', () => {
+            if (!drag.active || gameState !== 'PLAYING') return;
+            drag.active = false;
+            timeScale = 1.0;
+
+            if (drag.power <= 0) return;
+
+            if (drag.inkCost > 0) {
+                if (drop.ink < drag.inkCost) {
+                    spawnFloatingText(drop.x, drop.y - 24, 'MÜREKKEP YETERSİZ!', '#d93829', 13);
+                    return;
+                }
+                drop.ink = Math.max(0, drop.ink - drag.inkCost);
+            }
+
+            const prevNode = drop.latchedNode;
+            let isBoosted = false;
+            if (prevNode) {
+                prevNode.cooldown = 0.35;
+                if (prevNode.type === 'gold') {
+                    isBoosted = true;
+                    spawnRipple(prevNode.x, prevNode.y, '#d49b27', 80);
+                } else if (prevNode.type === 'jade') {
+                    isBoosted = true;
+                    hitStopTimer = 0.025;
+                    triggerShake(6, 0.14);
+                    spawnRipple(prevNode.x, prevNode.y, '#22c55e', 90);
+                }
+            }
+
+            drop.vx = drag.launchVx;
+            drop.vy = drag.launchVy;
+            drop.latchedNode = null;
+            drop.lastVelAngle = Math.atan2(drop.vy, drop.vx);
+            drop.airRotationAccum = 0;
+            drop.loopBonusAwarded = false;
+
+            drop.stretchX = 1.55;
+            drop.stretchY = 0.64;
+            drop.stretchAngle = Math.atan2(drop.vy, drop.vx);
+
+            sfx.playBrushWhoosh(drag.power, isBoosted);
+            spawnInkSplash(drop.x, drop.y, getActiveSkin().main, 12, drag.power + 0.3);
+            updateHUD();
+        });
+
+        document.getElementById('startBtn').addEventListener('click', startGame);
+        document.getElementById('restartBtn').addEventListener('click', startGame);
+        document.getElementById('backToLobbyBtn').addEventListener('click', () => {
+            document.getElementById('gameOverScreen').classList.add('hidden');
+            document.getElementById('startScreen').classList.remove('hidden');
+            renderLobbyUI();
+        });
+        document.getElementById('soundToggleBtn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            sfx.toggle();
+        });
+
+        // =====================================================================
+        // 10. ANA OYUN FİZİK VE GÜNCELLEME DÖNGÜSÜ
+        // =====================================================================
+        function updateHUD() {
+            const biome = getScrollBiome(currentScore);
+            const skin = getActiveSkin();
+            const skinComMult = skin.id === 'vermilion' ? 1.1 : 1.0;
+
+            document.getElementById('scoreText').textContent = `${currentScore}m`;
+            document.getElementById('scoreText').style.color = biome.isDark ? '#f8fafc' : '#141312';
+            document.getElementById('hudSubRow').className = biome.isDark
+                ? 'flex items-center gap-2 text-xs font-semibold text-slate-300'
+                : 'flex items-center gap-2 text-xs font-semibold text-stone-700';
+
+            document.getElementById('bestScoreHud').textContent = `${saveData.bestScore}m`;
+            document.getElementById('goldCountHud').textContent = `${runGold}`;
+
+            const inkPct = (drop.infInkTimer > 0 || feverTimer > 0) ? 100 : Math.max(0, Math.min(100, (drop.ink / drop.maxInk) * 100));
+            document.getElementById('inkBarFill').style.width = `${inkPct}%`;
+            document.getElementById('inkNumericText').textContent = (drop.infInkTimer > 0 || feverTimer > 0) ? '∞' : Math.round(drop.ink);
+
+            const comboBadge = document.getElementById('comboBadge');
+            if (drop.combo >= 2) {
+                comboBadge.textContent = `KOMBO x${drop.combo}`;
+                comboBadge.classList.remove('hidden');
+            } else {
+                comboBadge.classList.add('hidden');
+            }
+
+            // Durum etiketleri
+            document.getElementById('shieldTag').classList.toggle('hidden', drop.shields <= 0);
+            document.getElementById('shieldCountText').textContent = drop.shields;
+
+            const hasPhoenixReady = activeSkillSlots.some(s => s.id === 'phoenix_brush' && s.cd <= 0);
+            document.getElementById('phoenixTag').classList.toggle('hidden', !hasPhoenixReady);
+            document.getElementById('infInkTag').classList.toggle('hidden', drop.infInkTimer <= 0);
+
+            document.getElementById('dragonTag').classList.toggle('hidden', drop.dragonTimer <= 0);
+            if (drop.dragonTimer > 0) document.getElementById('dragonTimerBar').style.width = `${Math.min(100, (drop.dragonTimer / 3.5) * 100)}%`;
+
+            document.getElementById('chronoTag').classList.toggle('hidden', drop.chronoTimer <= 0);
+            if (drop.chronoTimer > 0) document.getElementById('chronoTimerBar').style.width = `${Math.min(100, (drop.chronoTimer / 3.5) * 100)}%`;
+
+            document.getElementById('magnetTag').classList.toggle('hidden', drop.magnetTimer <= 0);
+            if (drop.magnetTimer > 0) document.getElementById('magnetTimerBar').style.width = `${Math.min(100, (drop.magnetTimer / 5.0) * 100)}%`;
+        }
+
+        function update(rawDt) {
+            if (hitStopTimer > 0) {
+                hitStopTimer -= rawDt;
+                return;
+            }
+            if (shakeTime > 0) {
+                shakeTime -= rawDt;
+                if (shakeTime <= 0) shakeIntensity = 0;
+            }
+
+            const diff = getDifficulty();
+            const targetScale = (gameState === 'PLAYING' && drag.active && !drop.latchedNode)
+                ? (drop.chronoTimer > 0 ? 0.14 : diff.bulletTimeScale)
+                : 1.0;
+            timeScale += (targetScale - timeScale) * Math.min(1, rawDt * 14);
+            const dt = rawDt * timeScale;
+
+            // Dalgalar, Parçacıklar ve Yazılar
+            for (let i = inkRipples.length - 1; i >= 0; i--) {
+                const rp = inkRipples[i];
+                rp.r += (rp.maxR - rp.r) * rawDt * 8.5;
+                rp.life -= rawDt * 2.2;
+                if (rp.life <= 0) inkRipples.splice(i, 1);
+            }
+            for (let i = inkParticles.length - 1; i >= 0; i--) {
+                const p = inkParticles[i];
+                p.x += p.vx * dt;
+                p.y += p.vy * dt;
+                p.vy += 300 * dt;
+                p.vx *= 0.95;
+                p.life -= p.decay * rawDt;
+                if (p.life <= 0) inkParticles.splice(i, 1);
+            }
+            for (let i = floatingTexts.length - 1; i >= 0; i--) {
+                const ft = floatingTexts[i];
+                ft.y += ft.vy * rawDt;
+                ft.life -= rawDt * 1.1;
+                if (ft.life <= 0) floatingTexts.splice(i, 1);
+            }
+
+            if (gameState !== 'PLAYING') return;
+
+            // Skill bekleme sürelerini güncelle
+            let cdChanged = false;
+            activeSkillSlots.forEach(s => {
+                if (s.cd > 0) {
+                    s.cd = Math.max(0, s.cd - rawDt);
+                    cdChanged = true;
+                }
+            });
+            if (cdChanged) updateSkillButtonsUI();
+
+            // Güçlendirme & Fever & Kriz Dalgası Zamanlayıcıları
+            if (drop.dragonTimer > 0) drop.dragonTimer = Math.max(0, drop.dragonTimer - rawDt);
+            if (drop.chronoTimer > 0) drop.chronoTimer = Math.max(0, drop.chronoTimer - rawDt);
+            if (drop.magnetTimer > 0) drop.magnetTimer = Math.max(0, drop.magnetTimer - rawDt);
+            if (drop.infInkTimer > 0) drop.infInkTimer = Math.max(0, drop.infInkTimer - rawDt);
+
+            // Kombo Zamanlayıcı (Kombo Simyacısı Rünü süreyi uzatır)
+            const alchemistLvl = getRuneLevel('combo_alchemist');
+            if (drop.combo > 1) {
+                drop.comboDecayTimer -= rawDt;
+                if (drop.comboDecayTimer <= 0) {
+                    drop.combo = 1;
+                }
+            }
+
+            // Fever Modu (8x Komboda Mürekkep Taşkını!)
+            const overlay = document.getElementById('screenEffectOverlay');
+            const feverBanner = document.getElementById('feverBanner');
+            const crisisBanner = document.getElementById('crisisBanner');
+
+            if (feverTimer > 0) {
+                feverTimer = Math.max(0, feverTimer - rawDt);
+                document.getElementById('feverTimerText').textContent = `${feverTimer.toFixed(1)}s`;
+                feverBanner.classList.remove('hidden');
+                overlay.className = 'fixed inset-0 pointer-events-none z-10 fever-frame opacity-100';
+            } else {
+                feverBanner.classList.add('hidden');
+                if (crisisTimer > 0) {
+                    crisisTimer = Math.max(0, crisisTimer - rawDt);
+                    document.getElementById('crisisTimerText').textContent = `${crisisTimer.toFixed(1)}s`;
+                    crisisBanner.classList.remove('hidden');
+                    overlay.className = 'fixed inset-0 pointer-events-none z-10 crisis-frame opacity-100';
+                    wallNarrowInset = lerp(wallNarrowInset, Math.min(52, width * 0.13), rawDt * 2);
+
+                    if (crisisTimer <= 0) {
+                        // Kriz Dalgasından Hayatta Kalana Dev Varak Yağmuru Ödülü!
+                        sfx.playGoldChime();
+                        spawnGoldRain(drop.y);
+                    }
+                } else {
+                    crisisBanner.classList.add('hidden');
+                    overlay.style.opacity = '0';
+                    wallNarrowInset = lerp(wallNarrowInset, 0, rawDt * 2.5);
+                }
+            }
+
+            // Alttan Yükselen Kağıt Kuruması / Ateş Sınırı
+            const altRatio = Math.min(currentScore / 1500, 1);
+            const currentBurnSpeed = lerp(diff.burnBaseSpeed, diff.burnMaxSpeed, altRatio);
+            burnLineY -= currentBurnSpeed * rawDt;
+            // Kamera çok yukarı çıktıysa ateş çizgisi ekranın hemen altından takip etsin
+            burnLineY = Math.min(burnLineY, cameraY + height + 30);
+
+            drop.wobblePhase += rawDt * 7.5;
+            drop.stretchX += (1 - drop.stretchX) * Math.min(1, rawDt * 12);
+            drop.stretchY += (1 - drop.stretchY) * Math.min(1, rawDt * 12);
+
+            // Hokkaları Güncelle
+            const porcRuneLvl = getRuneLevel('unbreakable_porcelain');
+            for (const node of nodes) {
+                if (node.shattered) continue;
+                node.pulsePhase += rawDt * 3.2;
+                if (node.cooldown > 0) node.cooldown -= dt;
+
+                if (node.type === 'jade') {
+                    node.swirlAngle += node.swirlDir * 2.4 * rawDt;
+                    if (drop.latchedNode === node && drag.active) updateDragVector();
+                }
+
+                if (node.type === 'bamboo') {
+                    node.vx = node.moveDir * node.moveSpeed;
+                    node.x += node.vx * dt;
+                    if (Math.abs(node.x - node.baseX) > node.railRange || node.x < 40 + wallNarrowInset || node.x > width - 40 - wallNarrowInset) {
+                        node.moveDir *= -1;
+                    }
+                    if (drop.latchedNode === node && drag.active) updateDragVector();
+                }
+
+                if (drop.latchedNode === node && node.type === 'porcelain') {
+                    node.crackTimer += rawDt;
+                    if (node.crackTimer >= node.maxCrackTime) {
+                        node.shattered = true;
+                        drop.latchedNode = null;
+                        // Kırılmaz Porselen Rünü varsa yukarı doğru güçlü patlama itişi verir!
+                        drop.vy = porcRuneLvl > 0 ? -(480 + porcRuneLvl * 90) : -120;
+                        sfx.playImpact(porcRuneLvl > 0);
+                        triggerShake(6, 0.16);
+                        stampSplatter(node.x, node.y, '#3b6e8c', 22);
+                        spawnInkSplash(node.x, node.y, '#3b6e8c', 16, 1.0);
+                        if (porcRuneLvl > 0) {
+                            spawnFloatingText(node.x, node.y - 24, '🏺 RÜN PATLAMA İTİŞİ!', '#1d4ed8', 13);
+                        }
+                    }
+                }
+            }
+
+            // Kırmızı Mühür Engellerini Güncelle
+            for (const seal of seals) {
+                if (seal.broken) continue;
+                if (seal.isMoving) {
+                    seal.x += seal.moveDir * seal.moveSpeed * dt;
+                    if (Math.abs(seal.x - seal.baseX) > seal.moveRange || seal.x < 35 + wallNarrowInset || seal.x > width - 35 - wallNarrowInset) {
+                        seal.moveDir *= -1;
+                    }
+                }
+            }
+
+            // Ters Rüzgar Akımları
+            for (const w of windZones) {
+                w.phase += rawDt * 5;
+                if (!drop.latchedNode && drop.dragonTimer <= 0 && feverTimer <= 0) {
+                    if (Math.abs(drop.x - w.x) < w.w * 0.5 && Math.abs(drop.y - w.y) < w.h * 0.5) {
+                        drop.vy += w.vy * dt * 2.2;
+                    }
+                }
+            }
+
+            // Toplanabilir Öğeler & Manyetik Girdap Çekimi
+            const sharpLvl = getRuneLevel('sharpshooter');
+            const magnetRadius = drop.magnetTimer > 0 ? 340 : (44 + sharpLvl * 18);
+            for (const col of collectibles) {
+                if (col.collected) continue;
+                col.bobPhase += rawDt * 4.2;
+
+                const dx = drop.x - col.x;
+                const dy = drop.y - col.y;
+                const dist = Math.hypot(dx, dy);
+
+                if (dist < magnetRadius && dist > 1) {
+                    const pullSpd = drop.magnetTimer > 0 ? 580 : 240;
+                    col.x += (dx / dist) * pullSpd * dt;
+                    col.y += (dy / dist) * pullSpd * dt;
+                }
+
+                if (dist < drop.radius + 18) {
+                    col.collected = true;
+                    if (col.kind === 'gold') {
+                        runGold++;
+                        updateQuestProgress('gold', 1);
+                        drop.ink = Math.min(drop.maxInk, drop.ink + 28);
+                        maxAltitude += 12;
+                        sfx.playGoldChime();
+                        spawnInkSplash(col.x, col.y, '#d49b27', 10, 0.9);
+                    } else if (col.kind === 'ink_orb') {
+                        drop.ink = Math.min(drop.maxInk, drop.ink + 45);
+                        sfx.playKotoNote(3);
+                        spawnRipple(col.x, col.y, getActiveSkin().main, 46);
+                    } else if (col.kind === 'shield') {
+                        drop.shields++;
+                        drop.ink = drop.maxInk;
+                        sfx.playGoldChime();
+                        spawnRipple(col.x, col.y, '#22c55e', 70);
+                        spawnFloatingText(col.x, col.y - 20, '+1 YEŞİM KALKAN 🪷', '#15803d', 14);
+                    } else if (col.kind === 'dragon') {
+                        drop.dragonTimer = 3.4;
+                        drop.latchedNode = null;
+                        drop.vy = -880;
+                        sfx.playSkillCast();
+                        triggerShake(7, 0.2);
+                        spawnFloatingText(col.x, col.y - 22, '🐉 EJDERHA FIRÇASI!', '#b88014', 15);
+                    } else if (col.kind === 'magnet') {
+                        drop.magnetTimer = 5.0;
+                        sfx.playGoldChime();
+                        spawnFloatingText(col.x, col.y - 20, '🧲 MANYETİK GİRDAP!', '#8a600c', 14);
+                    }
+                }
+            }
+
+            // Oyuncu Hareket Fiziği
+            if (drop.dragonTimer > 0 || feverTimer > 0) {
+                drop.vy = lerp(drop.vy, -900, rawDt * 8);
+                if (drag.active) {
+                    const steer = Math.max(-1, Math.min(1, (drag.curX - drop.x) / 130));
+                    drop.vx += steer * 540 * rawDt;
+                }
+                drop.vx *= 0.93;
+                drop.x += drop.vx * rawDt;
+                drop.y += drop.vy * rawDt;
+            } else if (drop.latchedNode) {
+                const node = drop.latchedNode;
+                drop.x += (node.x - drop.x) * Math.min(1, rawDt * 24);
+                drop.y += (node.y - drop.y) * Math.min(1, rawDt * 24);
+                drop.vx = 0;
+                drop.vy = 0;
+                drop.ink = Math.min(drop.maxInk, drop.ink + 22 * rawDt);
+            } else {
+                drop.vy += GRAVITY * dt;
+                drop.x += drop.vx * dt;
+                drop.y += drop.vy * dt;
+
+                const spd = Math.hypot(drop.vx, drop.vy);
+                if (spd > 120) {
+                    const curAng = Math.atan2(drop.vy, drop.vx);
+                    drop.stretchAngle = curAng;
+                    let dAng = curAng - drop.lastVelAngle;
+                    while (dAng > Math.PI) dAng -= Math.PI * 2;
+                    while (dAng < -Math.PI) dAng += Math.PI * 2;
+                    drop.airRotationAccum += dAng;
+                    drop.lastVelAngle = curAng;
+
+                    if (!drop.loopBonusAwarded && Math.abs(drop.airRotationAccum) >= Math.PI * 1.92) {
+                        drop.loopBonusAwarded = true;
+                        incrementCombo(2);
+                        updateQuestProgress('spin', 1);
+                        maxAltitude += 40;
+                        sfx.playGoldChime();
+                        spawnRipple(drop.x, drop.y, '#d49b27', 65);
+                        spawnFloatingText(drop.x, drop.y - 26, '360° HAVA DÖNÜŞÜ! +40m', '#b88014', 14);
+                    }
+                }
+
+                // Kenar Duvar Etkileşimi (Dikenli Duvarlar vs Duvar Sekmesi Rünü)
+                const wallX = 16 + wallNarrowInset;
+                const wallRuneLvl = getRuneLevel('wall_ricochet');
+                if (drop.x < drop.radius + wallX || drop.x > width - drop.radius - wallX) {
+                    const isLeft = drop.x < width * 0.5;
+                    drop.x = isLeft ? (drop.radius + wallX) : (width - drop.radius - wallX);
+
+                    if (diff.spikyWalls && wallRuneLvl <= 0 && feverTimer <= 0 && drop.dragonTimer <= 0) {
+                        if (drop.shields > 0) {
+                            drop.shields--;
+                            drop.vx = isLeft ? 380 : -380;
+                            drop.vy = -480;
+                            sfx.playImpact(true);
+                            triggerShake(7, 0.18);
+                            spawnFloatingText(drop.x, drop.y - 20, '🪷 DİKENLİ DUVAR KALKANI!', '#15803d', 13);
+                        } else {
+                            triggerGameOver('DİKENLİ DUVARA ÇARPTI');
+                            return;
+                        }
+                    } else {
+                        const bounceBoost = wallRuneLvl > 0 ? (1.05 + wallRuneLvl * 0.1) : 0.85;
+                        drop.vx = (isLeft ? Math.abs(drop.vx) : -Math.abs(drop.vx)) * bounceBoost;
+                        if (wallRuneLvl > 0) {
+                            drop.ink = Math.min(drop.maxInk, drop.ink + 10 * wallRuneLvl);
+                            drop.vy -= 90;
+                            spawnFloatingText(drop.x, drop.y - 18, `🛡️ DUVAR SEKMESİ +${10 * wallRuneLvl}💧`, '#15803d', 12);
+                        }
+                        stampSplatter(drop.x, drop.y, getActiveSkin().main, 12);
+                    }
+                }
+
+                // Hokkalara Yakalanma
+                for (const node of nodes) {
+                    if (node.shattered || node.cooldown > 0) continue;
+                    const dist = Math.hypot(drop.x - node.x, drop.y - node.y);
+                    if (dist <= node.captureRadius) {
+                        drop.latchedNode = node;
+                        drop.vx = 0;
+                        drop.vy = 0;
+
+                        if (drop.lastNodeId !== node.id) {
+                            incrementCombo(1);
+                            drop.lastNodeId = node.id;
+                        }
+
+                        const inkGain = node.type === 'gold' ? 48 : 30;
+                        drop.ink = Math.min(drop.maxInk, drop.ink + inkGain);
+                        sfx.playKotoNote(drop.combo, node.type);
+                        stampSplatter(node.x, node.y, getActiveSkin().main, 16);
+                        spawnRipple(node.x, node.y, node.type === 'gold' ? '#d49b27' : getActiveSkin().main, 56);
+                        break;
+                    }
+                }
+            }
+
+            // Kırmızı Mühür Engelleri & Vampir Mürekkep Rünü
+            const vampireLvl = getRuneLevel('vampire_ink');
+            for (const seal of seals) {
+                if (seal.broken) continue;
+                const dist = Math.hypot(drop.x - seal.x, drop.y - seal.y);
+                const hitDist = drop.radius + seal.size - 3;
+
+                if (dist < hitDist) {
+                    if (drop.dragonTimer > 0 || feverTimer > 0) {
+                        seal.broken = true;
+                        runGold++;
+                        maxAltitude += 30;
+                        hitStopTimer = 0.025;
+                        sfx.playGoldChime();
+                        triggerShake(7, 0.16);
+                        stampSplatter(seal.x, seal.y, '#d93829', 26);
+                        spawnInkSplash(seal.x, seal.y, '#d93829', 16, 1.3);
+                        spawnFloatingText(seal.x, seal.y - 22, 'MÜHÜR PARÇALANDI! +30m', '#b88014', 14);
+                    } else if (drop.shields > 0) {
+                        drop.shields--;
+                        seal.broken = true;
+                        drop.vy = Math.min(drop.vy, -540);
+                        hitStopTimer = 0.035;
+                        sfx.playImpact(true);
+                        triggerShake(8, 0.2);
+                        spawnRipple(seal.x, seal.y, '#22c55e', 85);
+                        spawnFloatingText(seal.x, seal.y - 24, '🪷 YEŞİM KALKAN KORUDU!', '#15803d', 14);
+                    } else {
+                        stampSplatter(seal.x, seal.y, '#d93829', 30);
+                        triggerGameOver('KIRMIZI MÜHÜRE ÇARPTI');
+                        return;
+                    }
+                } else if (!drop.latchedNode && !seal.nearMissAwarded && dist < hitDist + 30) {
+                    seal.nearMissAwarded = true;
+                    incrementCombo(1);
+                    updateQuestProgress('nearMiss', 1);
+                    maxAltitude += 25;
+                    hitStopTimer = 0.018;
+
+                    const vampBonus = vampireLvl > 0 ? Math.round(drop.maxInk * (0.15 + vampireLvl * 0.10)) : 16;
+                    drop.ink = Math.min(drop.maxInk, drop.ink + vampBonus);
+                    sfx.playNearMissWhistle(drop.combo);
+                    spawnRipple(seal.x, seal.y, '#d93829', 52);
+                    spawnFloatingText(seal.x, seal.y - 24, `KIL PAYI! +${vampBonus}💧 (x${drop.combo})`, '#d93829', 14);
+                }
+            }
+
+            // Fırça İzi
+            const spd = Math.hypot(drop.vx, drop.vy);
+            if (!drop.latchedNode && spd > 30) {
+                drop.trail.push({
+                    x: drop.x, y: drop.y,
+                    speed: spd,
+                    life: 1.0,
+                    fever: feverTimer > 0 || drop.dragonTimer > 0
+                });
+            }
+            for (let i = drop.trail.length - 1; i >= 0; i--) {
+                drop.trail[i].life -= rawDt * 2.5;
+                if (drop.trail[i].life <= 0) drop.trail.splice(i, 1);
+            }
+
+            // Yükseklik, Kriz Dalgası & Açgözlü Ejder Rünü Kontrolü
+            const alt = Math.max(0, Math.floor((startY - drop.y) / 11));
+            if (alt > maxAltitude) maxAltitude = alt;
+            if (maxAltitude > currentScore) {
+                currentScore = maxAltitude;
+                updateQuestProgress('altitude', currentScore, true);
+            }
+
+            // Her 250m'de bir Mühür Fırtınası Kriz Dalgası
+            if (currentScore >= nextCrisisAlt && crisisTimer <= 0) {
+                crisisTimer = 15.0;
+                nextCrisisAlt += 250;
+                sfx.playTaikoDrum();
+                triggerShake(9, 0.28);
+            }
+
+            // Açgözlü Ejder Rünü: Her 100m'de ekstra altın varak yağmuru
+            const dragonLvl = getRuneLevel('greedy_dragon');
+            if (dragonLvl > 0 && Math.floor(currentScore / 100) > lastDragonMilestone) {
+                lastDragonMilestone = Math.floor(currentScore / 100);
+                spawnGoldRain(drop.y);
+            }
+
+            updateHUD();
+
+            // Kamera Takibi
+            const targetCamY = drop.y - height * 0.52;
+            if (targetCamY < cameraY) {
+                cameraY += (targetCamY - cameraY) * Math.min(1, rawDt * 8.5);
+            }
+
+            generateWorldUpTo(cameraY - height * 1.2);
+            const bottomBound = cameraY + height + 130;
+            nodes = nodes.filter(n => !n.shattered && n.y < bottomBound);
+            seals = seals.filter(s => !s.broken && s.y < bottomBound);
+            windZones = windZones.filter(w => w.y < bottomBound);
+            collectibles = collectibles.filter(c => !c.collected && c.y < bottomBound);
+            inkSplatters = inkSplatters.filter(sp => sp.y < bottomBound);
+
+            // Kağıt Kuruması (Ateş Çizgisi) veya Ekran Altı Düşüşü Kontrolü
+            if (drop.y > burnLineY || drop.y > cameraY + height + 40) {
+                if (drop.shields > 0) {
+                    drop.shields--;
+                    drop.y = Math.min(burnLineY - 70, cameraY + height - 40);
+                    drop.vy = -860;
+                    drop.latchedNode = null;
+                    sfx.playImpact(true);
+                    triggerShake(8, 0.2);
+                    spawnFloatingText(drop.x, drop.y - 26, '🪷 KALKAN KURUMADAN KURTARDI!', '#15803d', 14);
+                    updateHUD();
+                } else {
+                    triggerGameOver(drop.y > burnLineY ? 'KAĞIT KURUMASI YAKALADI 🔥' : 'PARŞÖMENDEN DÜŞTÜ');
+                }
+            }
+        }
+
+        function incrementCombo(amount = 1) {
+            const alchemistLvl = getRuneLevel('combo_alchemist');
+            drop.combo += amount;
+            drop.comboDecayTimer = (4.5 + alchemistLvl * 2.5);
+            maxCombo = Math.max(maxCombo, drop.combo);
+            updateQuestProgress('combo', drop.combo, true);
+
+            // Kombo Simyacısı Rünü: Her 5x komboda rastgele tılsım kazandırır
+            if (alchemistLvl > 0 && drop.combo % 5 === 0) {
+                const gifts = ['shield', 'dragon', 'magnet'];
+                const pick = gifts[Math.floor(Math.random() * gifts.length)];
+                if (pick === 'shield') drop.shields++;
+                else if (pick === 'dragon') drop.dragonTimer = 3.0;
+                else drop.magnetTimer = 4.5;
+                spawnFloatingText(drop.x, drop.y - 36, '⚗️ SİMYACI TILSIMI KAZANDIN!', '#6d28d9', 13);
+            }
+
+            // 8x Komboda FEVER / COŞKU MODU (Mürekkep Taşkını!)
+            if (drop.combo >= 8 && feverTimer <= 0) {
+                feverTimer = 5.0;
+                sfx.playTaikoDrum();
+                sfx.playGoldChime();
+                triggerShake(10, 0.25);
+            }
+        }
+
+        // =====================================================================
+        // 11. ÇİZİM (RENDER) DÖNGÜSÜ
+        // =====================================================================
+        function draw() {
+            const biome = getScrollBiome(currentScore);
+            const activeInk = getActiveSkin();
+            const diff = getDifficulty();
+
+            ctx.save();
+
+            // Parşömen Biyom Gradyanı
+            const bgGrad = ctx.createLinearGradient(0, 0, 0, height);
+            bgGrad.addColorStop(0, biome.bgTop);
+            bgGrad.addColorStop(1, biome.bgBot);
+            ctx.fillStyle = bgGrad;
+            ctx.fillRect(0, 0, width, height);
+
+            if (grainPattern) {
+                ctx.fillStyle = grainPattern;
+                ctx.fillRect(0, 0, width, height);
+            }
+
+            if (shakeIntensity > 0) {
+                ctx.translate((Math.random() - 0.5) * shakeIntensity * 2, (Math.random() - 0.5) * shakeIntensity * 2);
+            }
+
+            // Yan Çerçeveler (Kriz dalgasında daralır, Usta+ modda dikenlidir)
+            const borderX = 14 + wallNarrowInset;
+            ctx.strokeStyle = diff.spikyWalls ? '#d93829' : (biome.isDark ? 'rgba(248, 250, 252, 0.25)' : 'rgba(20, 19, 18, 0.2)');
+            ctx.lineWidth = diff.spikyWalls ? 2.5 : 1.5;
+            ctx.beginPath();
+            ctx.moveTo(borderX, 0); ctx.lineTo(borderX, height);
+            ctx.moveTo(width - borderX, 0); ctx.lineTo(width - borderX, height);
+            ctx.stroke();
+
+            if (diff.spikyWalls) {
+                ctx.fillStyle = '#d93829';
+                const spikeOffset = (-cameraY * 0.8) % 36;
+                for (let sy = spikeOffset - 36; sy < height; sy += 36) {
+                    ctx.beginPath();
+                    ctx.moveTo(borderX, sy);
+                    ctx.lineTo(borderX + 8, sy + 9);
+                    ctx.lineTo(borderX, sy + 18);
+                    ctx.fill();
+
+                    ctx.beginPath();
+                    ctx.moveTo(width - borderX, sy + 18);
+                    ctx.lineTo(width - borderX - 8, sy + 27);
+                    ctx.lineTo(width - borderX, sy + 36);
+                    ctx.fill();
+                }
+            }
+
+            ctx.save();
+            ctx.translate(0, -cameraY);
+
+            // Kalıcı Mürekkep Sıçramaları
+            for (const sp of inkSplatters) {
+                ctx.save();
+                ctx.globalAlpha = sp.alpha;
+                ctx.fillStyle = sp.color;
+                for (const b of sp.blobs) {
+                    ctx.beginPath();
+                    ctx.arc(sp.x + b.ox, sp.y + b.oy, b.r, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                ctx.restore();
+            }
+
+            // Metre İşaretleri
+            const topAlt = Math.floor((startY - cameraY) / 11) + 50;
+            const botAlt = Math.floor((startY - (cameraY + height)) / 11) - 30;
+            ctx.font = '700 11px Cinzel, serif';
+            for (let alt = Math.floor(botAlt / 100) * 100; alt <= topAlt; alt += 100) {
+                if (alt <= 0) continue;
+                const yPos = startY - alt * 11;
+                ctx.strokeStyle = biome.isDark ? 'rgba(248, 250, 252, 0.14)' : 'rgba(20, 19, 18, 0.1)';
+                ctx.setLineDash([4, 6]);
+                ctx.beginPath();
+                ctx.moveTo(borderX + 8, yPos); ctx.lineTo(width - borderX - 8, yPos);
+                ctx.stroke();
+                ctx.setLineDash([]);
+                ctx.textAlign = 'right';
+                ctx.fillStyle = biome.isDark ? 'rgba(248, 250, 252, 0.45)' : 'rgba(20, 19, 18, 0.35)';
+                ctx.fillText(`${alt}m`, width - borderX - 10, yPos - 4);
+            }
+
+            // Ters Rüzgar Akımları
+            for (const w of windZones) {
+                ctx.save();
+                ctx.fillStyle = 'rgba(217, 56, 41, 0.08)';
+                ctx.beginPath();
+                ctx.roundRect(w.x - w.w * 0.5, w.y - w.h * 0.5, w.w, w.h, 16);
+                ctx.fill();
+                ctx.fillStyle = 'rgba(217, 56, 41, 0.6)';
+                ctx.font = 'bold 11px Cinzel, serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('⬇ TERS RÜZGAR ⬇', w.x, w.y + 4);
+                ctx.restore();
+            }
+
+            // Hokkalar
+            for (const node of nodes) {
+                if (node.shattered) continue;
+                if (node.type === 'bamboo') {
+                    ctx.strokeStyle = 'rgba(101, 163, 13, 0.35)';
+                    ctx.lineWidth = 3;
+                    ctx.beginPath();
+                    ctx.moveTo(node.baseX - node.railRange, node.y);
+                    ctx.lineTo(node.baseX + node.railRange, node.y);
+                    ctx.stroke();
+                }
+
+                ctx.save();
+                ctx.translate(node.x, node.y);
+                ctx.strokeStyle = 'rgba(20, 19, 18, 0.18)';
+                ctx.setLineDash([3, 5]);
+                ctx.beginPath();
+                ctx.arc(0, 0, node.captureRadius, 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.setLineDash([]);
+
+                const strokeMap = {
+                    stone: biome.isDark ? '#94a3b8' : '#2c3545',
+                    gold: '#d49b27',
+                    jade: '#15803d',
+                    bamboo: '#65a30d',
+                    porcelain: '#3b6e8c'
+                };
+                ctx.fillStyle = node.type === 'gold' ? '#fcf4dc' : (biome.isDark ? '#334155' : '#e6decb');
+                ctx.strokeStyle = strokeMap[node.type] || '#2c3545';
+                ctx.lineWidth = 3.5;
+                ctx.beginPath();
+                ctx.arc(0, 0, node.radius, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+
+                if (node.type === 'jade') {
+                    ctx.strokeStyle = '#22c55e';
+                    ctx.lineWidth = 2.5;
+                    ctx.beginPath();
+                    ctx.moveTo(0, 0);
+                    ctx.lineTo(Math.cos(node.swirlAngle) * (node.radius + 9), Math.sin(node.swirlAngle) * (node.radius + 9));
+                    ctx.stroke();
+                }
+
+                ctx.fillStyle = activeInk.main;
+                ctx.beginPath();
+                ctx.arc(0, 0, node.radius * 0.52, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+
+            // Kırmızı Mühürler
+            for (const seal of seals) {
+                if (seal.broken) continue;
+                ctx.save();
+                ctx.translate(seal.x, seal.y);
+                ctx.fillStyle = 'rgba(217, 56, 41, 0.18)';
+                ctx.strokeStyle = '#d93829';
+                ctx.lineWidth = 2.8;
+                if (seal.shape === 'square') {
+                    const s = seal.size * 1.8;
+                    ctx.beginPath();
+                    ctx.roundRect(-s * 0.5, -s * 0.5, s, s, 4);
+                    ctx.fill();
+                    ctx.stroke();
+                } else {
+                    ctx.beginPath();
+                    ctx.arc(0, 0, seal.size, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+                }
+                ctx.fillStyle = '#d93829';
+                ctx.font = 'bold 15px serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('禁', 0, 1);
+                ctx.restore();
+            }
+
+            // Toplanabilir Öğeler
+            for (const col of collectibles) {
+                if (col.collected) continue;
+                const by = col.y + Math.sin(col.bobPhase) * 4.5;
+                ctx.save();
+                ctx.translate(col.x, by);
+                if (col.kind === 'gold') {
+                    ctx.fillStyle = '#d49b27';
+                    ctx.beginPath();
+                    ctx.moveTo(0, -10); ctx.lineTo(8, 0); ctx.lineTo(0, 10); ctx.lineTo(-8, 0);
+                    ctx.closePath();
+                    ctx.fill();
+                } else if (col.kind === 'ink_orb') {
+                    ctx.fillStyle = activeInk.main;
+                    ctx.beginPath();
+                    ctx.arc(0, 0, 8, 0, Math.PI * 2);
+                    ctx.fill();
+                } else {
+                    const icons = { shield: '🪷', dragon: '🐉', magnet: '🧲' };
+                    ctx.fillStyle = '#faf6ed';
+                    ctx.strokeStyle = '#d49b27';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.arc(0, 0, 15, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+                    ctx.font = '14px sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(icons[col.kind] || '✨', 0, 1);
+                }
+                ctx.restore();
+            }
+
+            // Nişan Yayı (Keskin Nişancı Rünü yay uzunluğunu artırır)
+            if (drag.active && drag.power > 0) {
+                const sharpLvl = getRuneLevel('sharpshooter');
+                const dotsCount = 16 + sharpLvl * 4;
+                const tensionColor = (!drop.latchedNode && drag.inkCost > 0 && drop.ink < drag.inkCost) ? '#d93829' : activeInk.main;
+
+                for (let i = 1; i <= dotsCount; i++) {
+                    const t = i * 0.042;
+                    const px = drop.x + drag.launchVx * t;
+                    const py = drop.y + drag.launchVy * t + 0.5 * GRAVITY * t * t;
+                    const ratio = 1 - i / (dotsCount + 1);
+                    ctx.fillStyle = tensionColor;
+                    ctx.globalAlpha = ratio * 0.85;
+                    ctx.beginPath();
+                    ctx.arc(px, py, Math.max(1.5, 5.2 * ratio), 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                ctx.globalAlpha = 1;
+            }
+
+            // Fırça İzi & Mürekkep Damlası
+            for (const pt of drop.trail) {
+                ctx.fillStyle = pt.fever
+                    ? `rgba(212, 155, 39, ${pt.life * 0.65})`
+                    : `rgba(${activeInk.trailRgb}, ${pt.life * 0.48})`;
+                ctx.beginPath();
+                ctx.arc(pt.x, pt.y, drop.radius * 0.82 * pt.life, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            ctx.save();
+            ctx.translate(drop.x, drop.y);
+            if (drop.shields > 0) {
+                ctx.strokeStyle = '#22c55e';
+                ctx.lineWidth = 2.5;
+                ctx.beginPath();
+                ctx.arc(0, 0, drop.radius + 8, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+            ctx.rotate(drop.stretchAngle);
+            ctx.scale(drop.stretchX, drop.stretchY);
+            ctx.fillStyle = (feverTimer > 0 || drop.dragonTimer > 0) ? '#d49b27' : activeInk.main;
+            ctx.beginPath();
+            ctx.arc(0, 0, drop.radius, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+
+            // Dalgalar, Parçacıklar ve Yüzen Yazılar
+            for (const rp of inkRipples) {
+                ctx.save();
+                ctx.globalAlpha = Math.max(0, rp.life * 0.7);
+                ctx.strokeStyle = rp.color;
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(rp.x, rp.y, rp.r, 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.restore();
+            }
+            for (const p of inkParticles) {
+                ctx.save();
+                ctx.globalAlpha = Math.max(0, p.life);
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+            for (const ft of floatingTexts) {
+                ctx.save();
+                ctx.globalAlpha = Math.max(0, ft.life);
+                ctx.font = `800 ${ft.size}px Cinzel, serif`;
+                ctx.textAlign = 'center';
+                ctx.fillStyle = ft.color;
+                ctx.fillText(ft.text, ft.x, ft.y);
+                ctx.restore();
+            }
+
+            // Alttan Yükselen Kağıt Kuruması / Ateş Sınırı Görseli
+            if (gameState === 'PLAYING') {
+                const burnGrad = ctx.createLinearGradient(0, burnLineY - 45, 0, burnLineY + 60);
+                burnGrad.addColorStop(0, 'rgba(217, 56, 41, 0)');
+                burnGrad.addColorStop(0.55, 'rgba(217, 56, 41, 0.35)');
+                burnGrad.addColorStop(1, 'rgba(20, 19, 18, 0.92)');
+                ctx.fillStyle = burnGrad;
+                ctx.fillRect(0, burnLineY - 45, width, 160);
+
+                ctx.strokeStyle = '#ef4444';
+                ctx.lineWidth = 2.5;
+                ctx.setLineDash([8, 6]);
+                ctx.beginPath();
+                ctx.moveTo(0, burnLineY);
+                ctx.lineTo(width, burnLineY);
+                ctx.stroke();
+                ctx.setLineDash([]);
+            }
+
+            ctx.restore();
+            ctx.restore();
+        }
+
+        let lastTime = performance.now();
+        function gameLoop(now) {
+            const rawDt = Math.min((now - lastTime) / 1000, 0.05);
+            lastTime = now;
+            update(rawDt);
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        renderLobbyUI();
+        requestAnimationFrame(gameLoop);
+    </script>
+</body>
+</html>
