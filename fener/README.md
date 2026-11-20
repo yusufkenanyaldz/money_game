@@ -8,7 +8,7 @@ Dünyayı sonsuz bir karanlık yutmuş. Elinde tek bir fener var. Işığın ula
 - **Fenere dokun** → kor. Kor bu oyunun parası.
 - **Fitil** ışığı uzatır. Işık bir yere değince o yer ortaya çıkar (kulübe, kuyu, mezarlık, değirmen, maden, manastır, kule, katedral… ve en sonda Uçurum Kapısı).
 - **Yerleri yak**, derecelerini artır; 10/25/50/100… derecelerde üretim ikiye katlanır.
-- Yerler canlı ve 3 görünümde büyür (1–24, 25–99, 100+ derece). Yükseltmede rün çemberi, yakma/yeniden yakma ve görünüm değişiminde alev patlaması.
+- Fener fitille 4 biçimde güçlenir (fitil 0, 5, 10, 16). Yerler canlı ve 4 görünümde büyür (1–24, 25–99, 100–199, 200+ derece). Yükseltmede rün çemberi, yakma/yeniden yakma ve görünüm değişiminde alev patlaması.
 - Her yer ilk kez ışığa çıktığında **Günce**'ye kasvetli bir not düşer; notlar birleşince hikâye ortaya çıkar.
 
 ## Gece dalgası

@@ -334,9 +334,11 @@ const IMG={};
 for(const k of['fener','kasa','fici','vazo','tabure','dikilitas','samdan','sandik']){const i=new Image();i.src='assets/'+k+'.webp';IMG[k]=i;}
 const ok=k=>IMG[k]&&IMG[k].complete&&IMG[k].naturalWidth>0;
 const PLACE={hut:['kulube',.9],well:['kuyu',.85],grave:['mezarlik',.85],mill:['degirmen',1.3],mine:['maden',.95],abbey:['manastir',1.25],tower:['kule',1.55],cathedral:['katedral',1.55],gate:['kapi',1.4]};
-const DARK={},ANIM={"anim-well-1": [24, 122, 180], "anim-hut-2": [24, 147, 180], "anim-grave-2": [24, 195, 180], "anim-mine-3": [24, 191, 180], "anim-fx-halka": [24, 188, 200], "anim-fx-patlama": [32, 210, 200], "anim-hut-1": [24, 151, 180], "anim-mill-1": [24, 98, 180], "anim-grave-1": [24, 281, 180], "anim-mine-1": [24, 195, 180], "anim-abbey-1": [24, 103, 180], "anim-tower-1": [24, 50, 180], "anim-cathedral-1": [24, 119, 180], "anim-gate-1": [24, 148, 180], "anim-abbey-2": [24, 113, 180], "anim-tower-2": [24, 62, 180], "anim-cathedral-2": [24, 122, 180], "anim-gate-2": [24, 150, 180], "anim-mill-2": [24, 99, 180], "anim-mine-2": [24, 192, 180], "anim-well-2": [24, 118, 180], "anim-grave-3": [24, 177, 180], "anim-mill-3": [24, 95, 180], "anim-well-3": [24, 112, 180], "anim-hut-3": [24, 140, 180], "anim-abbey-3": [24, 110, 180], "anim-tower-3": [24, 80, 180], "anim-cathedral-3": [24, 119, 180], "anim-gate-3": [24, 150, 180]},SHEET={},DARKS={};
+const DARK={},ANIM={"anim-well-1": [24, 122, 180], "anim-hut-2": [24, 147, 180], "anim-grave-2": [24, 195, 180], "anim-mine-3": [24, 191, 180], "anim-fx-halka": [24, 188, 200], "anim-fx-patlama": [32, 210, 200], "anim-hut-1": [24, 151, 180], "anim-mill-1": [24, 98, 180], "anim-grave-1": [24, 281, 180], "anim-mine-1": [24, 195, 180], "anim-abbey-1": [24, 103, 180], "anim-tower-1": [24, 50, 180], "anim-cathedral-1": [24, 119, 180], "anim-gate-1": [24, 148, 180], "anim-abbey-2": [24, 113, 180], "anim-tower-2": [24, 62, 180], "anim-cathedral-2": [24, 122, 180], "anim-gate-2": [24, 150, 180], "anim-mill-2": [24, 99, 180], "anim-mine-2": [24, 192, 180], "anim-well-2": [24, 118, 180], "anim-grave-3": [24, 177, 180], "anim-mill-3": [24, 95, 180], "anim-well-3": [24, 112, 180], "anim-hut-3": [24, 140, 180], "anim-abbey-3": [24, 110, 180], "anim-tower-3": [24, 80, 180], "anim-cathedral-3": [24, 119, 180], "anim-gate-3": [24, 150, 180], "anim-lantern-1": [24, 82, 180], "anim-lantern-2": [24, 82, 180], "anim-lantern-3": [24, 144, 180], "anim-lantern-4": [24, 142, 180], "anim-tower-4": [24, 108, 180], "anim-cathedral-4": [24, 132, 180], "anim-gate-4": [24, 179, 180], "anim-hut-4": [24, 189, 180], "anim-well-4": [24, 109, 180], "anim-grave-4": [24, 172, 180], "anim-mill-4": [24, 104, 180], "anim-mine-4": [24, 188, 180], "anim-abbey-4": [24, 146, 180]},SHEET={},DARKS={};
 const AURL=n=>'assets/'+n+'.webp';
-const tierOf=lv=>lv>=100?3:lv>=25?2:1;
+const tierOf=lv=>lv>=200?4:lv>=100?3:lv>=25?2:1;
+const lanTier=f=>f>=16?4:f>=10?3:f>=5?2:1;
+const LAN_K=[0,1,1.07,1.36,1.38];
 function sheet(n){
   if(!ANIM[n])return null;
   if(!SHEET[n]){const i=new Image();SHEET[n]=i;i.onload=()=>{const [N,fw,fh]=ANIM[n];
@@ -344,7 +346,7 @@ function sheet(n){
     g.globalCompositeOperation='source-atop';g.fillStyle='rgba(8,14,22,.62)';g.fillRect(0,0,fw,fh);g.globalCompositeOperation='destination-in';g.drawImage(i,0,0,fw,fh,0,0,fw,fh);});};i.src=AURL(n);}
   const i=SHEET[n];return i.complete&&i.naturalWidth?i:null;
 }
-sheet('anim-fx-halka');sheet('anim-fx-patlama');
+sheet('anim-fx-halka');sheet('anim-fx-patlama');sheet('anim-lantern-1');
 const FX=[];
 function fx(i,k){FX.push({i,k,t:(performance.now()-t0)/1000});}
 for(const k in PLACE){const i=new Image();i.onload=()=>{if(!ANIM[k])DARK[k]=mk(i.width,i.height,g=>{g.drawImage(i,0,0);g.globalCompositeOperation='saturation';g.fillStyle='#808080';g.fillRect(0,0,i.width,i.height);
@@ -501,9 +503,16 @@ function draw(now){
   for(const o of run.props||[]){if(o.d>Rw*1.08)continue;const P=PROP[o.k];if(!P.lit&&!P.rune)continue;const [x,y]=propPos(o,cx,cy),h=ps*P.h,g=h*(P.rune?.9:.7)*(.9+.1*Math.sin(t*11+o.a*5));
     ctx.globalAlpha=P.rune?.35+.15*Math.sin(t*1.7+o.a):.55;ctx.drawImage(glow(P.rune?'#e0a050':'#ffb060'),x-g/2,y-h*(P.rune?.55:.88)-g/2,g,g);}
   ctx.globalAlpha=1;ctx.globalCompositeOperation='source-over';
-  if(ok('fener')){const im=IMG.fener,h=clamp(zoom*1.75,64,120),w=h*im.width/im.height,top=cy-h*.56+Math.sin(t*1.2)*1.2;
-    ctx.fillStyle='rgba(0,0,0,.55)';ctx.beginPath();ctx.ellipse(cx,top+h*.99,w*.42,h*.05,0,0,TAU);ctx.fill();
-    ctx.drawImage(im,cx-w/2,top,w,h);
+  const ltr=lanTier(run.fitil);let lnm=null,lsh=null;for(let q=ltr;q>=1&&!lsh;q--){lnm='anim-lantern-'+q;lsh=sheet(lnm);}
+  if(lsh||ok('fener')){const h0=clamp(zoom*1.75,64,120),h=lsh?h0*LAN_K[+lnm.slice(-1)]:h0,top=cy-h*.56+Math.sin(t*1.2)*1.2;
+    const [N,fw,fh]=lsh?ANIM[lnm]:[1,IMG.fener.width,IMG.fener.height],w=h*fw/fh;
+    for(const e of FX){if(e.i!==-1||e.k!=='halka')continue;const age=t-e.t,ri=sheet('anim-fx-halka');if(age>1.6||!ri)continue;
+      const [RN,rfw,rfh]=ANIM['anim-fx-halka'],rw=h0*1.3,a=Math.min(1,age*5,(1.6-age)*2.5);ctx.save();ctx.globalAlpha=a;ctx.globalCompositeOperation='lighter';
+      ctx.drawImage(ri,(Math.floor(age*12)%RN)*rfw,0,rfw,rfh,cx-rw/2,top+h*.97-rw*.22,rw,rw*.44);ctx.restore();}
+    ctx.fillStyle='rgba(0,0,0,.55)';ctx.beginPath();ctx.ellipse(cx,top+h*.99,h0*.19,h0*.05,0,0,TAU);ctx.fill();
+    if(lsh)ctx.drawImage(lsh,(Math.floor(t*10)%N)*fw,0,fw,fh,cx-w/2,top,w,h);else ctx.drawImage(IMG.fener,cx-w/2,top,w,h);
+    for(const e of FX){if(e.i!==-1||e.k!=='patlama')continue;const pi=sheet('anim-fx-patlama'),[PN,pfw,pfh]=ANIM['anim-fx-patlama'],f=Math.floor((t-e.t)*12);if(!pi||f>=PN)continue;
+      const ph=h0*1.9,pw=ph*pfw/pfh;ctx.drawImage(pi,f*pfw,0,pfw,pfh,cx-pw/2,top+h0*1.02-ph,pw,ph);}
     ctx.globalCompositeOperation='lighter';const g=h*(.85+.25*flare);ctx.globalAlpha=.28+.3*(fl-.9)*4;ctx.drawImage(glow('#e0a050'),cx-g/2,top+h*.6-g/2,g,g);
     ctx.globalAlpha=1;ctx.globalCompositeOperation='source-over';}
   else drawLantern(cx,cy,clamp(zoom*.7,26,48),fl,t);
@@ -629,7 +638,7 @@ function specsFor(){
   if(tab==='fener'){
     out.push({icon:'<img src="assets/ikon-fitil.webp" alt="">',
       tt:()=>`Fitil <i>${run.fitil}</i>`,sb:()=>{const a=R(),L=run.fitil+1,b=1+L*1.2+L*L*.06;return`Işık <b>${a.toFixed(1)} → ${b.toFixed(1)}</b> adıma ulaşır. Işık büyüdükçe gece de sertleşir.`;},
-      can:()=>S.kor>=fitilCost(),buy:()=>{S.kor-=fitilCost();run.fitil++;},bt:()=>`Uzat<small>${fmt(fitilCost())}</small>`});
+      can:()=>S.kor>=fitilCost(),buy:()=>{const o=lanTier(run.fitil);S.kor-=fitilCost();run.fitil++;if(lanTier(run.fitil)>o){fx(-1,'patlama');toast('FENER','Alev güçlendi. Fener yeni bir biçime büründü.');}fx(-1,'halka');},bt:()=>`Uzat<small>${fmt(fitilCost())}</small>`});
     out.push({icon:'<img src="assets/ikon-sur.webp" alt="">',
       tt:()=>`Sur <i>${run.sur}</i>`,sb:()=>`Savunma <b>${fmt(defBase(run.sur))} → ${fmt(defBase(run.sur+1))}</b>. Sıradaki gecenin gücü <b>${fmt(waveStr(run.waveN))}</b>.`,
       can:()=>S.kor>=surCost(),buy:()=>{S.kor-=surCost();run.sur++;},bt:()=>`Ör<small>${fmt(surCost())}</small>`});
