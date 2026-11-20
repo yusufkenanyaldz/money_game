@@ -22,6 +22,10 @@ canvas{display:block;width:100%;height:100%}
 .row{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;width:min(100%,460px)}
 .row button{font:inherit;font-size:14px;letter-spacing:.08em;color:var(--ink);background:rgba(20,33,61,.7);border:1px solid rgba(201,162,74,.55);border-radius:4px;padding:9px 14px;cursor:pointer}
 .row button.on{background:linear-gradient(180deg,#2a4a82,#1d3461);border-color:var(--gold2);color:#fff}
+.sfx{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;width:min(100%,460px);margin-top:12px}
+.sfx button{font:inherit;font-size:12px;color:var(--dim);background:none;border:1px solid rgba(201,162,74,.35);border-radius:4px;padding:6px 9px;cursor:pointer}
+.sfx b{width:100%;text-align:center;font-weight:400;font-size:12px;letter-spacing:.2em;color:var(--gold)}
+#snd{margin-top:10px}
 .note{margin-top:14px;font-size:12.5px;color:var(--dim);font-style:italic;text-align:center;max-width:440px;line-height:1.5}
 </style>
 </head>
@@ -30,6 +34,8 @@ canvas{display:block;width:100%;height:100%}
 <p class="sub">Birinci makam · yolun başındaki yolcu</p>
 <div class="frame"><canvas id="c"></canvas></div>
 <div class="row" id="btns"></div>
+<div class="row" id="snd"><button id="sesBtn">🔇 Ses kapalı</button></div>
+<div class="sfx" id="sfx"><b>TEK TEK SESLER</b></div>
 <p class="note">Hareketler senin videolarından üretildi: 15 kare/sn, şeffaf zemin. Oyunda karakter bu boyutta ve bu sahne tonunda görünecek.</p>
 <script>
 'use strict';
@@ -40,6 +46,17 @@ const IMG={};for(const [k] of LIST){const i=new Image();i.src=AURL('anim-garip-'
 let cur='bekle',t0=performance.now();
 const box=document.getElementById('btns');
 for(const [k,n] of LIST){const b=document.createElement('button');b.textContent=n;b.onclick=()=>{cur=k;t0=performance.now();for(const x of box.children)x.classList.toggle('on',x===b);};if(k===cur)b.classList.add('on');box.appendChild(b);}
+const SURL=n=>'assets/ses/'+n+'.mp3';
+const TEK=["adim-1", "adim-2", "adim-3", "adim-4", "adim-5", "adim2-1", "adim2-2", "adim2-3", "adim2-4", "kosu-adim-1", "kosu-adim-2", "kosu-adim-3", "kosu-adim-4", "kosu-adim-5", "kosu-adim-6", "yumruk-1", "yumruk-2", "yumruk-3", "yumruk-4", "yumruk-5", "kacin-1", "durus-1", "durus-2"];
+let AC=null,sesOn=false,src=null;const BUF={};
+async function buf(n){if(BUF[n])return BUF[n];const r=await fetch(SURL(n));const a=await r.arrayBuffer();return BUF[n]=await AC.decodeAudioData(a);}
+async function playLoop(){if(src){try{src.stop();}catch(e){}src=null;}if(!sesOn)return;const b=await buf('dongu-'+cur);src=AC.createBufferSource();src.buffer=b;src.loop=true;src.connect(AC.destination);
+  const off=((performance.now()-t0)/1000)%2.4;src.start(0,off);}
+async function playOne(n){if(!AC)AC=new (window.AudioContext||window.webkitAudioContext)();const s=AC.createBufferSource();s.buffer=await buf(n);s.connect(AC.destination);s.start();}
+document.getElementById('sesBtn').onclick=async e=>{if(!AC)AC=new (window.AudioContext||window.webkitAudioContext)();await AC.resume();sesOn=!sesOn;e.target.textContent=sesOn?'🔊 Ses açık':'🔇 Ses kapalı';playLoop();};
+for(const b of box.children)b.addEventListener('click',()=>playLoop());
+{const sx=document.getElementById('sfx');const NM={adim:'Adım','adim2':'Adım II','kosu-adim':'Koşu adımı',yumruk:'Yumruk',kacin:'Kaçınma',durus:'Duruş'};
+ for(const n of TEK){const b=document.createElement('button');const k=n.replace(/-\d+$/,'');b.textContent=(NM[k]||k)+' '+n.match(/\d+$/)[0];b.onclick=()=>playOne(n);sx.appendChild(b);}}
 const cv=document.getElementById('c'),ctx=cv.getContext('2d');
 function frame(now){
   const r=cv.getBoundingClientRect(),d=Math.min(2,devicePixelRatio||1);
