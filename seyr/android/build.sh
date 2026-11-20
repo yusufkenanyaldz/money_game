@@ -16,7 +16,7 @@ P
 fi
 CP="$T/lib/*"
 # 1) oyun dosyaları
-mkdir -p "$W/assets" && cp ../index.html ../defter.js "$W/assets/" && cp -r ../assets "$W/assets/assets"
+mkdir -p "$W/assets" && cp ../index.html ../defter.js ../savas.js "$W/assets/" && cp -r ../assets "$W/assets/assets"
 # 2) simge
 python3 icon.py "$W/res"
 cp -r res/values "$W/res/"

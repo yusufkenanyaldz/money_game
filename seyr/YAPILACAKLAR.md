@@ -50,7 +50,10 @@ Her görünüm için gereken hareketler (Garip'tekilerle aynı): bekleme, yürü
 - [ ] Her canavar için hareketler: bekleme, yürüme, saldırı, darbe alma, yenilme.
 
 ## 5. Mekanikler
-- [ ] Savaş: can, hasar, isabet, darbe alma, emanetlerin canavarlara karşı gücü.
+- [x] Savaş altyapısı (`savas.js`): oyuncu canı (seviye + Cevher), düşman yapay zekâsı (yaklaş → hazırlan → saldır → dinlen), kaçınmada dokunulmazlık, sendeleme kuralı, aynı anda tek saldıran, dalgalar, 5. dalgada Kızıl Dev, Seher Çiyi canavarına karşı +%25/çiy, düşme ve yeniden doğma.
+- [ ] Düşmanların gerçek görselleri (şu an kodla çizilmiş gölgeler)
+- [ ] Karakterin darbe alma / düşme animasyonu (şu an yanıp sönme)
+- [ ] Bölge ve seviyeye göre canavar kilidi (Kızıl Dev ancak uygun makamda)
 - [x] Seviye (1–100, eğri: ~240 tecrübe/gün ile ~1 yıl) ve 4 güç (Kut, Hikmet, Alp, Cevher) — `defter.js`
 - [x] Yıldız Defteri + Seher Çiyi (itiraf da aynı tecrübeyi verir; ayrıca çiy)
 - [x] Devamlılık serisi (+%2/gün, en çok +%50; boş gün seriyi yarıya indirir)
