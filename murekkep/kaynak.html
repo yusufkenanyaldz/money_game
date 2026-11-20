@@ -98,6 +98,9 @@
     <!-- Ekran Kenarı Efekt Çerçevesi (Fever Modu / Kriz Dalgası) -->
     <div id="screenEffectOverlay" class="fixed inset-0 pointer-events-none z-10 transition-opacity duration-300 opacity-0"></div>
 
+    <!-- Kuruma yaklaşınca alttan kızaran uyarı -->
+    <div id="dangerOverlay" class="fixed inset-0 pointer-events-none z-10" style="opacity:0;background:linear-gradient(to top, rgba(217,56,41,0.6), rgba(217,56,41,0.18) 30%, rgba(217,56,41,0) 55%)"></div>
+
     <!-- Kriz Dalgası (Mühür Fırtınası) Üst Banner -->
     <div id="crisisBanner" class="fixed top-32 left-1/2 -translate-x-1/2 z-20 pointer-events-none hidden">
         <div class="px-4 py-1.5 rounded-full bg-[#991b1b]/95 border-2 border-[#fca5a5] text-white font-calligraphy text-xs sm:text-sm font-black tracking-widest shadow-xl flex items-center gap-2">
@@ -417,14 +420,14 @@
                 mult: 1.0,
                 badge: 'ÇIRAK 1.0x',
                 desc: 'Standart hız, bol mürekkep ve affedici kenar sekmesi.',
-                burnBaseSpeed: 28,
-                burnMaxSpeed: 65,
+                burnBaseSpeed: 55,
+                burnMaxSpeed: 130,
                 porcelainTime: 1.55,
                 sealDensity: 0.34,
                 movingSealChance: 0.25,
                 spikyWalls: false,
                 headwindChance: 0.0,
-                bulletTimeScale: 0.20,
+                bulletTimeScale: 0.30,
                 color: '#15803d'
             },
             {
@@ -433,14 +436,14 @@
                 mult: 1.5,
                 badge: 'USTA 1.5x',
                 desc: 'Hızlanan kağıt kuruması çizgisi, hareketli mühürler ve dikenli duvarlar.',
-                burnBaseSpeed: 48,
-                burnMaxSpeed: 105,
+                burnBaseSpeed: 75,
+                burnMaxSpeed: 160,
                 porcelainTime: 1.15,
                 sealDensity: 0.50,
                 movingSealChance: 0.52,
                 spikyWalls: true,
                 headwindChance: 0.12,
-                bulletTimeScale: 0.25,
+                bulletTimeScale: 0.36,
                 color: '#b88014'
             },
             {
@@ -449,14 +452,14 @@
                 mult: 2.2,
                 badge: 'B.HATTAT 2.2x',
                 desc: 'Kısıtlı ağır çekim, ikili mühür zincirleri, 0.8s porselen ömrü.',
-                burnBaseSpeed: 68,
-                burnMaxSpeed: 140,
+                burnBaseSpeed: 95,
+                burnMaxSpeed: 190,
                 porcelainTime: 0.80,
                 sealDensity: 0.65,
                 movingSealChance: 0.68,
                 spikyWalls: true,
                 headwindChance: 0.24,
-                bulletTimeScale: 0.36,
+                bulletTimeScale: 0.45,
                 color: '#d93829'
             },
             {
@@ -465,14 +468,14 @@
                 mult: 3.5,
                 badge: 'KABUS 3.5x',
                 desc: 'Ekstrem kuruma hızı, devriye bekçi mühürleri ve ters rüzgar akımları!',
-                burnBaseSpeed: 92,
-                burnMaxSpeed: 185,
+                burnBaseSpeed: 120,
+                burnMaxSpeed: 230,
                 porcelainTime: 0.62,
                 sealDensity: 0.80,
                 movingSealChance: 0.85,
                 spikyWalls: true,
                 headwindChance: 0.38,
-                bulletTimeScale: 0.45,
+                bulletTimeScale: 0.55,
                 color: '#7f1d1d'
             }
         ];
@@ -535,7 +538,7 @@
                 icon: '🎯',
                 maxLvl: 3,
                 basePrice: 50,
-                desc: 'Nişan yayını seviye başına %25 uzatır; hokka yakalama alanını ve varak çekimini büyütür.'
+                desc: 'Kısa nişan yayını uzatır (3. seviyede yayın tamamı görünür); hokka yakalama alanını ve varak çekimini büyütür.'
             },
             {
                 id: 'combo_alchemist',
@@ -543,7 +546,7 @@
                 icon: '⚗️',
                 maxLvl: 3,
                 basePrice: 65,
-                desc: 'Kombo süresini 4,5 sn\'den 7 / 9,5 / 12 sn\'ye uzatır; her 5x komboda rastgele tılsım verir.'
+                desc: 'Kombo süresini 3,2 sn\'den 5,2 / 7,2 / 9,2 sn\'ye uzatır; her 5x komboda rastgele tılsım verir.'
             },
             {
                 id: 'unbreakable_porcelain',
@@ -904,6 +907,29 @@
                     gain.connect(this.ctx.destination);
                     osc.start();
                     osc.stop(this.ctx.currentTime + 0.28);
+                } catch (e) {}
+            }
+
+            /* Kalp atışı (lub-dub): kuruma yaklaştıkça hızlanır ve güçlenir */
+            playHeartbeat(intensity = 0.5) {
+                if (!this.enabled) return;
+                try {
+                    this.init();
+                    [0, 0.15].forEach((delay, i) => {
+                        const t = this.ctx.currentTime + delay;
+                        const osc = this.ctx.createOscillator();
+                        const gain = this.ctx.createGain();
+                        osc.type = 'sine';
+                        osc.frequency.setValueAtTime(i ? 52 : 64, t);
+                        osc.frequency.exponentialRampToValueAtTime(34, t + 0.14);
+                        gain.gain.setValueAtTime(0.0001, t);
+                        gain.gain.exponentialRampToValueAtTime((i ? 0.22 : 0.36) * (0.4 + intensity * 0.6), t + 0.015);
+                        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.16);
+                        osc.connect(gain);
+                        gain.connect(this.ctx.destination);
+                        osc.start(t);
+                        osc.stop(t + 0.17);
+                    });
                 } catch (e) {}
             }
 
@@ -1524,7 +1550,7 @@
         let crisisTimer = 0;
         let nextCrisisAlt = 250;
 
-        // Fever Modu (8x Komboda Mürekkep Taşkını)
+        // Fever Modu (10x Komboda Mürekkep Taşkını)
         let feverTimer = 0;
 
         const GRAVITY = 850;
@@ -1815,7 +1841,7 @@
                     y: highestGenY,
                     type,
                     radius: 17,
-                    captureRadius: 44 + captureBonus,
+                    captureRadius: 34 + captureBonus,
                     crackTimer: 0,
                     maxCrackTime: maxCrack,
                     shattered: false,
@@ -1870,9 +1896,9 @@
                     const roll = Math.random();
                     let kind = 'gold';
                     if (roll < 0.24) kind = 'ink_orb';
-                    else if (roll < 0.31) kind = 'shield';
-                    else if (roll < 0.38) kind = 'dragon';
-                    else if (roll < 0.45) kind = 'magnet';
+                    else if (roll < 0.27) kind = 'shield';
+                    else if (roll < 0.30) kind = 'dragon';
+                    else if (roll < 0.34) kind = 'magnet';
 
                     collectibles.push({
                         id: nextId++,
@@ -1929,7 +1955,7 @@
                 y: startY,
                 type: 'stone',
                 radius: 20,
-                captureRadius: 48 + sharpLvl * 9,
+                captureRadius: 40 + sharpLvl * 9,
                 crackTimer: 0,
                 maxCrackTime: 1.5,
                 shattered: false,
@@ -2072,6 +2098,7 @@
             crisisTimer = 0;
             feverTimer = 0;
 
+            setDangerOpacity(0);
             sfx.playImpact(false);
             triggerShake(11, 0.32);
             spawnInkSplash(drop.x, drop.y, getActiveSkin().main, 26, 1.3);
@@ -2175,7 +2202,7 @@
             if (drop.latchedNode || drop.infInkTimer > 0 || drop.chronoTimer > 0 || feverTimer > 0) {
                 drag.inkCost = 0;
             } else {
-                drag.inkCost = Math.round(15 + drag.power * 20);
+                drag.inkCost = Math.round(22 + drag.power * 23);
             }
         }
 
@@ -2399,7 +2426,7 @@
                 }
             }
 
-            // Fever Modu (8x Komboda Mürekkep Taşkını!)
+            // Fever Modu (10x Komboda Mürekkep Taşkını!)
             const feverBanner = document.getElementById('feverBanner');
             const crisisBanner = document.getElementById('crisisBanner');
 
@@ -2431,10 +2458,11 @@
 
             // Alttan Yükselen Kağıt Kuruması / Ateş Sınırı
             const altRatio = Math.min(currentScore / 1500, 1);
-            const currentBurnSpeed = lerp(diff.burnBaseSpeed, diff.burnMaxSpeed, altRatio);
+            const currentBurnSpeed = lerp(diff.burnBaseSpeed, diff.burnMaxSpeed, altRatio) * (crisisTimer > 0 ? 1.25 : 1);
             burnLineY -= currentBurnSpeed * rawDt;
-            // Kamera çok yukarı çıktıysa ateş çizgisi ekranın hemen altından takip etsin
-            burnLineY = Math.min(burnLineY, cameraY + height + 30);
+            /* Kuruma hiç geride kalmaz: en yüksek noktanın biraz altından, ekranda görünerek kovalar */
+            burnLineY = Math.min(burnLineY, cameraY + height * 0.52 + Math.max(height * 0.36, 300));
+            updateDanger(rawDt);
 
             drop.wobblePhase += rawDt * 7.5;
             drop.stretchX += (1 - drop.stretchX) * Math.min(1, rawDt * 12);
@@ -2527,16 +2555,16 @@
                     if (col.kind === 'gold') {
                         runGold++;
                         updateQuestProgress('gold', 1);
-                        drop.ink = Math.min(drop.maxInk, drop.ink + 28);
+                        drop.ink = Math.min(drop.maxInk, drop.ink + 15);
                         sfx.playGoldChime();
                         spawnInkSplash(col.x, col.y, '#d49b27', 10, 0.9);
                     } else if (col.kind === 'ink_orb') {
-                        drop.ink = Math.min(drop.maxInk, drop.ink + 45);
+                        drop.ink = Math.min(drop.maxInk, drop.ink + 35);
                         sfx.playKotoNote(3);
                         spawnRipple(col.x, col.y, getActiveSkin().main, 46);
                     } else if (col.kind === 'shield') {
-                        drop.shields++;
-                        drop.ink = drop.maxInk;
+                        drop.shields = Math.min(Math.max(drop.shields, 2), drop.shields + 1); /* yerden en çok 2 kalkan */
+                        drop.ink = Math.min(drop.maxInk, drop.ink + 30);
                         sfx.playGoldChime();
                         spawnRipple(col.x, col.y, '#22c55e', 70);
                         spawnFloatingText(col.x, col.y - 20, '+1 YEŞİM KALKAN 🪷', '#15803d', 14);
@@ -2575,7 +2603,7 @@
                 drop.y += (node.y - drop.y) * Math.min(1, rawDt * 24);
                 drop.vx = 0;
                 drop.vy = 0;
-                drop.ink = Math.min(drop.maxInk, drop.ink + 22 * rawDt);
+                drop.ink = Math.min(drop.maxInk, drop.ink + 12 * rawDt);
             } else {
                 drop.vy += GRAVITY * dt;
                 drop.x += drop.vx * dt;
@@ -2638,16 +2666,30 @@
                     if (node.shattered || node.cooldown > 0) continue;
                     const dist = Math.hypot(drop.x - node.x, drop.y - node.y);
                     if (dist <= node.captureRadius) {
+                        /* Tam isabet: damlanın gidiş çizgisi hokkanın merkezinden 9 pikselden yakın geçiyorsa */
+                        const vlen = Math.hypot(drop.vx, drop.vy);
+                        const miss = vlen > 1 ? Math.abs(drop.vx * (node.y - drop.y) - drop.vy * (node.x - drop.x)) / vlen : dist;
+                        const isNew = drop.lastNodeId !== node.id;
+                        const perfect = isNew && miss < 9;
                         drop.latchedNode = node;
                         drop.vx = 0;
                         drop.vy = 0;
 
-                        if (drop.lastNodeId !== node.id) {
-                            incrementCombo(1);
+                        if (isNew) {
+                            incrementCombo(perfect ? 2 : 1);
                             drop.lastNodeId = node.id;
                         }
+                        if (perfect) {
+                            const h = addHuner(15);
+                            drop.ink = Math.min(drop.maxInk, drop.ink + 15);
+                            hitStopTimer = 0.045;
+                            triggerShake(4, 0.1);
+                            spawnRipple(node.x, node.y, '#d49b27', 95);
+                            spawnInkSplash(node.x, node.y, '#d49b27', 10, 0.8);
+                            spawnFloatingText(node.x, node.y - 30, `TAM İSABET! +${h} hüner`, '#b88014', 15);
+                        }
 
-                        const inkGain = node.type === 'gold' ? 48 : 30;
+                        const inkGain = node.type === 'gold' ? 40 : 22;
                         drop.ink = Math.min(drop.maxInk, drop.ink + inkGain);
                         sfx.playKotoNote(drop.combo, node.type);
                         stampSplatter(node.x, node.y, getActiveSkin().main, 16);
@@ -2776,6 +2818,31 @@
             }
         }
 
+        /* Tehlike: kuruma damlaya yaklaştıkça alt kenar kızarır ve kalp atışı hızlanır */
+        let dangerBeat = 0;
+        let dangerShown = -1;
+        function setDangerOpacity(v) {
+            const q = Math.round(v * 20) / 20;
+            if (q === dangerShown) return;
+            dangerShown = q;
+            document.getElementById('dangerOverlay').style.opacity = q;
+        }
+        function updateDanger(rawDt) {
+            const flying = drop.dragonTimer > 0 || feverTimer > 0;
+            const gap = burnLineY - drop.y;
+            const danger = (gameState !== 'PLAYING' || flying) ? 0 : Math.max(0, Math.min(1, 1 - (gap - 30) / (height * 0.24)));
+            dangerBeat -= rawDt;
+            let pulse = 0;
+            if (danger > 0.05) {
+                if (dangerBeat <= 0) {
+                    sfx.playHeartbeat(danger);
+                    dangerBeat = lerp(0.9, 0.34, danger);
+                }
+                pulse = Math.max(0, dangerBeat / lerp(0.9, 0.34, danger) - 0.6) * 0.5;
+            }
+            setDangerOpacity(Math.min(1, danger * (0.75 + pulse)));
+        }
+
         /* Ekran kenarı efekti: '' (yok), 'fever' (altın) ya da 'crisis' (kırmızı). Yalnızca değişince dokunur. */
         let overlayMode = null;
         function setOverlayMode(mode) {
@@ -2791,7 +2858,7 @@
         function incrementCombo(amount = 1) {
             const alchemistLvl = getRuneLevel('combo_alchemist');
             drop.combo += amount;
-            drop.comboDecayTimer = (4.5 + alchemistLvl * 2.5);
+            drop.comboDecayTimer = (3.2 + alchemistLvl * 2.0);
             maxCombo = Math.max(maxCombo, drop.combo);
             updateQuestProgress('combo', drop.combo, true);
 
@@ -2805,10 +2872,10 @@
                 spawnFloatingText(drop.x, drop.y - 36, '⚗️ SİMYACI TILSIMI KAZANDIN!', '#6d28d9', 13);
             }
 
-            // 8x Komboda FEVER / COŞKU MODU (Mürekkep Taşkını!)
-            if (drop.combo >= 8 && feverTimer <= 0) {
-                feverTimer = 5.0;
-                drop.combo = 1; /* Taşkın komboyu harcar: yeniden 8x'e çıkmadan tekrar gelmez */
+            // 10x Komboda FEVER / COŞKU MODU (Mürekkep Taşkını!)
+            if (drop.combo >= 10 && feverTimer <= 0) {
+                feverTimer = 4.0;
+                drop.combo = 1; /* Taşkın komboyu harcar: yeniden 10x'e çıkmadan tekrar gelmez */
                 sfx.playTaikoDrum();
                 sfx.playGoldChime();
                 triggerShake(10, 0.25);
@@ -3067,7 +3134,7 @@
             // Nişan Yayı (Keskin Nişancı Rünü yay uzunluğunu artırır)
             if (drag.active && drag.power > 0) {
                 const sharpLvl = getRuneLevel('sharpshooter');
-                const dotsCount = 16 + sharpLvl * 4;
+                const dotsCount = 6 + sharpLvl * 3; /* yay yalnızca başlangıcı gösterir; iniş göz kararı */
                 const tensionColor = (!drop.latchedNode && drag.inkCost > 0 && drop.ink < drag.inkCost) ? '#d93829' : activeInk.main;
 
                 for (let i = 1; i <= dotsCount; i++) {
@@ -3176,21 +3243,37 @@
 
             // Alttan Yükselen Kağıt Kuruması / Ateş Sınırı Görseli
             if (gameState === 'PLAYING') {
-                const burnGrad = ctx.createLinearGradient(0, burnLineY - 45, 0, burnLineY + 60);
-                burnGrad.addColorStop(0, 'rgba(217, 56, 41, 0)');
-                burnGrad.addColorStop(0.55, 'rgba(217, 56, 41, 0.35)');
-                burnGrad.addColorStop(1, 'rgba(20, 19, 18, 0.92)');
-                ctx.fillStyle = burnGrad;
-                ctx.fillRect(0, burnLineY - 45, width, 160);
+                /* Kıpırdayan kor kenarı; altı ekranın sonuna kadar yanmış kâğıt */
+                const tt = performance.now() / 1000;
+                const edgeY = x => burnLineY + Math.sin(x * 0.07 + tt * 5) * 3.5 + Math.sin(x * 0.19 - tt * 3.3) * 2;
+                const bottom = cameraY + height + 20;
+                const glow = ctx.createLinearGradient(0, burnLineY - 70, 0, burnLineY);
+                glow.addColorStop(0, 'rgba(217, 56, 41, 0)');
+                glow.addColorStop(1, 'rgba(234, 88, 12, 0.38)');
+                ctx.fillStyle = glow;
+                ctx.fillRect(0, burnLineY - 70, width, 70);
 
-                ctx.strokeStyle = '#ef4444';
-                ctx.lineWidth = 2.5;
-                ctx.setLineDash([8, 6]);
                 ctx.beginPath();
-                ctx.moveTo(0, burnLineY);
-                ctx.lineTo(width, burnLineY);
+                ctx.moveTo(0, edgeY(0));
+                for (let x = 12; x <= width + 12; x += 12) ctx.lineTo(x, edgeY(x));
+                ctx.lineTo(width, bottom);
+                ctx.lineTo(0, bottom);
+                ctx.closePath();
+                const ash = ctx.createLinearGradient(0, burnLineY, 0, burnLineY + 90);
+                ash.addColorStop(0, 'rgba(60, 18, 10, 0.94)');
+                ash.addColorStop(1, 'rgba(20, 19, 18, 0.97)');
+                ctx.fillStyle = ash;
+                ctx.fill();
+
+                ctx.beginPath();
+                ctx.moveTo(0, edgeY(0));
+                for (let x = 12; x <= width + 12; x += 12) ctx.lineTo(x, edgeY(x));
+                ctx.strokeStyle = '#f97316';
+                ctx.lineWidth = 3;
+                ctx.shadowColor = '#ef4444';
+                ctx.shadowBlur = 12;
                 ctx.stroke();
-                ctx.setLineDash([]);
+                ctx.shadowBlur = 0;
             }
 
             ctx.restore();
