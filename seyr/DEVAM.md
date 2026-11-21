@@ -39,6 +39,12 @@ Canavarlar nefsin huylarıdır. **Oyun içinde ameller açıkça yazılmaz**, ef
 - `android/` — APK: `KEYSTORE=... KEYPASS=... VCODE=n VNAME=x ./build.sh cikti.apk`. Araçlar (aapt2, smali, apksig) Maven Central'dan otomatik iner. Paket `com.seyr.oyun`, yatay kilitli.
   Kabuk `MainActivity.java` (WebView + adım sensörü köprüsü `SeyrAndroid`). Derleme: `javac --release 8` (Robolectric `android-all` imzalarına karşı) → `dalvik-dx`. Araçlar `android/.tools/` içine iner (gitignore'da).
 
+## GitHub'da derleme
+`.github/workflows/seyr-apk.yml`: `seyr/` her değiştiğinde GitHub Actions APK derler (aynı `build.sh`).
+Depo sırları **SEYR_KEYSTORE_B64** (seyr.p12'nin base64'ü) ve **SEYR_KEYPASS** varsa asıl anahtarla imzalar ve
+**Release** olarak yayınlar (`seyr-v1.13.<n>`); yoksa geçici anahtarla deneme APK'sı (telefona kurulmaz) Actions sayfasında kalır.
+Sürüm kodu = 100 + çalıştırma numarası. Elle derlenecekse VCODE bundan büyük olmalı, yoksa telefona üstüne kurulmaz.
+
 ## İmza anahtarı
 `seyr.p12` (alias `seyr`) ve şifresi **kullanıcıda**, repoda yok. Yeni APK gerekince kullanıcıdan dosyayı ve şifreyi iste;
 aynı anahtar olmazsa güncelleme eskisinin üstüne kurulmaz. Son sürüm: **1.13 (VCODE 14)** — Er (20+) ve Alp (30+) görünümleri; darbe/yenilme/zafer; bekle↔yürü köprüleri; adım fazı görüntüden. Önceki: **1.12 (VCODE 13)** — video sesleri ilk kez gerçekten çalıyor (isim çakışması), kırpılmış WAV. Önceki: **1.11 (VCODE 12)** — oyun ekranında geçici görünüm düğmesi (GARİP/YOLCU, DEFTER'in solunda; `gorBtn`, sonra kaldırılacak).
