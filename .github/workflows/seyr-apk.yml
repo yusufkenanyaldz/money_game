@@ -1,0 +1,77 @@
+# Seyr APK: seyr/ klasöründe her değişiklikte APK derler.
+#  - Depo sırlarında SEYR_KEYSTORE_B64 (seyr.p12'nin base64 hali) ve SEYR_KEYPASS varsa APK asıl anahtarla imzalanır
+#    ve bir Release olarak yayınlanır: telefondaki uygulamanın üstüne kurulur, kayıtlar silinmez.
+#  - Sırlar yoksa yalnızca derlemenin çalıştığı denenir (geçici anahtar; bu APK telefondakinin üstüne KURULMAZ).
+name: Seyr APK
+
+on:
+  push:
+    paths: ['seyr/**', '.github/workflows/seyr-apk.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Pillow (simge için)
+        run: pip install --quiet pillow
+
+      - name: Derleme araçları önbelleği
+        uses: actions/cache@v4
+        with:
+          path: seyr/android/.tools
+          key: seyr-tools-${{ hashFiles('seyr/android/build.sh') }}
+
+      - name: İmza anahtarı
+        env:
+          KS: ${{ secrets.SEYR_KEYSTORE_B64 }}
+        run: |
+          if [ -n "$KS" ]; then
+            echo "$KS" | base64 -d > "$RUNNER_TEMP/seyr.p12"
+            echo "IMZA=asil" >> "$GITHUB_ENV"
+          else
+            echo "::warning::SEYR_KEYSTORE_B64 sırrı yok: geçici anahtarla deneme derlemesi yapılıyor (telefona kurulmaz)."
+            keytool -genkeypair -alias seyr -keyalg RSA -keysize 2048 -validity 30 -storetype PKCS12 \
+              -keystore "$RUNNER_TEMP/seyr.p12" -storepass deneme123 -keypass deneme123 -dname "CN=Seyr deneme"
+            echo "IMZA=deneme" >> "$GITHUB_ENV"
+          fi
+
+      - name: APK derle
+        env:
+          KP: ${{ secrets.SEYR_KEYPASS }}
+        run: |
+          VCODE=$((100 + ${{ github.run_number }}))
+          VNAME="1.13.${{ github.run_number }}"
+          if [ "$IMZA" = asil ]; then PASS="$KP"; else PASS=deneme123; fi
+          KEYSTORE="$RUNNER_TEMP/seyr.p12" KEYPASS="$PASS" VCODE=$VCODE VNAME=$VNAME \
+            ./seyr/android/build.sh "$PWD/Seyr-$VNAME.apk"
+          echo "VNAME=$VNAME" >> "$GITHUB_ENV"
+
+      - name: APK'yı sakla (Actions sayfasından indirilir)
+        uses: actions/upload-artifact@v4
+        with:
+          name: Seyr-${{ env.VNAME }}-${{ env.IMZA }}
+          path: Seyr-*.apk
+
+      - name: Release olarak yayınla (yalnızca asıl anahtarla)
+        if: env.IMZA == 'asil'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: seyr-v${{ env.VNAME }}
+          name: Seyr ${{ env.VNAME }}
+          target_commitish: ${{ github.sha }}
+          prerelease: true
+          files: Seyr-*.apk
+          body: |
+            Seyr ${{ env.VNAME }} — `${{ github.ref_name }}` dalı, ${{ github.sha }}.
+            Telefona indirip kurun; eski sürümün üstüne kurulur, kayıtlar silinmez.
