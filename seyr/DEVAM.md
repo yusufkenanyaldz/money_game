@@ -16,12 +16,17 @@ Canavarlar nefsin huylarıdır. **Oyun içinde ameller açıkça yazılmaz**, ef
 - Kitap ölçüsü: **10 sayfa = 30 dakika** (Risale-i Nur okuyor).
 - Boyut/RAM sorun değil (12 GB RAM'li Samsung).
 
+## Dal
+Tüm Seyr işi `ccr-1c90c77b-uxvoi0` dalında (**main dalında YOK**). Yeni sohbette önce:
+`git fetch origin ccr-1c90c77b-uxvoi0 && git checkout ccr-1c90c77b-uxvoi0`
+
 ## Dosyalar
 - `index.html` — oyun: manzara, karakter, joystick, VUR/KAÇIN, animasyon geçişleri (çapraz geçiş, ivme).
 - `defter.js` — emanetler, zikirmatik, Yıldız Defteri + Seher Çiyi, seviye/güçler/seri, geçmiş gün, yedek kodu.
 - `savas.js` — savaş altyapısı (düşman durum makinesi, can, dalgalar, Kızıl Dev). Düşmanlar şimdilik kodla çizilmiş gölge.
 - `sesler.js` — sentez sesler (davul, Hicaz kanun teli, hırıltı, rüzgâr).
 - `vitrin.html` — karakter hareket vitrini.
+- `ses-dinle.html` — sentez sesleri tek tek dinleme sayfası.
 - `assets/anim-garip-*.webp` — Garip'in 8 hareketi (ızgara kare şeridi: [kare sayısı, kare genişliği, yükseklik, sütun, kaynak boy] index.html'deki ANIM içinde).
 - `assets/ses/` — videolardan kesilmiş sesler + `ses.js` (WebView'de fetch engelli olduğu için sesler script olarak gömülü).
 - `animasyon-isle.py` — videodan kare şeridi: magenta temizleme, **doğal döngü noktası** bulma (harmanlama yok). İçindeki dosya yolları önceki oturuma ait; yeniden kullanırken `U`, `T`, `O` yollarını ve `V` listesini güncelle.
