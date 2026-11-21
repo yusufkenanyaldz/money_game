@@ -41,8 +41,11 @@ canvas{position:fixed;inset:0;display:block}
 <script>
 'use strict';
 /* ---------- VARLIKLAR ---------- */
-const ANIM={"anim-garip-durus": [63, 320, 420, 6, 838], "anim-garip-yuru": [56, 231, 420, 6, 802], "anim-garip-yumruk": [30, 346, 420, 6, 800], "anim-garip-arka": [32, 170, 420, 6, 808], "anim-garip-kos": [29, 297, 420, 6, 790], "anim-garip-bekle": [36, 186, 420, 6, 806], "anim-garip-kacin": [30, 265, 420, 6, 792], "anim-garip-yuru2": [30, 246, 420, 6, 800]};
-const FACE={bekle:-1,yuru:-1,yuru2:1,kos:1,durus:-1,yumruk:-1,kacin:-1,arka:1};   // görselin baktığı yön
+const ANIM={"anim-garip-durus": [63, 320, 420, 6, 838], "anim-garip-yuru": [56, 231, 420, 6, 802], "anim-garip-yumruk": [30, 346, 420, 6, 800], "anim-garip-arka": [32, 170, 420, 6, 808], "anim-garip-kos": [29, 297, 420, 6, 790], "anim-garip-bekle": [36, 186, 420, 6, 806], "anim-garip-kacin": [30, 265, 420, 6, 792], "anim-garip-yuru2": [30, 246, 420, 6, 800], "anim-garip-gkosdur": [34, 328, 420, 6, 815]};
+const FACE={bekle:-1,yuru:-1,yuru2:1,kos:1,durus:-1,yumruk:-1,kacin:-1,arka:1,gkosdur:1};   // görselin baktığı yön
+/* Köprü klipler (gecis-isle.py → gecis.json). giris: kaynak döngünün her karesine en benzeyen giriş karesi;
+   cikis: bitince hedef döngünün başlanacak karesi; dur: ayakların durduğu kare; kay: baş hizası (kaynak px, başta→sonda) */
+const GECIS={gkosdur:{giris:[5, 11, 11, 11, 11, 5, 6, 6, 6, 5, 5, 11, 0, 11, 5, 11, 6, 6, 5, 5, 11, 11, 0, 11, 5, 6, 6, 6, 5],cikis:1,dur:29,hedef:'bekle',hiz:1.3,kay:[-59.7,35.1]}};
 const AURL=n=>'assets/'+n+'.webp',SURL=n=>(window.SES&&SES[n])||'assets/ses/'+n+'.mp3';
 const IMG={};for(const k in FACE){const i=new Image();i.src=AURL('anim-garip-'+k);IMG[k]=i;}
 const SFX={adim:['adim-1','adim-2','adim-3','adim-4','adim-5'],kos:['kosu-adim-1','kosu-adim-2','kosu-adim-3','kosu-adim-4','kosu-adim-5','kosu-adim-6'],
@@ -89,14 +92,15 @@ function input(){let x=0,y=0;
 
 /* ---------- EYLEMLER ---------- */
 function setSt(s){if(P.st===s)return;
-  const one=x=>x==='yumruk'||x==='kacin';
+  const one=x=>x==='yumruk'||x==='kacin'||!!GECIS[x];
   P.prev={st:P.st,f:curFrame(),face:P.face,t0:performance.now(),one:one(P.st),rate:P.st==='kos'||P.st==='yuru'?Math.max(.75,P.rate||1):1};P.blend=0;
   // geçiş süresi: vuruşa hızlı, duruşa yumuşak
-  P.bdur=s==='yumruk'?.11:s==='kacin'?.1:(s==='bekle'&&(P.prev.st==='kos'||P.prev.st==='yuru'))?.22:.16;
+  P.bdur=s==='yumruk'?.11:s==='kacin'?.1:GECIS[s]?.13:(s==='bekle'&&(P.prev.st==='kos'||P.prev.st==='yuru'))?.22:.16;
   // yürüme <-> koşma arasında adım fazını koru
   const loop=x=>x==='yuru'||x==='kos'||x==='yuru2';P.ph=(loop(s)&&loop(P.prev.st))?P.ph:0;P.st=s;P.t=0;}
 function curFrame(){const N=ANIM['anim-garip-'+P.st][0];
-  if(P.st==='yumruk')return Math.min(PUNCH.to,PUNCH.from+Math.floor(P.t*PUNCH.fps));if(P.st==='kacin')return Math.min(N-1,Math.floor(P.t*15*1.4));
+  if(P.st==='yumruk')return Math.min(PUNCH.to,PUNCH.from+Math.floor(P.t*PUNCH.fps));
+  if(GECIS[P.st])return Math.min(N-1,P.gf0+Math.floor(P.t*15*GECIS[P.st].hiz));if(P.st==='kacin')return Math.min(N-1,Math.floor(P.t*15*1.4));
   return Math.floor(P.ph)%N;}
 function attack(){if(P.act>0||P.hurtT>0||P.hp<=0)return;setSt('yumruk');P.act=(PUNCH.to-PUNCH.from+1)/PUNCH.fps;P.hitDone=false;P.vx*=.35;}
 function dodge(){if((P.act>0&&P.st!=='yumruk')||P.hurtT>0||P.hp<=0)return;setSt('kacin');P.act=.6;play('kac',.9);}
@@ -113,6 +117,15 @@ function update(dt){
       if(window.SAVAS)SAVAS.vurus();}
     if(P.act<=0)setSt('bekle');
   }else{
+    const G=GECIS[P.st];
+    if(G&&m<=.12){                                 // köprü klip oynuyor ve oyuncu durmak istiyor
+      const f=curFrame(),N=ANIM['anim-garip-'+P.st][0],p=clamp((f-P.gf0)/Math.max(1,G.dur-P.gf0),0,1);
+      P.vx=P.gv0*Math.pow(1-p,1.6);P.vy=P.gvy0*Math.pow(1-p,1.6);
+      if(f>=N-1){const c=G.cikis;setSt(G.hedef);P.ph=c;P.vx=0;P.vy=0;}
+      P.stepT-=dt*Math.min(1.2,Math.abs(P.vx)/RUN+.3);if(P.stepT<=0&&p<1){P.stepT=.3;play('kos',.45*(1-p)+.1);}
+    }else if(P.st==='kos'&&m<=.12&&Math.abs(P.vx)>RUN*.6){   // koşudan fren: o anki adıma en yakın kareden gir
+      const k=curFrame(),G2=GECIS.gkosdur;setSt('gkosdur');P.gf0=G2.giris[k%G2.giris.length];P.gv0=P.vx;P.gvy0=P.vy;
+    }else{
     const run=m>.85,tvx=m>.12?ix*(run?RUN:WALK):0,tvy=m>.12?iy*(run?.55:.35):0;
     const acc=m>.12?7:6.5;                       // hızlanma / yavaşlama
     P.vx+=(tvx-P.vx)*Math.min(1,acc*dt);P.vy+=(tvy-P.vy)*Math.min(1,acc*dt);
@@ -120,6 +133,7 @@ function update(dt){
     const sp=Math.abs(P.vx)+Math.abs(P.vy)*400;
     if(sp>WALK*1.35)setSt('kos');else if(sp>40||m>.12)setSt('yuru');else{setSt('bekle');P.vx=0;P.vy=0;P.stepT=.1;}
     if(P.st!=='bekle'){P.stepT-=dt*Math.min(1.2,sp/(P.st==='kos'?RUN:WALK));if(P.stepT<=0){P.stepT=P.st==='kos'?.26:.42;play(P.st==='kos'?'kos':'adim',P.st==='kos'?.55:.45);}}
+    }
   }
   P.x+=P.vx*dt;P.y=clamp(P.y+P.vy*dt,0,1);
   // animasyon hızı hareket hızına bağlı: yavaşlarken adımlar da yavaşlar
@@ -171,7 +185,8 @@ function dummy(d){const s=scaleAt(d.y),x=d.x-camX+W/2,y=yScr(d.y),sh=Math.sin(pe
 function sprite(st,f,face,alpha){const n='anim-garip-'+st,[N,fw,fh,C,src]=ANIM[n],im=IMG[st];if(!im.complete||!im.naturalWidth)return;
   const s=scaleAt(P.y),h=H*.4*s*src/806,w=h*fw/fh,x=P.x-camX+W/2,y=yScr(P.y);f=Math.max(0,Math.min(N-1,f));
   ctx.save();ctx.globalAlpha=alpha;ctx.translate(x,y);if(FACE[st]!==face)ctx.scale(-1,1);
-  ctx.drawImage(im,(f%C)*fw,Math.floor(f/C)*fh,fw,fh,-w/2,-h*.985,w,h);ctx.restore();}
+  const G=GECIS[st],dx=G?(G.kay[0]+(G.kay[1]-G.kay[0])*f/Math.max(1,N-1))*h/src:0;
+  ctx.drawImage(im,(f%C)*fw,Math.floor(f/C)*fh,fw,fh,-w/2+dx,-h*.985,w,h);ctx.restore();}
 function hero(){if(P.inv>0&&Math.floor(performance.now()/70)%2)return;const s=scaleAt(P.y),x=P.x-camX+W/2,y=yScr(P.y),h=H*.4*s;
   ctx.fillStyle='rgba(40,30,10,.3)';ctx.beginPath();ctx.ellipse(x,y,h*.17,h*.035,0,0,7);ctx.fill();
   const k=P.blend*P.blend*(3-2*P.blend);          // yumuşak eğri

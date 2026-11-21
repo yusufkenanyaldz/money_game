@@ -26,13 +26,15 @@ Canavarlar nefsin huylarıdır. **Oyun içinde ameller açıkça yazılmaz**, ef
 - `assets/ses/` — videolardan kesilmiş sesler + `ses.js` (WebView'de fetch engelli olduğu için sesler script olarak gömülü).
 - `animasyon-isle.py` — videodan kare şeridi: magenta temizleme, **doğal döngü noktası** bulma (harmanlama yok). İçindeki dosya yolları önceki oturuma ait; yeniden kullanırken `U`, `T`, `O` yollarını ve `V` listesini güncelle.
 - `ses-kes.py` — videolardan ses efekti kesme.
+- `gecis-isle.py` — köprü klipler: ölçeği bekleme boyuna eşitler, baş hizasını ölçer, giriş karesini o anki adıma en benzeyen pozdan seçer → `assets/anim-garip-g*.webp` + `gecis.json` (index.html'deki `GECIS` tablosu buradan).
+- `tek-html.py` — tek dosya HTML (`python3 tek-html.py . Seyr.html 84`; 84 kalite ≈ 9,4 MB).
 - `GORSELLER.md` — karakter görünüm komutları (10 unvan).
 - `android/` — APK: `KEYSTORE=... KEYPASS=... VCODE=n VNAME=x ./build.sh cikti.apk`. Araçlar (aapt2, smali, apksig) Maven Central'dan otomatik iner. Paket `com.seyr.oyun`, yatay kilitli.
   Kabuk `MainActivity.java` (WebView + adım sensörü köprüsü `SeyrAndroid`). Derleme: `javac --release 8` (Robolectric `android-all` imzalarına karşı) → `dalvik-dx`. Araçlar `android/.tools/` içine iner (gitignore'da).
 
 ## İmza anahtarı
 `seyr.p12` (alias `seyr`) ve şifresi **kullanıcıda**, repoda yok. Yeni APK gerekince kullanıcıdan dosyayı ve şifreyi iste;
-aynı anahtar olmazsa güncelleme eskisinin üstüne kurulmaz. Son sürüm: **1.6 (VCODE 7)** — adım sensörü.
+aynı anahtar olmazsa güncelleme eskisinin üstüne kurulmaz. Son sürüm: **1.7 (VCODE 8)** — koşudan fren köprü klibi.
 
 ## Bilinen tuzaklar
 - `const` ile tanımlanan modüller `window`'a düşmez: `window.SAVAS=SAVAS` gibi açıkça ata.
