@@ -1,4 +1,12 @@
 {
+ "saldiri": {
+  "n": 19,
+  "w": 98,
+  "h": 66,
+  "fps": 12,
+  "yon": 1,
+  "dongu": false
+ },
  "yuru": {
   "n": 14,
   "w": 45,
@@ -6,5 +14,29 @@
   "fps": 12,
   "yon": 1,
   "dongu": true
+ },
+ "bekle": {
+  "n": 105,
+  "w": 54,
+  "h": 65,
+  "fps": 12,
+  "yon": 1,
+  "dongu": true
+ },
+ "kos": {
+  "n": 9,
+  "w": 59,
+  "h": 62,
+  "fps": 12,
+  "yon": 1,
+  "dongu": true
+ },
+ "kacin": {
+  "n": 16,
+  "w": 90,
+  "h": 70,
+  "fps": 12,
+  "yon": 1,
+  "dongu": false
  }
 }

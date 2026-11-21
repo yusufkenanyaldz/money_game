@@ -13,7 +13,7 @@ from PIL import Image
 BURASI = os.path.dirname(os.path.abspath(__file__)); ASSETS = os.path.join(BURASI, 'assets'); os.makedirs(ASSETS, exist_ok=True)
 BOY = 64          # ayakta duruş boyu (piksel)
 FPS = 12          # pixel animasyonu için yeterli; dosya küçük kalır
-RENK = 24         # ortak paletteki renk sayısı
+RENK = 28         # ortak paletteki renk sayısı (kılıç izi için birkaç açık renk payı)
 
 ap = argparse.ArgumentParser()
 ap.add_argument('video'); ap.add_argument('hareket')

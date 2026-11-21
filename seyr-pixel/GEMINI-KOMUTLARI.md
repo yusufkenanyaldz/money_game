@@ -7,14 +7,14 @@ Ortak kural (her komutun sonunda var): pixel art, yana bakan (sağa), kamera sab
 
 | # | Hareket | Durum |
 |---|---|---|
-| 1 | Bekleme | ☐ |
+| 1 | Bekleme | ✅ |
 | 2 | Yürüme | ✅ (ilk video, 21 Kasım) |
-| 3 | Koşu | ☐ |
-| 4 | Saldırı | ☐ |
-| 5 | Kaçınma | ☐ |
-| 6 | Darbe alma | ☐ |
+| 3 | Koşu | ✅ (3,4. sn'den itibaren) |
+| 4 | Saldırı | ✅ (kılıç izi efektiyle) |
+| 5 | Kaçınma | ✅ (4. videonun 3,8–5,1. sn'si; dönerek kaçış) |
+| 6 | Darbe alma | ☐ (sprite sheet olarak geldi; farklı çizim, video olarak yeniden) |
 | 7 | Yenilme | ☐ |
-| 8 | Zafer | ☐ |
+| 8 | Zafer | ☐ (sprite sheet olarak geldi; farklı çizim, video olarak yeniden) |
 
 ## 1 · Bekleme
 ```

@@ -13,13 +13,15 @@ html,body{height:100%;margin:0;background:var(--zemin);color:var(--yazi);font:14
 canvas{image-rendering:pixelated;image-rendering:crisp-edges;display:block}
 #bilgi{position:fixed;top:calc(8px + env(safe-area-inset-top,0px));left:max(16px,env(safe-area-inset-left,0px));right:max(16px,env(safe-area-inset-right,0px));color:var(--soluk);font-size:12px;text-align:center;pointer-events:none}
 .tus{position:fixed;bottom:calc(18px + env(safe-area-inset-bottom,0px));width:64px;height:64px;border-radius:50%;border:2px solid var(--altin);background:rgba(20,22,31,.6);color:var(--altin);font:700 22px system-ui;touch-action:none;user-select:none;-webkit-user-select:none}
-#sol{left:max(18px,env(safe-area-inset-left,0px))}#sag{left:calc(max(18px,env(safe-area-inset-left,0px)) + 78px)}
+#sol{left:max(18px,env(safe-area-inset-left,0px))}.tus.sagda{font-size:14px;letter-spacing:.08em}
+#vur{right:max(18px,env(safe-area-inset-right,0px))}#kac{right:calc(max(18px,env(safe-area-inset-right,0px)) + 78px)}#sag{left:calc(max(18px,env(safe-area-inset-left,0px)) + 78px)}
 .tus.on{background:var(--altin);color:var(--zemin)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 <div id="sahne"><canvas id="c" width="320" height="180" aria-label="Seyr Pixel önizleme"></canvas></div>
-<p id="bilgi">Seyr Pixel · yürüme önizlemesi · ← → tuşları ya da alttaki düğmeler</p>
+<p id="bilgi">Seyr Pixel · ◀ ▶ yürü (basılı tut: koş) · VUR · KAÇ — klavyede ← → J K</p>
 <button class="tus" id="sol" aria-label="Sola yürü">◀</button><button class="tus" id="sag" aria-label="Sağa yürü">▶</button>
+<button class="tus sagda" id="kac" aria-label="Kaç">KAÇ</button><button class="tus sagda" id="vur" aria-label="Vur">VUR</button>
 <script>
 const META=__META__,SERIT=__SERIT__;
 const cv=document.getElementById('c'),ctx=cv.getContext('2d');ctx.imageSmoothingEnabled=false;
@@ -37,21 +39,32 @@ function zemin(kam){
     ctx.fillStyle=PAL.ot;ctx.fillRect(ox,140,16,4);ctx.fillStyle=PAL.ot2;ctx.fillRect(ox+((wx*5)&7),140,3,1);
     ctx.fillStyle=(wx&1)?PAL.toprak:PAL.toprak2;ctx.fillRect(ox,144,16,36);}
 }
-const P={x:0,yon:1,t:0,hiz:0};const tus={sol:false,sag:false};
-addEventListener('keydown',e=>{if(e.key==='ArrowLeft')tus.sol=true;if(e.key==='ArrowRight')tus.sag=true;});
+const P={x:0,yon:1,t:0,bas:0,eylem:null,et:0};const tus={sol:false,sag:false};
+/* tek seferlik hareketler: oyun için hızlandırılmış oynatma */
+const TEK={saldiri:{hiz:1.6},kacin:{hiz:1.7}};
+function eylem(ad){if(P.eylem||!META[ad])return;P.eylem=ad;P.et=0;}
+addEventListener('keydown',e=>{if(e.key==='ArrowLeft')tus.sol=true;if(e.key==='ArrowRight')tus.sag=true;if(e.key==='j'||e.key==='J')eylem('saldiri');if(e.key==='k'||e.key==='K')eylem('kacin');});
 addEventListener('keyup',e=>{if(e.key==='ArrowLeft')tus.sol=false;if(e.key==='ArrowRight')tus.sag=false;});
 for(const id of ['sol','sag']){const b=document.getElementById(id);
   b.addEventListener('pointerdown',e=>{e.preventDefault();tus[id]=true;b.classList.add('on');});
   for(const ev of ['pointerup','pointercancel','pointerleave'])b.addEventListener(ev,()=>{tus[id]=false;b.classList.remove('on');});}
-let son=performance.now();
+for(const [id,ad] of [['vur','saldiri'],['kac','kacin']]){const b=document.getElementById(id);
+  b.addEventListener('pointerdown',e=>{e.preventDefault();b.classList.add('on');eylem(ad);});
+  for(const ev of ['pointerup','pointercancel','pointerleave'])b.addEventListener(ev,()=>b.classList.remove('on'));}
+let son=performance.now(),tbek=0;
+function ciz(st,f){const M=META[st],im=IMG[st];if(!im||!im.complete||!im.naturalWidth)return;
+  const x=Math.round(160-M.w/2),y=144-M.h;ctx.save();if(P.yon!==M.yon){ctx.translate(320,0);ctx.scale(-1,1);}
+  ctx.fillStyle='rgba(0,0,0,.35)';ctx.fillRect(Math.round(160-14),143,28,2);
+  ctx.drawImage(im,f*M.w,0,M.w,M.h,x,y,M.w,M.h);ctx.restore();}
 function kare(now){const dt=Math.min(.05,(now-son)/1000);son=now;
-  const yon=(tus.sag?1:0)-(tus.sol?1:0);P.hiz=yon*34;if(yon)P.yon=yon;P.x+=P.hiz*dt;if(yon)P.t+=dt;
-  zemin(P.x);
-  const st=META.bekle&&!yon?'bekle':'yuru',M=META[st],im=IMG[st];
-  if(im.complete&&im.naturalWidth){let f=st==='yuru'&&!yon?0:Math.floor(P.t*M.fps)%M.n;if(st==='bekle')f=Math.floor(now/1000*M.fps)%M.n;
-    const x=Math.round(160-M.w/2),y=144-M.h;ctx.save();if(P.yon!==M.yon){ctx.translate(320,0);ctx.scale(-1,1);}
-    ctx.fillStyle='rgba(0,0,0,.35)';ctx.fillRect(Math.round(160-M.w*.3),143,Math.round(M.w*.6),2);
-    ctx.drawImage(im,f*M.w,0,M.w,M.h,x,y,M.w,M.h);ctx.restore();}
+  const yon=P.eylem?0:(tus.sag?1:0)-(tus.sol?1:0);if(yon){P.yon=yon;P.bas+=dt;}else P.bas=0;
+  const kos=yon&&P.bas>.5&&META.kos;let hiz=yon*(kos?82:34);
+  if(P.eylem==='kacin')hiz=-P.yon*70*Math.max(0,1-P.et/.6);
+  P.x+=hiz*dt;zemin(P.x);
+  if(P.eylem){const M=META[P.eylem];P.et+=dt;const f=Math.floor(P.et*M.fps*TEK[P.eylem].hiz);
+    if(f>=M.n){P.eylem=null;}else{ciz(P.eylem,f);requestAnimationFrame(kare);return;}}
+  if(yon){P.t+=dt;const st=kos?'kos':'yuru';ciz(st,Math.floor(P.t*META[st].fps)%META[st].n);}
+  else{tbek+=dt;const st=META.bekle?'bekle':'yuru';ciz(st,META.bekle?Math.floor(tbek*META.bekle.fps)%META.bekle.n:0);}
   requestAnimationFrame(kare);}
 requestAnimationFrame(kare);
 </script>

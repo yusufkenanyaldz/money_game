@@ -20,4 +20,6 @@ dokunulmadan duruyor; Defter (`seyr/defter.js`) buraya taşınacak.
 - `onizleme.py` → `onizleme.html`: şeritleri gömülü, telefonda açılan önizleme (ok tuşları / ekran düğmeleri).
 
 ## Durum
-- Yürüme: 14 kare (1,17 sn), 45×66 px, 34 KB.
+- Palet saldırı klibinden (kılıç izinin açık mavisi için), 28 renk. Yeni palet gerekirse `assets/palet.png` silinip önce saldırı işlenir.
+- Bekleme 105 kare (8,75 sn; pelerin düzensiz, kısa döngü yok) · yürüme 14 · koşu 9 · saldırı 19 · kaçınma 16 kare. Toplam ~340 KB.
+- Bekleyen: darbe, yenilme, zafer (video olarak). Gemini'nin sprite sheet'leri farklı çizimde (iri kafa, önden bakış, beyaz zemin JPEG) — kullanılmadı.
