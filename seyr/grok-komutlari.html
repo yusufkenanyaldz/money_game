@@ -1,0 +1,281 @@
+<title>Seyr Grok Komutları</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya:wght@500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap">
+<style>
+/* Düzen: tek sütun okuma kolonu; üstte yapışkan bölüm çubuğu, her komut kopyalanabilir bir kart. Minyatür lacivert-altın. */
+:root{
+  --zemin:#eef0f4; --kagit:#ffffff; --murekkep:#1b2233; --soluk:#5b6478; --cizgi:#d6dbe5;
+  --lacivert:#1f3a6e; --altin:#a77b1f; --tamam:#2f7a4f; --kod:#f5f6f9;
+  --f-baslik:'Alegreya',Georgia,serif; --f-govde:'Inter',system-ui,sans-serif; --f-kod:'JetBrains Mono',ui-monospace,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --zemin:#10141f; --kagit:#171d2b; --murekkep:#e6e8ee; --soluk:#9aa3b6; --cizgi:#2a3246;
+  --lacivert:#8fb0ec; --altin:#d9ad4f; --tamam:#6cc293; --kod:#121725; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --zemin:#10141f; --kagit:#171d2b; --murekkep:#e6e8ee; --soluk:#9aa3b6; --cizgi:#2a3246;
+  --lacivert:#8fb0ec; --altin:#d9ad4f; --tamam:#6cc293; --kod:#121725; color-scheme:dark}
+body{background:var(--zemin);color:var(--murekkep);font:15px/1.55 var(--f-govde)}
+.sar{max-width:880px;margin:0 auto;padding-block:20px 60px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1{font:700 30px/1.15 var(--f-baslik);margin:0 0 6px;text-wrap:balance;color:var(--lacivert)}
+h2{font:700 23px/1.2 var(--f-baslik);margin:0;text-wrap:balance}
+h3{font:700 18px/1.25 var(--f-baslik);margin:0;color:var(--lacivert)}
+p{margin:0}
+.ust p{color:var(--soluk);max-width:65ch}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--zemin)}
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--zemin);border-bottom:1px solid var(--cizgi);margin:16px 0 8px;padding-block:8px;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
+nav a{flex:none;text-decoration:none;color:var(--murekkep);border:1px solid var(--cizgi);background:var(--kagit);border-radius:999px;padding:5px 12px;font-size:13px;white-space:nowrap}
+nav a span{color:var(--soluk);font-variant-numeric:tabular-nums;margin-left:4px}
+nav a.bitti span{color:var(--tamam)}
+.arac{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:6px 0 4px;font-size:13px;color:var(--soluk)}
+.arac label{display:flex;gap:6px;align-items:center;cursor:pointer}
+section{margin-top:34px;display:grid;gap:14px}
+.bolumbas{display:grid;gap:6px;border-top:2px solid var(--altin);padding-top:12px}
+.bolumbas .say{font-size:13px;color:var(--soluk);font-variant-numeric:tabular-nums}
+.not{color:var(--soluk);font-size:14px;max-width:65ch}
+.grup{display:grid;gap:10px;background:var(--kagit);border:1px solid var(--cizgi);border-radius:10px;padding:14px}
+.grup>.ac{display:grid;gap:4px}
+.grup .etiket{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--altin);font-weight:600}
+.kart{display:grid;gap:8px;border-top:1px solid var(--cizgi);padding-top:10px}
+.kart:first-of-type{border-top:0;padding-top:0}
+.kbas{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.kbas b{font-weight:600}
+.kbas .tr{color:var(--soluk);font-size:13px;flex:1 1 200px;min-width:0}
+pre{margin:0;background:var(--kod);border:1px solid var(--cizgi);border-radius:8px;padding:10px 12px;font:12.5px/1.55 var(--f-kod);white-space:pre-wrap;word-break:break-word;color:var(--murekkep)}
+button.kop{font:600 13px var(--f-govde);border:1px solid var(--lacivert);color:var(--lacivert);background:transparent;border-radius:6px;padding:5px 12px;cursor:pointer}
+button.kop:hover{background:var(--lacivert);color:var(--kagit)}
+button.kop.oldu{border-color:var(--tamam);color:var(--tamam);background:transparent}
+.yap{display:flex;gap:6px;align-items:center;font-size:13px;color:var(--soluk);cursor:pointer}
+.yap input{width:18px;height:18px;accent-color:var(--tamam)}
+.kart.tamam pre{opacity:.45}
+.kart.tamam .kbas b{text-decoration:line-through;color:var(--soluk)}
+body.gizle .kart.tamam{display:none}
+:focus-visible{outline:2px solid var(--altin);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="sar">
+  <header class="ust">
+    <h1>Seyr — Grok Komutları</h1>
+    <p>Grok'a yaptırılacak her şey, oyunda kullanılacağı sırayla. Komutlar İngilizce, açıklamalar Türkçe. Kopyala düğmesiyle alın, bitenleri işaretleyin; işaretler bu telefonda hatırlanır.</p>
+  </header>
+  <nav id="nav" aria-label="Bölümler"></nav>
+  <div class="arac">
+    <label><input type="checkbox" id="gizleKutu"> Yapılanları gizle</label>
+    <span id="toplam"></span>
+  </div>
+  <main id="icerik"></main>
+</div>
+
+<script>
+/* ---------- Ortak kurallar (GORSELLER.md ile aynı) ---------- */
+const STYLE = "Ottoman and Persian miniature painting style, flat vivid colors, fine gold detailing, delicate ink outlines, lapis blue, vermilion, turquoise and gold palette, elegant stylized proportions. Full body, standing, three-quarter view facing left, centered, feet visible, same scale and framing as before. Flat solid magenta background (#E8087F), no pink or magenta on the character, no text, no letters, no calligraphy, no halo.";
+const NEXT = "This is the same man at his previous stage. Create his NEXT stage: same face, same body, same pose style, same scale and framing, clearly the same person but grown. ";
+const SABIT = " The character stays centered and the same size; the camera does not move, no zoom, no cuts. Every detail of the costume, colors and equipment stays exactly the same in every frame. Flat solid magenta background #E8087F unchanged, no scenery, no shadows on the background, no text.";
+const TAKIP = " The camera tracks him so he stays centered and the same size the whole time, no zoom, no cuts. Every detail of the costume, colors and equipment stays exactly the same in every frame. Flat solid magenta background #E8087F unchanged, no scenery, no shadows on the background, no text.";
+
+/* Bir görünümün oyunda kullanılan hareketleri. it = elinde/sırtında taşıdığı, vur = saldırı tarifi */
+function hareketler(kod, it, vur, ek=[]) {
+  const L = [
+    ['bekle', 'Bekleme', 'Yerinde nefes alır; döngü olacak.',
+      `Animate this exact character: subtle idle breathing while standing in place, small natural movements of the head and hands, clothes gently swaying, ${it} held exactly as in the image. Calm seamless loop that ends in the starting pose.` + SABIT],
+    ['yuru', 'Yürüme (sola)', 'Yerinde yürüyüş, kamera takip eder; döngü olacak.',
+      `Animate this exact character walking calmly to the left in a three-quarter view, natural steady pace, arms and ${it} moving naturally with each step. He walks in place: a continuous walk cycle for the whole clip.` + TAKIP],
+    ['kos', 'Koşu (sağa)', 'Yerinde koşu, kamera takip eder; döngü olacak.',
+      `Animate this exact character running fast to the right in side view, strong natural running cycle, clothes flowing back with the speed, ${it} carried securely. A continuous run cycle for the whole clip.` + TAKIP],
+    ['vurus', 'Saldırı', 'Tek hızlı vuruş; geri dönmeyecek, sırtını dönmeyecek.',
+      `Animate this exact character: from a ready fighting stance facing left he performs ONE fast, strong attack: ${vur}. Then he returns to the ready stance and holds still. The strike itself is quick, under half a second. No spinning, he never turns his back, he keeps facing left the whole time.` + SABIT],
+    ['kacin', 'Kaçınma', 'Geriye hızlı sıçrayış, sonra ayakta duruş.',
+      `Animate this exact character: from his relaxed standing pose he quickly dodges backward, a fast light hop back while leaning his upper body away from an incoming blow, ${it} held protectively, clothes flaring from the motion, then he lands balanced and settles back into the same standing pose, still facing left. One quick dodge, about 0.6 seconds of action, then he holds still.` + SABIT],
+    ['fren', 'Koşudan durma', 'Koşu → 2-3 yavaşlayan adım → bekleme duruşu. Sonda eli ve eşyası görseldeki gibi olmalı.',
+      `Animate this exact character: he is running fast to the right in side view, then brakes with two or three slowing steps, plants his feet and settles into his relaxed standing pose, with ${it} held exactly the same way as in the reference image, now facing right in three-quarter view, and holds still for the last second. One continuous shot, no cuts.` + TAKIP],
+    ['baslaDur', 'Bekle → yürü → dur', 'Yürümeye başlama ve durma köprü klipleri bundan kesilir.',
+      `Single continuous 6-second shot of this exact character: he starts standing still in his relaxed pose, then walks naturally to the left for about three calm steps in a three-quarter view, then slows down, plants his feet and settles back into the same relaxed pose, holding it still for the final second.` + TAKIP],
+    ['darbe', 'Darbe alma', 'Yediği darbeyle sarsılır, toparlanır.',
+      `Animate this exact character: standing facing left, he is hit by an unseen blow from the front: a sharp flinch, his head and shoulders jerk back and he staggers half a step backward, then he recovers into his relaxed standing pose and holds still. About one second of action. No blood, no wounds.` + SABIT],
+    ['yenilme', 'Yenilme / düşme', 'Yere yığılır ve hareketsiz kalır.',
+      `Animate this exact character: he is defeated. He staggers, his knees buckle and he slowly collapses onto the ground, lying on his side, and stays still for the last seconds. Facing left. No blood, no wounds, nothing graphic. His whole body stays inside the frame.` + SABIT],
+    ['zafer', 'Zafer', 'Sakin, mağrur olmayan bir zafer anı.',
+      `Animate this exact character: a calm victory moment. He raises ${it} high with quiet pride, holds the pose for a moment, then lowers it back into his relaxed standing pose and holds still. Dignified and humble, not boastful.` + SABIT],
+  ];
+  return L.filter(h => !ek.length || ek.includes(h[0])).map(([id, ad, tr, metin]) => ({id: kod + '-' + id, ad, tr, metin}));
+}
+
+/* ---------- Görünümler ---------- */
+const GORUNUM = [
+  {kod:'er', ad:'3 — Er', sev:'20–29. seviye', it:'his short curved dagger', vur:'a fast forward slash with his curved dagger',
+   tarif:"He is now a Soldier (Er): sturdier build, a padded cotton tunic with a leather belt over his beige robe, the brown hooded cloak now shorter, leather boots instead of sandals, a neater cream turban, the leather shoulder bag and the water gourd kept, a short neat beard, steady confident stance, holding a short curved dagger point-down in his right hand."},
+  {kod:'alp', ad:'4 — Alp', sev:'30–39. seviye', it:'his curved sword and round shield', vur:'one fast diagonal slash with his curved sword while his round shield guards his body',
+   tarif:"He is now a young Warrior (Alp): light chainmail under a red kaftan, red leather boots, a cream turban wrapped around a small pointed helmet, a round painted shield on his left arm, a curved sword (pala) held lowered in his right hand, short dark beard, alert stance."},
+  {kod:'bahadir', ad:'5 — Bahadır', sev:'40–49. seviye', it:'his bow', vur:'he draws an arrow from his quiver, pulls the bow and looses the arrow straight forward',
+   tarif:"He is now a brave Hero (Bahadır): ornate lamellar armor with decorated shoulder plates over a crimson kaftan, a helmet wrapped with a turban and a small plume, a quiver of arrows on his back, a sword at his side, holding a curved composite bow in his left hand, confident heroic stance."},
+  {kod:'ulu', ad:'6 — Ulu', sev:'50–59. seviye', it:'his gilded mace', vur:'one heavy overhead blow with his gilded mace',
+   tarif:"He is now a Noble (Ulu): a rich lapis-blue kaftan covered with golden floral patterns, a fur-trimmed cloak, a jeweled belt, a tall turban with a feather aigrette (sorguç), holding a heavy gilded mace (gürz) in his right hand, dignified posture."},
+  {kod:'bilge', ad:'7 — Bilge', sev:'60–69. seviye', it:'his brass-headed staff', vur:'one sweeping strike forward with his brass-headed staff',
+   tarif:"He is now a wise warrior-sage (Bilge): deep green and gold layered robes, a leather scroll case at his side, a tall wooden staff with an ornate brass head held in his right hand, a full dark beard, calm thoughtful expression."},
+  {kod:'kutlu', ad:'8 — Kutlu', sev:'70–79. seviye', it:'his slender golden sword', vur:'one graceful forward thrust with his slender golden sword, leaving a faint golden trail',
+   tarif:"He is now Blessed (Kutlu): a golden kaftan with softly glowing patterns, a few small golden leaves floating gently around him, a faint warm light on his robes (the light stays on the robes, no glow around the body), holding a slender golden sword lowered in his right hand, serene expression."},
+  {kod:'nurlu', ad:'9 — Nurlu', sev:'80–89. seviye', it:'his open right hand', vur:'a palm thrust forward with his right hand that releases a soft burst of golden light motes',
+   tarif:"He is now Radiant (Nurlu): flowing white and gold robes, soft warm golden light on his robes, small golden motes of light drifting around him (no glow around the body, no halo), no weapon, his right hand open and calm, peaceful expression."},
+  {kod:'simurg', ad:'10 — Simurg', sev:'90–100. seviye', it:'his feathered wing-cloak', vur:'he sweeps his feathered wing-cloak forward, releasing a gust of shining feathers',
+   tarif:"His final legendary form (Simurg): robes patterned with the feathers of a great mythical bird, a long cloak shaped like spread wings of turquoise, emerald and gold feathers, a single majestic feather crest on his turban, gentle light on his robes, majestic yet humble."},
+];
+
+/* ---------- Canavarlar ---------- */
+const MSTYLE = " Ottoman and Persian miniature painting style in the Shahnameh div tradition, flat vivid colors, fine gold detailing, delicate ink outlines. Full body, three-quarter view facing left, centered, the whole body inside the frame. Flat solid magenta background (#E8087F), no pink or magenta on the creature, no text, no letters, no calligraphy, no halo, no blood, not gory.";
+const MSABIT = " The creature stays centered and the same size; the camera does not move, no zoom, no cuts. Every detail of its body and colors stays exactly the same in every frame. Flat solid magenta background #E8087F unchanged, no scenery, no text, no blood.";
+const MTAKIP = " The camera tracks it so it stays centered and the same size, no zoom, no cuts. Every detail of its body and colors stays exactly the same in every frame. Flat solid magenta background #E8087F unchanged, no scenery, no text.";
+function canavarHareket(kod, vur, olum) {
+  return [
+    {id:kod+'-gorsel', ad:'Görsel', tr:'Önce bu; beğenince videolar bu görselden.', metin:null},
+    {id:kod+'-bekle', ad:'Bekleme', tr:'Döngü olacak.', metin:`Animate this exact creature: an idle menacing loop in place, slow breathing, small shifts of weight, eyes alive. Seamless loop that ends in the starting pose.` + MSABIT},
+    {id:kod+'-yuru', ad:'Yürüme (sola)', tr:'Yerinde ilerleyiş, kamera takip eder.', metin:`Animate this exact creature advancing to the left in a three-quarter view with its own natural gait, a continuous moving cycle for the whole clip; it moves in place.` + MTAKIP},
+    {id:kod+'-vurus', ad:'Saldırı', tr:'Tek saldırı, sonra eski duruşa döner.', metin:`Animate this exact creature: it performs ONE fast attack toward the left: ${vur}. Then it returns to its starting pose and holds still. It keeps facing left the whole time.` + MSABIT},
+    {id:kod+'-darbe', ad:'Darbe alma', tr:'Sarsılır, toparlanır.', metin:`Animate this exact creature: it is struck by an unseen blow from the left: it recoils sharply, staggers back a little, then recovers into its starting pose and holds still. About one second of action.` + MSABIT},
+    {id:kod+'-yenilme', ad:'Yenilme', tr:'Yenilip dağılır.', metin:`Animate this exact creature being defeated: ${olum}. Nothing graphic, no blood. The last second shows only the flat magenta background.` + " The camera does not move, no zoom, no cuts. Flat solid magenta background #E8087F unchanged, no scenery, no text."},
+  ];
+}
+const DISSOLVE = 'it falters, sinks down and dissolves into dark smoke that fades away';
+const PATRON = [
+  {kod:'kizildev', ad:'Kızıl Dev', tarif:"A towering red-skinned div from Persian miniatures: muscular, spotted red skin, small curved horns, wild black hair, fierce amber eyes, a leopard-skin loincloth, gold armbands, holding a huge knotted wooden club.", vur:'it raises its huge club and smashes it down in front of it', olum:DISSOLVE},
+  {kod:'yilan', ad:'Yedi Dilli Yılan', tarif:"A giant coiled serpent with ornate turquoise and gold patterned scales, rearing up high, its open mouth showing seven long forked tongues fanning out.", vur:'it lunges forward and strikes, its seven tongues snapping out', olum:'it collapses into its coils and dissolves into dark smoke that fades away'},
+  {kod:'gulyabani', ad:'Bin Yüzlü Gulyabani', tarif:"A tall gaunt ghoul (gulyabani) wrapped in tattered grey-green robes, its body and robes covered with many small mask-like faces, long clawed fingers, a smiling false mask held over its real face.", vur:'it swipes forward with its long claws while the small faces on its robes shift expressions', olum:'its masks crack and fall away one by one and it dissolves into grey smoke that fades away'},
+  {kod:'karabasan', ad:'Karabasan', tarif:"A heavy squat nightmare creature of deep indigo and black, drowsy half-closed yellow eyes, wrapped in a thick dark shroud like a heavy blanket, long arms reaching to the ground.", vur:'it leaps forward and presses down hard with both long arms', olum:DISSOLVE},
+  {kod:'albasti', ad:'Sis Albastısı', tarif:"A pale hag spirit (albastı) with very long ash-grey hair flowing into stylized mist swirls painted as solid opaque shapes, pale blue-grey skin, long nails, eyes like two dim lanterns. All mist is opaque, not transparent.", vur:'it lunges forward with its long nails while its opaque mist swirls curl forward', olum:'it unravels into opaque grey mist swirls that drift away and fade'},
+  {kod:'boru', ad:'Zifiri Börü', tarif:"A giant wolf with pitch-black fur painted with deep blue highlights, eyes like two bright stars, stylized flame-like tufts of fur, bared white fangs.", vur:'it pounces forward snapping its jaws', olum:DISSOLVE},
+  {kod:'ifrit', ad:'Ateş İfriti', tarif:"A towering ifrit made of stylized miniature flames in orange, vermilion and gold, painted as solid opaque shapes (not transparent), a dark smoky core, burning eyes, iron chain bracelets on its wrists.", vur:'it hurls a burst of opaque stylized flame forward with both hands', olum:'its flames shrink and gutter out into dark smoke that fades away'},
+  {kod:'ejder', ad:'Yeşil Gözlü Ejder', tarif:"A Persian miniature dragon (ejderha) with a long serpentine body, jade and gold scales, a flame-like mane, piercing bright green eyes, four clawed legs.", vur:'it lunges forward biting with its jaws', olum:DISSOLVE},
+  {kod:'tavus', ad:'Tavus Şah', tarif:"A vain tyrant king with the features of a peacock: a jeweled crown, robes of iridescent blue and green, a huge fanned peacock tail behind him full of eye patterns in blue, green and gold only (no pink), holding a jeweled scepter.", vur:'he swings his jeweled scepter forward while his tail flares open', olum:'his tail feathers fall away, he crumples and dissolves into golden dust that fades away'},
+  {kod:'sirca', ad:'Sırça Saray Cini', tarif:"A jinn whose body is made of faceted crystal and mirror glass in pale turquoise and silver, painted fully opaque (no transparency), a crown shaped like a domed palace, glowing white eyes.", vur:'it thrusts both arms forward and shoots a spray of sharp crystal shards', olum:'it cracks all over and shatters into crystal shards that fade away'},
+  {kod:'dahhak', ad:'Dahhâk (son)', tarif:"The final tyrant king Zahhak of the Shahnameh: a pale cruel king in black and dark gold robes with a tall dark crown, two black serpents growing out of his shoulders, rising and hissing, holding a dark curved sword.", vur:'his two shoulder serpents strike forward while he thrusts his dark sword', olum:'he falls to his knees, his serpents wither, and he dissolves into black smoke that fades away'},
+];
+const YARDAK = [
+  {kod:'golge', ad:'Gölge (her yerde)', tarif:"A small hunched shadow creature, its body like dark violet smoke painted as solid opaque shapes, two golden eyes, long thin arms.", vur:'it scratches forward with its thin arm', olum:DISSOLVE},
+  {kod:'kor', ad:'Kor Cüceleri (Kızıl Dev)', tarif:"A small red imp-div with tiny horns, spotted red skin, a leopard-skin loincloth and a stubby wooden club.", vur:'it swings its stubby club', olum:DISSOLVE},
+  {kod:'fisilti', ad:'Fısıltı Yılanları (Yedi Dilli Yılan)', tarif:"A small rearing serpent with turquoise and gold scales and two long forked tongues.", vur:'it strikes forward with a quick bite', olum:DISSOLVE},
+  {kod:'maske', ad:'Maskeliler (Gulyabani)', tarif:"A small hunched ghoul in tattered grey-green rags, hiding its face behind a smiling white mask, clawed hands.", vur:'it swipes with its claws', olum:'its mask cracks and it dissolves into grey smoke that fades away'},
+  {kod:'uyku', ad:'Uyku Gölgeleri (Karabasan)', tarif:"A small drowsy indigo shadow creature with heavy half-closed yellow eyes and a little dark shroud.", vur:'it lunges and pushes forward with both hands', olum:DISSOLVE},
+  {kod:'sis', ad:'Sis Kuklaları (Albastı)', tarif:"A small grey wisp figure with long hair, painted as solid opaque mist shapes (not transparent), dim lantern eyes.", vur:'it lunges with its long nails', olum:'it unravels into opaque grey mist that fades away'},
+  {kod:'yavru', ad:'Zifiri Kurtlar (Börü)', tarif:"A black wolf with deep blue highlights and small star-like eyes, smaller and leaner than a great wolf.", vur:'it leaps forward snapping', olum:DISSOLVE},
+  {kod:'kivilcim', ad:'Kıvılcımlar (İfrit)', tarif:"A small fire sprite made of stylized opaque orange and gold flames with bright eyes.", vur:'it throws a small opaque flame forward', olum:'it gutters out into smoke that fades away'},
+  {kod:'kertenkele', ad:'Yeşil Kertenkeleler (Ejder)', tarif:"A jade-green lizard with gold-edged scales, a small flame-like crest and bright green eyes.", vur:'it lunges forward biting', olum:DISSOLVE},
+  {kod:'muhafiz', ad:'Tavus Muhafızları (Tavus Şah)', tarif:"A palace guard with a peacock-feather crest on his helmet (blue, green and gold only, no pink), blue and green uniform, holding a spear.", vur:'he thrusts his spear forward', olum:'he falls and dissolves into golden dust that fades away'},
+  {kod:'kukla', ad:'Cam Kuklalar (Sırça Cin)', tarif:"A small puppet figure made of faceted pale turquoise crystal, fully opaque, with silver joints and glowing white eyes.", vur:'it swings its crystal arm forward', olum:'it shatters into shards that fade away'},
+  {kod:'yilanasker', ad:'Yılan Askerleri (Dahhâk)', tarif:"A soldier in black and dark gold armor with a helmet shaped like a serpent's head, holding a curved sword.", vur:'he slashes forward with his curved sword', olum:'he falls to his knees and dissolves into black smoke that fades away'},
+];
+
+/* ---------- Bölgeler ---------- */
+const BSTYLE = "Ottoman and Persian miniature painting landscape style, flat vivid colors, gold details in the sky, stylized curling clouds, delicate ink outlines, no people, no animals, no text, no letters, no calligraphy.";
+const BOLGE = [
+  {kod:'gaflet', ad:'Gaflet Ovası (başlangıç)', uzak:"a wide calm plain under a golden dawn sky, soft blue distant hills, a few slender cypress trees far away", orta:"gentle rolling green and ochre hills with scattered cypress trees and flowering shrubs"},
+  {kod:'ofke', ad:'Öfke Dağları (Kızıl Dev)', uzak:"jagged red and rust mountains under a smoky orange sky, distant volcanic glow", orta:"rocky red slopes, cracked boulders and twisted thorn trees"},
+  {kod:'fisilti', ad:'Fısıltı Bataklığı (Yılan)', uzak:"a misty green marsh under a pale turquoise sky, far reeds and still water", orta:"tall reeds, twisted roots and dark pools painted as flat solid shapes"},
+  {kod:'ayna', ad:'Bin Ayna Çarşısı (Gulyabani)', uzak:"a far city of domes and minaret-like towers under a dusky violet-blue sky", orta:"a row of covered bazaar arches with hanging lanterns and draped awnings"},
+  {kod:'uyku', ad:'Uyku Ormanı (Karabasan)', uzak:"a deep indigo night sky with a heavy moon and dark distant forest", orta:"dense dark blue and green trees with drooping heavy branches"},
+  {kod:'sis', ad:'Sis Vadisi (Albastı)', uzak:"a pale grey-blue valley with layered stylized fog bands and far cliffs", orta:"grey rocks, bare silver trees and banks of stylized opaque fog"},
+  {kod:'bozkir', ad:'Zifiri Bozkır (Börü)', uzak:"an endless night steppe under a starry deep-blue sky with a thin crescent moon", orta:"low dark grass hills, scattered standing stones and dry shrubs"},
+  {kod:'col', ad:'Kızgın Çöl (İfrit)', uzak:"burning orange desert dunes under a hot pale-gold sky, shimmering distant mesas", orta:"sand dunes, sun-bleached rocks and a few dry palm trees"},
+  {kod:'kaya', ad:'Haset Kayalıkları (Ejder)', uzak:"tall jade-green cliffs and pinnacles under a cold turquoise sky", orta:"green stone outcrops, cave mouths and twisted pine trees"},
+  {kod:'saray', ad:'Kibir Sarayı Bahçeleri (Tavus Şah)', uzak:"a far gleaming palace with blue domes and gold finials under a bright lapis sky", orta:"formal garden walls, clipped cypress, tiled fountains and arched gateways"},
+  {kod:'sirca', ad:'Sırça Saray (Cin)', uzak:"a far palace of pale turquoise crystal towers under a silver-white sky", orta:"crystal pillars, mirror-tiled walls and cold blue arches, all opaque"},
+  {kod:'kale', ad:'Dahhâk Kalesi (son)', uzak:"a dark fortress on a black mountain under a stormy deep-red and indigo sky", orta:"black stone walls, iron gates, banners and serpent-shaped statues"},
+];
+const SUS = [
+  ['servi','Servi','a tall slender dark green cypress tree'], ['cinar','Çınar','a broad plane tree (çınar) with a thick trunk'], ['cesme','Çeşme','an Ottoman stone wall fountain with a small basin'],
+  ['kemer','Kemer','a single pointed stone arch gateway with tile decoration'], ['tasyol','Taş yol','a short straight section of old cobblestone road'],
+  ['kaya','Kayalar','a cluster of stylized boulders'], ['cicek','Çiçek öbeği','a clump of tulips, carnations and hyacinths'], ['kervansaray','Kervansaray kapısı','a caravanserai gate with a heavy wooden door'],
+];
+
+/* ---------- Emanet simgeleri ---------- */
+const ISTYLE = " Ottoman and Persian miniature illumination style, flat vivid colors, fine gold detailing, delicate ink outlines. A single object, centered, filling most of the frame, simple and readable at small size, front view. Flat solid magenta background (#E8087F), no pink or magenta on the object, no text, no letters, no calligraphy, no halo.";
+const EMANET = [
+  ['kandil','Ezel Kandili','an ancient bronze oil lamp with a calm eternal flame and engraved gold patterns'],
+  ['kalem','Lokman\'ın Kalemi','a reed pen (kamış kalem) resting across a small lapis and gold inkwell'],
+  ['kabuk','Yedi Deniz Kabuğu','a spiral seashell with seven bands of sea colors and a pearl at its opening'],
+  ['gevher','Sonsuz Gevher Dizisi','a long looped string of polished round gemstones with a gold tassel'],
+  ['seher','Seher Halkası','a gold ring set with a pale dawn-blue stone, a tiny morning star shining above it'],
+  ['nal','Tozkoparan Nalı','a gleaming silver horseshoe with gold nails, a little trail of golden dust behind it'],
+  ['ayna','İskender\'in Aynası','a round polished bronze hand mirror with an ornate gold frame'],
+  ['muhur','Sessiz Ejder Mührü','a round seal stamp with the relief of a coiled sleeping dragon, a little red wax beneath it, no letters'],
+  ['yanki','Kaf Dağı Yankısı','a small bronze bell shaped like a mountain peak with an emerald-green summit'],
+  ['su','Âb-ı Hayat Damlası','a single luminous water drop inside a small opaque turquoise glass vial with a gold stopper'],
+  ['ciy','Seher Çiyi','a single shining dew drop resting on a green rose leaf'],
+];
+
+/* ---------- Bölümleri kur ---------- */
+const GARIP_IT = 'his burlap sack', YOLCU_IT = 'his wooden walking staff';
+const BOLUMLER = [
+  {id:'duzelt', ad:'1 · Düzeltmeler', not:'Oyunda eksik kalan iki köprü klip. Garip için Garip\'in bekleme görselini, Yolcu için Yolcu\'nun sola bakan görselini verin.', gruplar:[
+    {etiket:'Garip', baslik:'Bekle ↔ yürü', not:'Önceki klipte heybe kızıl kahveye dönmüştü; heybe zeytin yeşili kalmalı.', kartlar:[{id:'garip-baslaDur', ad:'Bekle → yürü → dur', tr:'Heybe ve yamalar her karede aynı kalmalı.',
+      metin:"Single continuous 6-second shot of the exact same character from the reference image: an Ottoman Persian miniature style young male traveler in a patched beige robe, cream embroidered cap, sandals with wrapped legs, carrying an OLIVE-GREEN burlap sack on his back. He starts standing still in a relaxed idle pose, then walks naturally to the left for about three calm steps in a three-quarter view (body turned slightly toward the viewer, facing left), then slows down, plants his feet and settles back into the same relaxed idle pose, holding it still for the final second. The camera tracks him so he stays centered in the frame the whole time; full body always visible, same size, no zoom. The character's design must stay identical in every frame: the sack stays the same olive-green color and the same size, the robe patches stay exactly the same shapes, colors and positions (light gray-blue and beige patches), no new patches, no color shifts. Solid flat magenta background #E8087F, no shadows on the background, no text, no halo, no other objects, no pink on the character."}]},
+    {etiket:'Yolcu', baslik:'Koşudan durma', not:'Önceki klipte ortada kesme vardı ve asa sonda yatay kalıyordu.', kartlar:hareketler('yolcu', YOLCU_IT, '', ['fren']).map(k=>({...k, metin:k.metin.replace('with his wooden walking staff held exactly the same way as in the reference image','holding his wooden walking staff upright in his right hand exactly as in the reference image (never horizontal)')}))},
+  ]},
+  {id:'eksik', ad:'2 · Garip ve Yolcu: yeni hareketler', not:'Darbe alma, yenilme ve zafer henüz hiçbir görünümde yok. Yolcu\'ya bekle ↔ yürü de eklenecek.', gruplar:[
+    {etiket:'Garip', baslik:'Garip (1–9. seviye)', not:'Garip\'in bekleme görselinden.', kartlar:hareketler('garip', GARIP_IT, '', ['darbe','yenilme','zafer'])},
+    {etiket:'Yolcu', baslik:'Yolcu (10–19. seviye)', not:'Yolcu\'nun sola bakan görselinden.', kartlar:hareketler('yolcu', YOLCU_IT, '', ['baslaDur','darbe','yenilme','zafer'])},
+  ]},
+  {id:'gorunum', ad:'3 · Görünümler 3–10', not:'Sırayla gidin. Her yeni görünümde Grok\'a bir öncekinin görselini yükleyin, hepsi aynı sohbette. İki görsel gelirse sola bakan 3/4 olanı seçin; videoları o görselden üretin. Her görünüm: 1 görsel + 10 video.', gruplar:
+    GORUNUM.map(g=>({etiket:g.sev, baslik:g.ad, not:'', kartlar:[{id:g.kod+'-gorsel', ad:'Görsel', tr:'Önce bu; beğenince videolar.', metin:NEXT+g.tarif+' '+STYLE}, ...hareketler(g.kod, g.it, g.vur)]}))},
+  {id:'canavar', ad:'4 · Canavarlar', not:'Bölüm sonu canavarları ve yardakçıları. Her biri: 1 görsel + 5 video. Canavarlar da sola baksın; oyun gerektiğinde çevirir. Ateş, sis ve cam gibi şeffaf olabilecekler "opak" istendi, yoksa magenta içlerinden görünür.', gruplar:[
+    ...PATRON.map(c=>({etiket:'Bölüm sonu', baslik:c.ad, not:'', kartlar:canavarHareket(c.kod, c.vur, c.olum).map(k=>k.metin?k:{...k, metin:c.tarif+MSTYLE})})),
+    ...YARDAK.map(c=>({etiket:'Yardakçı', baslik:c.ad, not:'', kartlar:canavarHareket(c.kod, c.vur, c.olum).map(k=>k.metin?k:{...k, metin:c.tarif+' Smaller than a boss, about the height of a child.'+MSTYLE})})),
+  ]},
+  {id:'bolge', ad:'5 · Bölgeler', not:'Her bölge iki katman: uzak manzara (tam resim) ve orta katman (magenta üstüne şerit; arkadan uzak katman görünsün). Kaydırırken derinlik bundan gelir. Yatay geniş isteyin.', gruplar:[
+    ...BOLGE.map(b=>({etiket:'Bölge', baslik:b.ad, not:'', kartlar:[
+      {id:'bolge-'+b.kod+'-uzak', ad:'Uzak katman', tr:'Gökyüzü ve uzak dağlar; magenta yok.', metin:`A wide horizontal landscape panorama, 16:9: ${b.uzak}. Only sky and far distance, the lower quarter is a simple flat ground color with no objects, so other layers can be placed in front. ${BSTYLE}`},
+      {id:'bolge-'+b.kod+'-orta', ad:'Orta katman', tr:'Magenta üstünde yatay şerit.', metin:`A wide horizontal strip, 16:9: ${b.orta}, painted only in the lower half of the image as one continuous band from the left edge to the right edge, with a clean silhouette on top. Everything above the band is flat solid magenta (#E8087F). No pink or magenta inside the band. ${BSTYLE}`},
+    ]})),
+    {etiket:'Ön plan', baslik:'Süsler (her bölgede)', not:'Tek tek nesneler; oyun yol kenarına dizer.', kartlar:SUS.map(([k,ad,t])=>({id:'sus-'+k, ad, tr:'', metin:`A single ${t.replace(/^an? /,'')}, seen from the side, standing on nothing, whole object inside the frame. ${BSTYLE} Flat solid magenta background (#E8087F), no pink or magenta on the object.`}))},
+  ]},
+  {id:'emanet', ad:'6 · Emanet simgeleri', not:'Defter\'deki emanetlerin simgeleri. Küçük boyutta da okunacak, sade.', gruplar:[
+    {etiket:'Simgeler', baslik:'10 emanet + Seher Çiyi', not:'', kartlar:EMANET.map(([k,ad,t])=>({id:'emanet-'+k, ad, tr:'', metin:`${t[0].toUpperCase()+t.slice(1)}.${ISTYLE}`}))},
+  ]},
+];
+
+/* ---------- Çizim ---------- */
+const anahtar = id => 'grok:' + id;
+const oku = id => { try { return localStorage.getItem(anahtar(id)) === '1'; } catch (e) { return false; } };
+const yaz = (id, v) => { try { v ? localStorage.setItem(anahtar(id), '1') : localStorage.removeItem(anahtar(id)); } catch (e) {} };
+const esc = s => s.replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+const icerik = document.getElementById('icerik'), nav = document.getElementById('nav');
+let html = '';
+for (const b of BOLUMLER) {
+  html += `<section id="${b.id}"><div class="bolumbas"><h2>${b.ad}</h2><p class="not">${b.not}</p><p class="say" data-say="${b.id}"></p></div>`;
+  for (const g of b.gruplar) {
+    html += `<div class="grup"><div class="ac"><span class="etiket">${g.etiket}</span><h3>${g.baslik}</h3>${g.not ? `<p class="not">${g.not}</p>` : ''}</div>`;
+    for (const k of g.kartlar) {
+      html += `<div class="kart" data-id="${k.id}" data-bolum="${b.id}"><div class="kbas"><b>${k.ad}</b><span class="tr">${k.tr || ''}</span>
+        <button class="kop" type="button">Kopyala</button>
+        <label class="yap"><input type="checkbox" id="y-${k.id}"> Yapıldı</label></div><pre>${esc(k.metin)}</pre></div>`;
+    }
+    html += `</div>`;
+  }
+  html += `</section>`;
+}
+icerik.innerHTML = html;
+function sayaclar() {
+  let tY = 0, tH = 0; nav.innerHTML = '';
+  for (const b of BOLUMLER) {
+    const ks = [...document.querySelectorAll(`.kart[data-bolum="${b.id}"]`)], y = ks.filter(k => k.classList.contains('tamam')).length;
+    tY += y; tH += ks.length;
+    document.querySelector(`[data-say="${b.id}"]`).textContent = `${y} / ${ks.length} yapıldı`;
+    const a = document.createElement('a'); a.href = '#' + b.id; a.innerHTML = `${b.ad.split(' · ')[1]}<span>${y}/${ks.length}</span>`;
+    if (y === ks.length) a.classList.add('bitti'); nav.appendChild(a);
+  }
+  document.getElementById('toplam').textContent = `Toplam ${tY} / ${tH} komut yapıldı`;
+}
+document.querySelectorAll('.kart').forEach(k => {
+  const id = k.dataset.id, cb = k.querySelector('input'), pre = k.querySelector('pre'), btn = k.querySelector('.kop');
+  cb.checked = oku(id); k.classList.toggle('tamam', cb.checked);
+  cb.addEventListener('change', () => { yaz(id, cb.checked); k.classList.toggle('tamam', cb.checked); sayaclar(); });
+  btn.addEventListener('click', () => {
+    const bitti = () => { btn.textContent = 'Kopyalandı'; btn.classList.add('oldu'); setTimeout(() => { btn.textContent = 'Kopyala'; btn.classList.remove('oldu'); }, 1600); };
+    const sec = () => { const r = document.createRange(); r.selectNodeContents(pre); const s = getSelection(); s.removeAllRanges(); s.addRange(r); btn.textContent = 'Seçildi, uzun basıp kopyala'; };
+    try { navigator.clipboard.writeText(pre.textContent).then(bitti, sec); } catch (e) { sec(); }
+  });
+});
+const gk = document.getElementById('gizleKutu');
+try { gk.checked = localStorage.getItem('grok:gizle') === '1'; } catch (e) {}
+document.body.classList.toggle('gizle', gk.checked);
+gk.addEventListener('change', () => { document.body.classList.toggle('gizle', gk.checked); try { localStorage.setItem('grok:gizle', gk.checked ? '1' : '0'); } catch (e) {} });
+sayaclar();
+</script>

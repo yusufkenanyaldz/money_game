@@ -32,6 +32,7 @@ Canavarlar nefsin huylarıdır. **Oyun içinde ameller açıkça yazılmaz**, ef
 - `karakter-isle.py` — yeni görünümün (Yolcu, Er, ...) Grok videolarını şeritlere çevirir: her videoda ayrı ölçek (ayakta boydan), zemin ayaklardan, yatay orta baştan, ayak sesleri görüntüdeki adım aralığı + videonun sesi. Çıktı `karakter-<ad>.json` → index.html'de `FACE_ALL`, `ADIM_ALL`, `PUNCH_ALL`, `ANIM`.
 - Görünüm seçimi: `setKar()`; seviye ≥10 → Yolcu. Defter › Güçler › **Görünüm önizleme** ile seviyeye gelmeden denenir (geçici).
 - `GORSELLER.md` — karakter görünüm komutları (10 unvan).
+- `grok-komutlari.html` — Grok'a yaptırılacak her şeyin kopyala-yapıştır komutları (278 komut: düzeltmeler, darbe/yenilme/zafer, görünümler 3–10, canavarlar, bölgeler, emanet simgeleri). Yayınlanmış sayfası da var.
 - `android/` — APK: `KEYSTORE=... KEYPASS=... VCODE=n VNAME=x ./build.sh cikti.apk`. Araçlar (aapt2, smali, apksig) Maven Central'dan otomatik iner. Paket `com.seyr.oyun`, yatay kilitli.
   Kabuk `MainActivity.java` (WebView + adım sensörü köprüsü `SeyrAndroid`). Derleme: `javac --release 8` (Robolectric `android-all` imzalarına karşı) → `dalvik-dx`. Araçlar `android/.tools/` içine iner (gitignore'da).
 
