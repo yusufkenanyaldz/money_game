@@ -34,7 +34,7 @@ Canavarlar nefsin huylarıdır. **Oyun içinde ameller açıkça yazılmaz**, ef
 
 ## İmza anahtarı
 `seyr.p12` (alias `seyr`) ve şifresi **kullanıcıda**, repoda yok. Yeni APK gerekince kullanıcıdan dosyayı ve şifreyi iste;
-aynı anahtar olmazsa güncelleme eskisinin üstüne kurulmaz. Son sürüm: **1.7 (VCODE 8)** — koşudan fren köprü klibi.
+aynı anahtar olmazsa güncelleme eskisinin üstüne kurulmaz. Son sürüm: **1.8 (VCODE 9)** — ayak sesleri animasyona bağlandı.
 
 ## Bilinen tuzaklar
 - `const` ile tanımlanan modüller `window`'a düşmez: `window.SAVAS=SAVAS` gibi açıkça ata.
