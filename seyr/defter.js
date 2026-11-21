@@ -151,6 +151,12 @@ function ciz(){const G=$('#dfGovde'),g=gun(secili());G.innerHTML='';
       <div class="ik"><button id="ykAl">Yedek kodunu kopyala</button><button id="ykYukle">Yedekten geri yükle</button></div>
       <textarea id="ykAlan" rows="3" placeholder="Geri yüklemek için yedek kodunu buraya yapıştır" spellcheck="false"></textarea><p class="not" id="ykDurum"></p></div>`);
     $('#ykAl').onclick=yedekAl;$('#ykYukle').onclick=yedekYukle;
+    /* Görünüm önizleme (geçici, deneme için): seviyeye gelmeden sonraki görünümü oyunda dene */
+    const ak=window.__oyun?__oyun.kar:'garip',secim=window.__onizleme||'';
+    G.insertAdjacentHTML('beforeend',`<div class="yedek"><b>GÖRÜNÜM ÖNİZLEME</b>
+      <p class="not">Deneme içindir; kayda ve seviyeye dokunmaz. Şu an: ${ak==='yolcu'?'Yolcu':'Garip'}.</p>
+      <div class="ik"><button data-gr="" class="${secim===''?'on':''}">Seviyeye göre</button><button data-gr="garip" class="${secim==='garip'?'on':''}">Garip</button><button data-gr="yolcu" class="${secim==='yolcu'?'on':''}">Yolcu</button></div></div>`);
+    G.querySelectorAll('[data-gr]').forEach(b=>b.onclick=()=>{window.__onizleme=b.dataset.gr;if(window.__oyun)__oyun.gorunum(b.dataset.gr||null);ciz();});
   }
 }
 function zikirmatik(e){const z=$('#zm');let n=0;$('#zmSay').textContent='0';$('#zmAlt').textContent=e.ad.toLocaleUpperCase('tr-TR');z.classList.add('on');

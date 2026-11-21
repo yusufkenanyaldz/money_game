@@ -27,14 +27,16 @@ Canavarlar nefsin huylarıdır. **Oyun içinde ameller açıkça yazılmaz**, ef
 - `animasyon-isle.py` — videodan kare şeridi: magenta temizleme, **doğal döngü noktası** bulma (harmanlama yok). İçindeki dosya yolları önceki oturuma ait; yeniden kullanırken `U`, `T`, `O` yollarını ve `V` listesini güncelle.
 - `ses-kes.py` — videolardan ses efekti kesme.
 - `gecis-isle.py` — köprü klipler: ölçeği bekleme boyuna eşitler, baş hizasını ölçer, giriş karesini o anki adıma en benzeyen pozdan seçer → `assets/anim-garip-g*.webp` + `gecis.json` (index.html'deki `GECIS` tablosu buradan).
-- `tek-html.py` — tek dosya HTML (`python3 tek-html.py . Seyr.html 84`; 84 kalite ≈ 9,4 MB).
+- `tek-html.py` — tek dosya HTML: `python3 tek-html.py . Seyr.html <kalite> <küçültme>`. İki görünümle 9,5 MB'a sığması için `82 0.6` (şeritler %60 boyda; APK tam boy).
+- `karakter-isle.py` — yeni görünümün (Yolcu, Er, ...) Grok videolarını şeritlere çevirir: her videoda ayrı ölçek (ayakta boydan), zemin ayaklardan, yatay orta baştan, ayak sesleri görüntüdeki adım aralığı + videonun sesi. Çıktı `karakter-<ad>.json` → index.html'de `FACE_ALL`, `ADIM_ALL`, `PUNCH_ALL`, `ANIM`.
+- Görünüm seçimi: `setKar()`; seviye ≥10 → Yolcu. Defter › Güçler › **Görünüm önizleme** ile seviyeye gelmeden denenir (geçici).
 - `GORSELLER.md` — karakter görünüm komutları (10 unvan).
 - `android/` — APK: `KEYSTORE=... KEYPASS=... VCODE=n VNAME=x ./build.sh cikti.apk`. Araçlar (aapt2, smali, apksig) Maven Central'dan otomatik iner. Paket `com.seyr.oyun`, yatay kilitli.
   Kabuk `MainActivity.java` (WebView + adım sensörü köprüsü `SeyrAndroid`). Derleme: `javac --release 8` (Robolectric `android-all` imzalarına karşı) → `dalvik-dx`. Araçlar `android/.tools/` içine iner (gitignore'da).
 
 ## İmza anahtarı
 `seyr.p12` (alias `seyr`) ve şifresi **kullanıcıda**, repoda yok. Yeni APK gerekince kullanıcıdan dosyayı ve şifreyi iste;
-aynı anahtar olmazsa güncelleme eskisinin üstüne kurulmaz. Son sürüm: **1.8 (VCODE 9)** — ayak sesleri animasyona bağlandı.
+aynı anahtar olmazsa güncelleme eskisinin üstüne kurulmaz. Son sürüm: **1.9 (VCODE 10)** — Yolcu görünümü (10–19. seviye).
 
 ## Bilinen tuzaklar
 - `const` ile tanımlanan modüller `window`'a düşmez: `window.SAVAS=SAVAS` gibi açıkça ata.

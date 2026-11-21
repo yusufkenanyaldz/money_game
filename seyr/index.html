@@ -41,13 +41,17 @@ canvas{position:fixed;inset:0;display:block}
 <script>
 'use strict';
 /* ---------- VARLIKLAR ---------- */
-const ANIM={"anim-garip-durus": [63, 320, 420, 6, 838], "anim-garip-yuru": [56, 231, 420, 6, 802], "anim-garip-yumruk": [30, 346, 420, 6, 800], "anim-garip-arka": [32, 170, 420, 6, 808], "anim-garip-kos": [29, 297, 420, 6, 790], "anim-garip-bekle": [36, 186, 420, 6, 806], "anim-garip-kacin": [30, 265, 420, 6, 792], "anim-garip-yuru2": [30, 246, 420, 6, 800], "anim-garip-gkosdur": [34, 328, 420, 6, 815]};
-const FACE={bekle:-1,yuru:-1,yuru2:1,kos:1,durus:-1,yumruk:-1,kacin:-1,arka:1,gkosdur:1};   // görselin baktığı yön
+const ANIM={"anim-garip-durus": [63, 320, 420, 6, 838], "anim-garip-yuru": [56, 231, 420, 6, 802], "anim-garip-yumruk": [30, 346, 420, 6, 800], "anim-garip-arka": [32, 170, 420, 6, 808], "anim-garip-kos": [29, 297, 420, 6, 790], "anim-garip-bekle": [36, 186, 420, 6, 806], "anim-garip-kacin": [30, 265, 420, 6, 792], "anim-garip-yuru2": [30, 246, 420, 6, 800], "anim-garip-gkosdur": [34, 328, 420, 6, 815], "anim-yolcu-bekle": [21, 192, 420, 6, 853], "anim-yolcu-yuru": [60, 300, 420, 6, 853], "anim-yolcu-yuru2": [67, 272, 420, 6, 838], "anim-yolcu-arka": [24, 262, 420, 6, 866], "anim-yolcu-kos": [31, 539, 420, 6, 803], "anim-yolcu-durus": [38, 411, 420, 6, 789], "anim-yolcu-yumruk": [52, 418, 420, 6, 840], "anim-yolcu-kacin": [20, 279, 420, 6, 845]};
+/* Görünümler (seviye 1-9 Garip, 10-19 Yolcu ...). Yolcu: karakter-isle.py → karakter-yolcu.json */
+const FACE_ALL={garip:{bekle:-1,yuru:-1,yuru2:1,kos:1,durus:-1,yumruk:-1,kacin:-1,arka:1,gkosdur:1},   // görselin baktığı yön
+  yolcu:{"bekle":-1,"yuru":-1,"yuru2":1,"arka":1,"kos":1,"durus":-1,"yumruk":-1,"kacin":-1}};
+let KAR='garip',FACE=FACE_ALL.garip;
 /* Köprü klipler (gecis-isle.py → gecis.json). giris: kaynak döngünün her karesine en benzeyen giriş karesi;
    cikis: bitince hedef döngünün başlanacak karesi; dur: ayakların durduğu kare; kay: baş hizası (kaynak px, başta→sonda) */
-const GECIS={gkosdur:{giris:[5, 11, 11, 11, 11, 5, 6, 6, 6, 5, 5, 11, 0, 11, 5, 11, 6, 6, 5, 5, 11, 11, 0, 11, 5, 6, 6, 6, 5],cikis:1,dur:29,hedef:'bekle',hiz:1.3,kay:[-59.7,35.1]}};
+const GECIS_ALL={garip:{},yolcu:{}};GECIS_ALL.garip={gkosdur:{giris:[5, 11, 11, 11, 11, 5, 6, 6, 6, 5, 5, 11, 0, 11, 5, 11, 6, 6, 5, 5, 11, 11, 0, 11, 5, 6, 6, 6, 5],cikis:1,dur:29,hedef:'bekle',hiz:1.3,kay:[-59.7,35.1]}};let GECIS=GECIS_ALL.garip;
 const AURL=n=>'assets/'+n+'.webp',SURL=n=>(window.SES&&SES[n])||'assets/ses/'+n+'.mp3';
-const IMG={};for(const k in FACE){const i=new Image();i.src=AURL('anim-garip-'+k);IMG[k]=i;}
+const IMG_ALL={};for(const g in FACE_ALL){IMG_ALL[g]={};for(const k in FACE_ALL[g]){const i=new Image();i.src=AURL('anim-'+g+'-'+k);IMG_ALL[g][k]=i;}}
+let IMG=IMG_ALL.garip;
 const SFX={adim:['adim-1','adim-2','adim-3','adim-4','adim-5'],kos:['kosu-adim-1','kosu-adim-2','kosu-adim-3','kosu-adim-4','kosu-adim-5','kosu-adim-6'],
   vur:['yumruk-1','yumruk-2','yumruk-3','yumruk-4','yumruk-5'],kac:['kacin-1'],durus:['durus-1','durus-2']};
 
@@ -74,9 +78,12 @@ const BLEND=.16,WALK=170,RUN=340;
 /* Ayak sesleri: ayağın yere bastığı kareler. Kaynak videoların kendi seslerinden çıkarıldı
    (dongu-*.mp3 animasyonla aynı anda başlar; fren klibi kendi videosundan). Eskiden ses ayrı bir zamanlayıcıyla
    çalıyordu ve adımlardan kayıyordu (yürümede ~%50 hızlı). */
-const ADIM={yuru:{k:[6.1,15.4,24.7,34.1,43.4,52.7],s:'adim',v:.45},kos:{k:[0,4.8,9.6,14.4,19.3,24.1],s:'kos',v:.55},
-  gkosdur:{k:[-1,5.5,10.2,15.1,21.3,26.3,28.9],s:'kos',v:.5}};
-const PUNCH={from:4,to:11,fps:16,hit:7};   // videoda: 4 = gard, 7 = tam uzanma, 11 = geri çekilme
+const ADIM_ALL={garip:{yuru:{k:[6.1,15.4,24.7,34.1,43.4,52.7],s:'adim',v:.45},kos:{k:[0,4.8,9.6,14.4,19.3,24.1],s:'kos',v:.55},
+  gkosdur:{k:[-1,5.5,10.2,15.1,21.3,26.3,28.9],s:'kos',v:.5}},
+  yolcu:{yuru:{k:[4.5, 14.5, 24.5, 34.5, 44.5, 54.5],s:'adim',v:.45},kos:{k:[1.0, 6.2, 11.3, 16.5, 21.7, 26.8],s:'kos',v:.55}}};let ADIM=ADIM_ALL.garip;
+/* Vuruş: garip videoda 4 = gard, 7 = tam uzanma, 11 = geri çekilme; yolcu (asa): 31 = asa başın üstünde, 38 = asa iner, 43 = toparlanma.
+   menzil: asa yumruktan uzun */
+const PUNCH_ALL={garip:{from:4,to:11,fps:16,hit:7,menzil:170},yolcu:{from:31,to:43,fps:24,hit:38,menzil:215}};let PUNCH=PUNCH_ALL.garip;window.MENZIL=PUNCH.menzil;
 const DUMMY=[];for(let i=1;i<=2;i++)DUMMY.push({x:i*620+rnd(-80,80),y:rnd(.3,.8),hp:3,shake:0,down:0});
 let camX=0;const parts=[];
 
@@ -103,14 +110,14 @@ function setSt(s){if(P.st===s)return;
   P.bdur=s==='yumruk'?.11:s==='kacin'?.1:GECIS[s]?.13:(s==='bekle'&&(P.prev.st==='kos'||P.prev.st==='yuru'))?.22:.16;
   // yürüme <-> koşma arasında adım fazını koru
   const loop=x=>x==='yuru'||x==='kos'||x==='yuru2';P.ph=(loop(s)&&loop(P.prev.st))?P.ph:0;P.st=s;P.t=0;}
-function curFrame(){const N=ANIM['anim-garip-'+P.st][0];
+function curFrame(){const N=ANIM['anim-'+KAR+'-'+P.st][0];
   if(P.st==='yumruk')return Math.min(PUNCH.to,PUNCH.from+Math.floor(P.t*PUNCH.fps));
   if(GECIS[P.st])return Math.min(N-1,P.gf0+Math.floor(P.t*15*GECIS[P.st].hiz));if(P.st==='kacin')return Math.min(N-1,Math.floor(P.t*15*1.4));
   return Math.floor(P.ph)%N;}
 /* Animasyonun sürekli konumu (kare cinsinden, döngülerde sarılmadan) */
 function animPos(){return GECIS[P.st]?P.gf0+P.t*15*GECIS[P.st].hiz:P.ph;}
 function adimSesi(st0,a0,a1){const A=ADIM[st0];if(!A||P.st!==st0||a1<=a0)return;
-  const N=ANIM['anim-garip-'+st0][0],loop=!GECIS[st0];
+  const N=ANIM['anim-'+KAR+'-'+st0][0],loop=!GECIS[st0];
   A.k.forEach((c,i)=>{const gecti=loop?Math.floor((a1-c)/N)>Math.floor((a0-c)/N):(a0<c&&a1>=c);
     if(gecti){const son=!loop&&i===A.k.length-1;play(son?'adim':A.s,loop?A.v:A.v*(1-.55*i/A.k.length));}});}
 function attack(){if(P.act>0||P.hurtT>0||P.hp<=0)return;setSt('yumruk');P.act=(PUNCH.to-PUNCH.from+1)/PUNCH.fps;P.hitDone=false;P.vx*=.35;}
@@ -123,18 +130,18 @@ function update(dt){
     if(P.st==='kacin'){const k=P.act/.6;P.vx=-P.face*420*k;}else P.vx*=Math.pow(.02,dt);  // geriye sıçrar
     if(P.st==='yumruk'&&!P.hitDone&&curFrame()>=PUNCH.hit){P.hitDone=true;play('vur',.9);
       for(const d of DUMMY){if(d.down>0)continue;const dx=(d.x-P.x)*P.face,dy=Math.abs(d.y-P.y);
-        if(dx>20&&dx<170&&dy<.18){d.hp-=GUCLU.dmg;d.shake=.35;for(let i=0;i<14;i++)parts.push({x:d.x,gy:d.y,h:rnd(70,150),vx:P.face*rnd(60,260),vh:rnd(60,260),l:rnd(.4,.8),c:Math.random()<.5?'#c9a24a':'#e8cf8a'});
+        if(dx>20&&dx<PUNCH.menzil&&dy<.18){d.hp-=GUCLU.dmg;d.shake=.35;for(let i=0;i<14;i++)parts.push({x:d.x,gy:d.y,h:rnd(70,150),vx:P.face*rnd(60,260),vh:rnd(60,260),l:rnd(.4,.8),c:Math.random()<.5?'#c9a24a':'#e8cf8a'});
           if(d.hp<=0){d.down=4;d.hp=3;}}}
       if(window.SAVAS)SAVAS.vurus();}
     if(P.act<=0)setSt('bekle');
   }else{
     const G=GECIS[P.st];
     if(G&&m<=.12&&P.hurtT<=0){                    // köprü klip oynuyor ve oyuncu durmak istiyor
-      const f=curFrame(),N=ANIM['anim-garip-'+P.st][0],p=clamp((f-P.gf0)/Math.max(1,G.dur-P.gf0),0,1);
+      const f=curFrame(),N=ANIM['anim-'+KAR+'-'+P.st][0],p=clamp((f-P.gf0)/Math.max(1,G.dur-P.gf0),0,1);
       P.vx=P.gv0*Math.pow(1-p,1.6);P.vy=P.gvy0*Math.pow(1-p,1.6);
       if(f>=N-1){const c=G.cikis;setSt(G.hedef);P.ph=c;P.vx=0;P.vy=0;}
-    }else if(P.st==='kos'&&m<=.12&&P.hurtT<=0&&performance.now()-(P.kosT||0)<300&&Math.abs(P.vx)>RUN*.6){   // koşudan fren: o anki adıma en yakın kareden gir
-      const k=curFrame(),G2=GECIS.gkosdur;setSt('gkosdur');P.gf0=G2.giris[k%G2.giris.length];P.gv0=P.vx;P.gvy0=P.vy;
+    }else if(P.st==='kos'&&GECIS.gkosdur&&m<=.12&&P.hurtT<=0&&performance.now()-(P.kosT||0)<300&&Math.abs(P.vx)>RUN*.6){   // koşudan fren: o anki adıma en yakın kareden gir
+      const k=curFrame(),G2=GECIS.gkosdur;if(!G2){}else{setSt('gkosdur');P.gf0=G2.giris[k%G2.giris.length];P.gv0=P.vx;P.gvy0=P.vy;}
     }else{
     const run=m>.85,tvx=m>.12?ix*(run?RUN:WALK):0,tvy=m>.12?iy*(run?.55:.35):0;
     const acc=m>.12?7:6.5;                       // hızlanma / yavaşlama
@@ -194,7 +201,7 @@ function dummy(d){const s=scaleAt(d.y),x=d.x-camX+W/2,y=yScr(d.y),sh=Math.sin(pe
   ctx.beginPath();ctx.arc(0,-150,17,0,7);ctx.fill();ctx.stroke();
   ctx.strokeStyle='#b23a1e';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(-24,-80);ctx.lineTo(24,-80);ctx.stroke();
   ctx.restore();}
-function sprite(st,f,face,alpha){const n='anim-garip-'+st,[N,fw,fh,C,src]=ANIM[n],im=IMG[st];if(!im.complete||!im.naturalWidth)return;
+function sprite(st,f,face,alpha){const n='anim-'+KAR+'-'+st,[N,fw,fh,C,src]=ANIM[n],im=IMG[st];if(!im.complete||!im.naturalWidth)return;
   const s=scaleAt(P.y),h=H*.4*s*src/806,w=h*fw/fh,x=P.x-camX+W/2,y=yScr(P.y);f=Math.max(0,Math.min(N-1,f));
   ctx.save();ctx.globalAlpha=alpha;ctx.translate(x,y);if(FACE[st]!==face)ctx.scale(-1,1);
   const G=GECIS[st],dx=G?(G.kay[0]+(G.kay[1]-G.kay[0])*f/Math.max(1,N-1))*h/src:0;
@@ -202,7 +209,7 @@ function sprite(st,f,face,alpha){const n='anim-garip-'+st,[N,fw,fh,C,src]=ANIM[n
 function hero(){if(P.inv>0&&Math.floor(performance.now()/70)%2)return;const s=scaleAt(P.y),x=P.x-camX+W/2,y=yScr(P.y),h=H*.4*s;
   ctx.fillStyle='rgba(40,30,10,.3)';ctx.beginPath();ctx.ellipse(x,y,h*.17,h*.035,0,0,7);ctx.fill();
   const k=P.blend*P.blend*(3-2*P.blend);          // yumuşak eğri
-  if(P.prev&&k<1){const pp=P.prev,N=ANIM['anim-garip-'+pp.st][0],adv=Math.floor((performance.now()-pp.t0)/1000*15*pp.rate);
+  if(P.prev&&k<1){const pp=P.prev,N=ANIM['anim-'+KAR+'-'+pp.st][0],adv=Math.floor((performance.now()-pp.t0)/1000*15*pp.rate);
     sprite(pp.st,pp.one?Math.min(N-1,pp.f+adv):(pp.f+adv)%N,pp.face,1-k);sprite(P.st,curFrame(),P.face,Math.min(1,k*1.6));}
   else sprite(P.st,curFrame(),P.face,1);
 }
@@ -224,8 +231,13 @@ document.getElementById('basla').onclick=async()=>{await initAudio();try{await d
 requestAnimationFrame(frame);
 window.__s={P,DUMMY,attack,dodge,update,joy,set run(v){running=v}};
 // defter ile bağ: güç → vuruş, defter açıkken oyun durur
-let paused=false,GUCLU={dmg:2};
-window.__oyun={durdur(v){paused=v;},guc(h){GUCLU.dmg=2+(h.L-1)*.08+h.g.alp/1500; /* 1. seviye: 2, 50. seviye: ~6 */},seviye(L){if(window.SES)SES.seviye();}};
+let paused=false,GUCLU={dmg:2},onizleme=null,seviyeKar='garip';
+/* Görünüm değiştir: tabloları o görünümünkilerle değiştirir; o görünümde olmayan bir köprü klipteyse bekleye döner */
+function setKar(k){if(!FACE_ALL[k]||k===KAR)return;KAR=k;FACE=FACE_ALL[k];GECIS=GECIS_ALL[k];IMG=IMG_ALL[k];PUNCH=PUNCH_ALL[k];ADIM=ADIM_ALL[k];
+  window.MENZIL=PUNCH.menzil;if(!FACE[P.st]){P.st='bekle';P.act=0;}P.prev=null;P.blend=1;P.t=0;}
+const seviyeGorunum=L=>L>=10?'yolcu':'garip';
+window.__oyun={durdur(v){paused=v;},guc(h){GUCLU.dmg=2+(h.L-1)*.08+h.g.alp/1500; /* 1. seviye: 2, 50. seviye: ~6 */seviyeKar=seviyeGorunum(h.L);setKar(onizleme||seviyeKar);},
+  /* önizleme: Defter'den görünümü geçici dene (null = seviyeye göre) */ gorunum(k){onizleme=k;setKar(k||seviyeKar);},get kar(){return KAR},seviye(L){if(window.SES)SES.seviye();}};
 </script>
 <script src="sesler.js"></script>
 <script src="savas.js"></script>

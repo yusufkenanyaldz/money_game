@@ -21,7 +21,7 @@ Son denemede (APK 1.1) geçişler yumuşadı ama donma hissi verdi. Muhtemel seb
 | Seviye | Unvan | Görsel | Hareketler |
 |---|---|---|---|
 | 1–9 | Garip | ✅ | ✅ bekleme, yürüme ×2, koşma, ufka yürüyüş, dövüş duruşu, yumruk, kaçınma (+ses) |
-| 10–19 | Yolcu | ☐ | ☐ |
+| 10–19 | Yolcu | ✅ | ✅ bekleme, yürüme, sağa yürüme, ufka yürüyüş, koşu, dövüş duruşu, asayla vuruş · ⚠️ kaçınma geçici (gerçek kaçınma değil), koşudan fren yok (APK 1.9) |
 | 20–29 | Er | ☐ | ☐ |
 | 30–39 | Alp | ☐ | ☐ |
 | 40–49 | Bahadır | ☐ | ☐ |
