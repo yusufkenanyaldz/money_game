@@ -43,17 +43,19 @@ canvas{position:fixed;inset:0;display:block}
 /* ---------- VARLIKLAR ---------- */
 const ANIM={"anim-garip-durus": [63, 320, 420, 6, 838], "anim-garip-yuru": [56, 231, 420, 6, 802], "anim-garip-yumruk": [30, 346, 420, 6, 800], "anim-garip-arka": [32, 170, 420, 6, 808], "anim-garip-kos": [29, 297, 420, 6, 790], "anim-garip-bekle": [36, 186, 420, 6, 806], "anim-garip-kacin": [30, 265, 420, 6, 792], "anim-garip-yuru2": [30, 246, 420, 6, 800]};
 const FACE={bekle:-1,yuru:-1,yuru2:1,kos:1,durus:-1,yumruk:-1,kacin:-1,arka:1};   // görselin baktığı yön
-const AURL=n=>'assets/'+n+'.webp',SURL=n=>(window.SES&&SES[n])||'assets/ses/'+n+'.mp3';
+const AURL=n=>'assets/'+n+'.webp',SURL=n=>(window.SES_DOSYA&&SES_DOSYA[n])||'assets/ses/'+n+'.mp3';
 const IMG={};for(const k in FACE){const i=new Image();i.src=AURL('anim-garip-'+k);IMG[k]=i;}
 const SFX={adim:['adim-1','adim-2','adim-3','adim-4','adim-5'],kos:['kosu-adim-1','kosu-adim-2','kosu-adim-3','kosu-adim-4','kosu-adim-5','kosu-adim-6'],
   vur:['yumruk-1','yumruk-2','yumruk-3','yumruk-4','yumruk-5'],kac:['kacin-1'],durus:['durus-1','durus-2']};
 
 /* ---------- SES ---------- */
 let AC=null,sesOn=true;const BUF={};
-async function initAudio(){if(!AC){AC=new (window.AudioContext||window.webkitAudioContext)();
+function kurAudio(){if(AC)return;try{AC=new (window.AudioContext||window.webkitAudioContext)({latencyHint:'interactive'});}catch(e){AC=new (window.AudioContext||window.webkitAudioContext)();}
   for(const g in SFX)for(const n of SFX[g])fetch(SURL(n)).then(r=>r.arrayBuffer()).then(a=>AC.decodeAudioData(a)).then(b=>BUF[n]=b).catch(()=>{});}
-  if(AC.state==='suspended')AC.resume();}
-function play(g,vol){if(!AC||!sesOn)return;const L=SFX[g],n=L[(Math.random()*L.length)|0],b=BUF[n];if(!b)return;
+async function initAudio(){kurAudio();if(AC.state!=='running')try{await AC.resume();}catch(e){}}
+kurAudio();
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&AC)AC.resume().catch(()=>{});});
+function play(g,vol){if(!AC||!sesOn)return;const L=SFX[g].filter(n=>BUF[n]);if(!L.length)return;const b=BUF[L[(Math.random()*L.length)|0]];if(AC.state!=='running')AC.resume();
   const s=AC.createBufferSource(),v=AC.createGain();s.buffer=b;s.playbackRate.value=.94+Math.random()*.12;v.gain.value=vol??.8;s.connect(v);v.connect(AC.destination);s.start();}
 document.getElementById('ses').onclick=()=>{sesOn=!sesOn;document.getElementById('ses').textContent=sesOn?'🔊':'🔇';};
 
@@ -68,7 +70,9 @@ function hash(i){let h=i*374761393;h=(h^(h>>>13))*1274126177;return((h^(h>>>16))
 // yer şeridi: y = 0 (arka) .. 1 (ön)
 const P={x:0,y:.55,face:1,st:'bekle',t:0,ph:0,act:0,vx:0,vy:0,stepT:0,hitDone:false,prev:null,blend:1};
 const BLEND=.16,WALK=170,RUN=340;
-const PUNCH={from:4,to:11,fps:16,hit:7};   // videoda: 4 = gard, 7 = tam uzanma, 11 = geri çekilme
+const PUNCH={from:4,to:11,fps:16,hit:7,ses:6};
+// adımlar videodaki ayak sesinin geldiği karelerde (videonun kendi sesinden ölçüldü)
+const ADIM={yuru:[5.6,15.4,24.3,33.4,42.3,51.5],kos:[.2,4.7,9.6,14.5,19.3,24],yuru2:[2.3,13.3,23]};   // videoda: 4 = gard, 7 = tam uzanma, 11 = geri çekilme
 const DUMMY=[];for(let i=1;i<=2;i++)DUMMY.push({x:i*620+rnd(-80,80),y:rnd(.3,.8),hp:3,shake:0,down:0});
 let camX=0;const parts=[];
 
@@ -98,7 +102,7 @@ function setSt(s){if(P.st===s)return;
 function curFrame(){const N=ANIM['anim-garip-'+P.st][0];
   if(P.st==='yumruk')return Math.min(PUNCH.to,PUNCH.from+Math.floor(P.t*PUNCH.fps));if(P.st==='kacin')return Math.min(N-1,Math.floor(P.t*15*1.4));
   return Math.floor(P.ph)%N;}
-function attack(){if(P.act>0||P.hurtT>0||P.hp<=0)return;setSt('yumruk');P.act=(PUNCH.to-PUNCH.from+1)/PUNCH.fps;P.hitDone=false;P.vx*=.35;}
+function attack(){if(P.act>0||P.hurtT>0||P.hp<=0)return;setSt('yumruk');P.act=(PUNCH.to-PUNCH.from+1)/PUNCH.fps;P.hitDone=false;P.sesDone=false;P.vx*=.35;}
 function dodge(){if((P.act>0&&P.st!=='yumruk')||P.hurtT>0||P.hp<=0)return;setSt('kacin');P.act=.6;play('kac',.9);}
 
 function update(dt){
@@ -106,7 +110,8 @@ function update(dt){
   if(P.act>0){
     P.act-=dt;
     if(P.st==='kacin'){const k=P.act/.6;P.vx=-P.face*420*k;}else P.vx*=Math.pow(.02,dt);  // geriye sıçrar
-    if(P.st==='yumruk'&&!P.hitDone&&curFrame()>=PUNCH.hit){P.hitDone=true;play('vur',.9);
+    if(P.st==='yumruk'&&!P.sesDone&&curFrame()>=PUNCH.ses){P.sesDone=true;play('vur',.9);}
+    if(P.st==='yumruk'&&!P.hitDone&&curFrame()>=PUNCH.hit){P.hitDone=true;
       for(const d of DUMMY){if(d.down>0)continue;const dx=(d.x-P.x)*P.face,dy=Math.abs(d.y-P.y);
         if(dx>20&&dx<170&&dy<.18){d.hp-=GUCLU.dmg;d.shake=.35;for(let i=0;i<14;i++)parts.push({x:d.x,gy:d.y,h:rnd(70,150),vx:P.face*rnd(60,260),vh:rnd(60,260),l:rnd(.4,.8),c:Math.random()<.5?'#c9a24a':'#e8cf8a'});
           if(d.hp<=0){d.down=4;d.hp=3;}}}
@@ -119,11 +124,13 @@ function update(dt){
     if(m>.12&&Math.abs(ix)>.15)P.face=ix>0?1:-1;
     const sp=Math.abs(P.vx)+Math.abs(P.vy)*400;
     if(sp>WALK*1.35)setSt('kos');else if(sp>40||m>.12)setSt('yuru');else{setSt('bekle');P.vx=0;P.vy=0;P.stepT=.1;}
-    if(P.st!=='bekle'){P.stepT-=dt*Math.min(1.2,sp/(P.st==='kos'?RUN:WALK));if(P.stepT<=0){P.stepT=P.st==='kos'?.26:.42;play(P.st==='kos'?'kos':'adim',P.st==='kos'?.55:.45);}}
+    
   }
   P.x+=P.vx*dt;P.y=clamp(P.y+P.vy*dt,0,1);
   // animasyon hızı hareket hızına bağlı: yavaşlarken adımlar da yavaşlar
   const sp2=Math.abs(P.vx)+Math.abs(P.vy)*400;
+  {const A=ADIM[P.st];if(A){const N=ANIM['anim-garip-'+P.st][0],a=P.ph%N,b=(P.ph+dt*15*(P.rate||1))%N;
+    for(const f of A){if((a<=f&&f<b)||(b<a&&(f>=a||f<b))){play(P.st==='kos'?'kos':'adim',P.st==='kos'?.55:.45);break;}}}}
   P.rate=P.st==='kos'?clamp(sp2/RUN,.8,1.1):P.st==='yuru'?clamp(sp2/WALK,.75,1.1):1;P.ph+=dt*15*P.rate;
   P.t+=dt;P.blend=Math.min(1,P.blend+dt/(P.bdur||BLEND));
   for(const d of DUMMY){d.shake=Math.max(0,d.shake-dt);if(d.down>0)d.down-=dt;}

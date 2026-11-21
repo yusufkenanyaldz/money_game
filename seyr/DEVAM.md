@@ -36,13 +36,17 @@ Tüm Seyr işi `ccr-1c90c77b-uxvoi0` dalında (**main dalında YOK**). Yeni sohb
 
 ## İmza anahtarı
 `seyr.p12` (alias `seyr`) ve şifresi **kullanıcıda**, repoda yok. Yeni APK gerekince kullanıcıdan dosyayı ve şifreyi iste;
-aynı anahtar olmazsa güncelleme eskisinin üstüne kurulmaz. Son sürüm: **1.5 (VCODE 6)**.
+aynı anahtar olmazsa güncelleme eskisinin üstüne kurulmaz. Son sürüm: **1.6 (VCODE 7)**.
 
 ## Bilinen tuzaklar
 - `const` ile tanımlanan modüller `window`'a düşmez: `window.SAVAS=SAVAS` gibi açıkça ata.
 - Satır içinde `//` yorum kullanma (tek satırlık kodlarda geri kalanı yorum yapar), `/* */` kullan.
 - Yumruk videosu kol uzanmış başlıyor; temiz vuruş kare 4–11 (PUNCH ayarı).
 - Bekleme hareketi için yanlış (renkli yamalı) video kullanılmamalı; doğru kaynaklar animasyon-isle.py içindeki V listesinde.
+
+- **İsim çakışması:** ses paketi `window.SES_DOSYA`, sentez sesler `window.SES`. Eskiden ikisi de `SES` idi; sentez dosyası paketi ezdi ve APK'da video sesleri hiç çalmadı (1.6'da düzeltildi).
+- Ses için MP3 değil **kırpılmış WAV** (MP3 başa ~25 ms sessizlik ekler). Ses bağlamı sayfa açılınca kurulur, sesler dokunmadan önce çözülür.
+- Adım sesleri zamanlayıcıyla değil, **videodaki ayak sesinin geldiği karelerde** çalar (`ADIM` dizisi). Yumruk sesi isabetten 1 kare önce (Android gecikmesi).
 
 ## Bekleyen kararlar
 - Kur'an ölçüsü (öneri 1 sayfa = 3 dk), zikir ölçüsü (öneri 100 = 1,5 dk), adım ölçüsü (öneri 100 adım = 1 dk).
