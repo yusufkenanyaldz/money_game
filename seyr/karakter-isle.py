@@ -47,6 +47,17 @@ GORUNUMLER = {
         'yenilme': ('a2cdc089', 0, ('oto', 4), -1, None),
         'zafer':  ('4c23c63b', 0, ('oto', 3), -1, None),
     }),
+    # Alp: kırmızı kaftan, zırh, yuvarlak kalkan, pala (21 Kasım 13:41 seti)
+    'alp': dict(boy=858, klip={
+        'bekle':  ('e66baf8e', .3, 'dongu', -1, None),
+        'yuru':   ('b78680d7', 1.0, 'dongu', -1, None),
+        'kos':    ('9441f0eb', 1.3, 'dongu', 1, 'e2748384'),
+        'yumruk': ('50bda91c', 0, ('oto', 3), -1, None),
+        'kacin':  ('2d272b8c', 0, ('oto', 3), -1, None),
+        'darbe':  ('efeb8604', .75, ('oto', 3), -1, None),     # 0,5. sn'de bozuk bir kare var; ondan sonra başla
+        'yenilme': ('ed4de51b', 0, ('oto', 4), -1, None),
+        'zafer':  ('5e13896b', 0, ('oto', 3), -1, None),
+    }),
 }
 
 ad, U, T = sys.argv[1], sys.argv[2], sys.argv[3]
@@ -97,15 +108,26 @@ def adimlar(dosya, bas, N):
     return sorted(round(t * FPS - bas * FPS, 1) for t in ons if 0 <= t * FPS - bas * FPS < N)
 
 
-def duzenli(ons, N, sil):
+def duzenli(ons, N, sil, enaz=8, alfa=None):
     """Adım aralığı görüntüden (siluetin kendini tekrar ettiği süre = bir çift adım), adımın düştüğü an sesten."""
-    if not ons: return []
     fark = [np.mean([np.abs(sil[i] - sil[(i + L) % N]).mean() for i in range(N)]) for L in range(1, N // 2 + 1)]
     # en küçük farklı gecikme: bir çift adım (yarım adımlık gecikmede ayaklar ters, fark büyük)
-    adaylar = [(fark[L - 1], L) for L in range(4, N // 2 + 1)]
-    S = min(adaylar)[1]; n = max(2, round(N / (S / 2))); P = N / n
-    en = max(((sum(1 for o in ons if min((o - f) % P, P - (o - f) % P) < 1.2), f) for f in np.arange(0, P, .25)))
-    print(f'   çift adım {S} kare → döngüde {n} adım, her {P:.1f} karede; sesle uyan {en[0]}/{len(ons)}')
+    adaylar = [(fark[L - 1], L) for L in range(enaz, N // 2 + 1)]   # çok kısa gecikme sahte tekrar verir
+    S = min(adaylar)[1] if adaylar else N    # döngü tek çift adımdan kısaysa: döngünün kendisi bir çift adım
+    n = max(2, round(N / (S / 2))); P = N / n
+    # adımın düştüğü an: görüntüden. Ayak bandının genişliği (adım açıklığı) aralığa göre katlanır, en açık faz seçilir.
+    #   Grok'un sesi görüntünün 2-4 kare gerisinde kalabiliyor (Yolcu ve Er'de görüldü), bu yüzden ses yalnızca yedek.
+    gen = []
+    for a in alfa:
+        rows = np.where((a > 128).sum(1) > 3)[0]; bot, top = rows.max(), rows.min()
+        band = a[bot - int((bot - top) * .07):bot + 1] > 128; xs = np.where(band.any(0))[0]; gen.append(xs.max() - xs.min())
+    gen = np.array(gen, float); gen = (gen - gen.mean()) / (gen.std() + 1e-6)
+    fazlar = np.arange(0, P, .25)
+    skor = [sum(gen[i] * np.cos(2 * np.pi * (i - f) / P) for i in range(N)) for f in fazlar]
+    faz = float(fazlar[int(np.argmax(skor))])
+    sesli = max(((sum(1 for o in ons if min((o - f) % P, P - (o - f) % P) < 1.2), f) for f in np.arange(0, P, .25)))[1] if ons else None
+    print(f'   çift adım {S} kare → döngüde {n} adım, her {P:.1f} karede; görüntüden faz {faz:.1f}' + (f' (ses {sesli:.1f})' if sesli is not None else ''))
+    en = (0, faz)
     return [round(float(en[1] + i * P), 1) for i in range(n)]
 
 
@@ -156,7 +178,7 @@ for st, (dosya, bas, tur, yon, ayakta) in G['klip'].items():
     meta['FACE'][st] = yon
     if st in ('yuru', 'kos'):
         sil = [np.asarray(Image.fromarray(r[..., 3]).resize((64, 64))).astype(float) / 255 for r in R]
-        meta['ADIM'][st] = duzenli(adimlar(dosya, bas, N), N, sil)
+        meta['ADIM'][st] = duzenli(adimlar(dosya, bas, N), N, sil, 14 if st == 'yuru' else 8, [r[..., 3] for r in R])   # çift adım: yürüme ≥0,9 sn, koşu ≥0,5 sn
     if st == 'gkosdur': meta['ADIM'][st] = adimlar(dosya, bas, N)
     print(f'   {fw}x{H_STRIP}, ölçek {k:.3f}, {os.path.getsize(yol) // 1024} KB, adım {meta["ADIM"].get(st, "-")}')
 

@@ -31,7 +31,7 @@ function vurus(){for(const e of E){if(e.durum==='ol')continue;const dx=(e.x-P.x)
     if(dx>10&&dx<(window.MENZIL||170)&&dy<.2){let h=GUCLU.dmg*(1+.25*(e.T.zayif?cig(e.T.zayif):0));
       e.can-=h;e.flas=.15;e.kx=P.face*260;yazi.push({x:e.x,y:e.y,h:H*e.T.boy*scaleAt(e.y),s:'−'+(Math.round(h*10)/10),t:.8,c:'#f6e2a4'});
       for(let i=0;i<10;i++)parts.push({x:e.x,gy:e.y,h:rnd(60,140),vx:P.face*rnd(60,240),vh:rnd(40,220),l:rnd(.3,.6),c:Math.random()<.5?'#6b5a8a':'#2a2236'});
-      if(e.can<=0){e.durum='ol';e.t=0;window.SES&&SES.olum(!!e.T.patron);}else window.SES&&SES.isabet(!!e.T.patron);
+      if(e.can<=0){e.durum='ol';e.t=0;window.SES&&SES.olum(!!e.T.patron);if(E.every(x=>x.durum==='ol'))setTimeout(()=>window.ZAFER&&ZAFER(),350);}else window.SES&&SES.isabet(!!e.T.patron);
       if(e.durum==='ol'){}
       // sendeleme kuralı: hazırlanan/saldıran ve patron sendelemez; sendeledikten sonra 1,2 sn bağışık
       else if(!e.T.patron&&e.durum!=='hazir'&&e.durum!=='saldir'&&e.sars<=0){e.durum='darbe';e.t=0;e.sars=1.2;}

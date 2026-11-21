@@ -15,12 +15,30 @@ from PIL import Image
 BURASI = os.path.dirname(os.path.abspath(__file__))
 ASSETS = os.path.join(BURASI, 'assets')
 U, T = sys.argv[1], sys.argv[2]
+GOR = sys.argv[3] if len(sys.argv) > 3 else 'garip'   # görünüm: garip, yolcu, er, alp
 H_STRIP, COLS, FPS, IDLE_SRC = 420, 6, 15, 806
 UNIT = 200 / IDLE_SRC                      # karşılaştırma ölçeği: bekleme boyu = 200 birim
 
-KLIPLER = {'A': 'e2fa845f', 'B': '152daa7f', 'E': '437dcb00'}   # dosya adlarının başı
-ESKI = ['bekle', 'yuru', 'kos', 'yumruk', 'durus', 'kacin', 'arka', 'yuru2']
+# Görünüm başına: klipler (dosya adı başı), bekleme boyu (karakter-isle.py'deki boy) ve geçişler.
+#  'oto' geçişlerde aralıklar kendiliğinden bulunur: hareketin başladığı kare ve karakterin durup oturduğu kare.
+AYAR = {
+    'garip': dict(boy=806, klip={'B': '152daa7f', 'W': '8063b3af'}, gecis=[
+        dict(ad='gkosdur', klip='B', giris_ara=(46, 58), kaynak='kos', son=79, dur=75, hedef='bekle', yon=1),
+        dict(ad='gbasla', klip='W', oto=True, hedef='yuru', yon=-1), dict(ad='gdur', klip='W', oto=True, kaynak='yuru', hedef='bekle', yon=-1)]),
+    'yolcu': dict(boy=838, klip={'F': 'ce8b38df', 'W': '014af892'}, gecis=[
+        dict(ad='gkosdur', klip='F', oto=True, kaynak='kos', hedef='bekle', yon=1),
+        dict(ad='gbasla', klip='W', oto=True, hedef='yuru', yon=-1), dict(ad='gdur', klip='W', oto=True, kaynak='yuru', hedef='bekle', yon=-1)]),
+    'er': dict(boy=850, klip={'F': 'b5b15726', 'W': 'fc7818b3'}, gecis=[
+        dict(ad='gkosdur', klip='F', oto=True, kaynak='kos', hedef='bekle', yon=1),
+        dict(ad='gbasla', klip='W', oto=True, hedef='yuru', yon=-1), dict(ad='gdur', klip='W', oto=True, kaynak='yuru', hedef='bekle', yon=-1)]),
+    'alp': dict(boy=858, klip={'F': 'e2748384'}, gecis=[      # bekle↔yürü klibi henüz yok
+        dict(ad='gkosdur', klip='F', oto=True, kaynak='kos', hedef='bekle', yon=1)]),
+}[GOR]
+KLIPLER = AYAR['klip']; IDLE_SRC = AYAR['boy']; UNIT = 200 / IDLE_SRC
+ESKI = ['bekle', 'yuru', 'kos']
 ANIM = json.loads(open(os.path.join(BURASI, 'index.html'), encoding='utf-8').read().split('const ANIM=')[1].split(';')[0])
+if os.path.exists(os.path.join(BURASI, f'karakter-{GOR}.json')):
+    ANIM.update(json.load(open(os.path.join(BURASI, f'karakter-{GOR}.json')))['ANIM'])
 
 
 def key(f):
@@ -66,8 +84,8 @@ def fark(a, b): return float(np.abs(a - b).mean() * 100)
 # ---- mevcut şeritler: kareler, eksen kayması, karşılaştırma siluetleri
 eski = {}
 for st in ESKI:
-    N, fw, fh, C, src = ANIM['anim-garip-' + st]
-    sh = np.asarray(Image.open(os.path.join(ASSETS, f'anim-garip-{st}.webp')).convert('RGBA'))
+    N, fw, fh, C, src = ANIM[f'anim-{GOR}-{st}']
+    sh = np.asarray(Image.open(os.path.join(ASSETS, f'anim-{GOR}-{st}.webp')).convert('RGBA'))
     fr = [sh[(i // C) * fh:(i // C + 1) * fh, (i % C) * fw:(i % C + 1) * fw, 3] for i in range(N)]
     ek = [eksen(a) for a in fr]
     olc = src / H_STRIP * UNIT
@@ -86,9 +104,7 @@ for st in ESKI:
 #     dict(ad='gdur', klip='A', giris_ara=(30, 52), kaynak='yuru', son=70, dur=62, hedef='bekle', yon=-1),
 #  E (07-28-30, vuruş→bekle): eller göğüs hizasında kalır, bekleme duruşuna hiç varmaz.
 #  07-28-16 (bekle→yürü): yürümeye başlarken yamalar renk değiştirir. 07-28-23 (bekle→vuruş): arkasını dönüp savrulur.
-GECIS = [
-    dict(ad='gkosdur', klip='B', giris_ara=(46, 58), kaynak='kos', son=79, dur=75, hedef='bekle', yon=1),
-]
+GECIS = AYAR['gecis']
 
 klip = {k: kareler(k) for k in {g['klip'] for g in GECIS}}
 olcek = {}
@@ -97,9 +113,24 @@ for k, fr in klip.items():
     olcek[k] = IDLE_SRC / float(ys.max() - ys.min())      # bekleme duruşu boyu → 806
     print(f'klip {k}: bekleme boyu {ys.max() - ys.min()} px → ölçek {olcek[k]:.3f}')
 
+def aralik(fr):
+    """(hareketin başladığı kare, karakterin durup oturduğu kare)"""
+    sm = [np.asarray(Image.fromarray(f[..., 3]).resize((96, 96))).astype(float) / 255 for f in fr]
+    d = [np.abs(sm[i + 1] - sm[i]).mean() for i in range(len(sm) - 1)]
+    bas = next(i for i in range(len(d)) if d[i] > .006)
+    otur = max(i for i in range(len(d)) if d[i] > .006) + 1
+    return bas, min(otur, len(fr) - 1)
+
+
 sonuc = {}
 for g in GECIS:
     fr = klip[g['klip']]; k = olcek[g['klip']]
+    if g.get('oto'):
+        hb, ho = aralik(fr); g = dict(g)
+        if g['ad'] == 'gbasla': g.update(bas=max(0, hb - 1), son_ara=(hb + 8, min(hb + 28, ho)))
+        elif g['ad'] == 'gdur': g.update(giris_ara=(max(hb + 10, ho - 40), ho - 16), son=min(len(fr) - 1, ho + 2), dur=ho - 4)
+        else: g.update(giris_ara=(max(hb + 2, ho - 34), ho - 20), son=min(len(fr) - 1, ho + 2), dur=ho - 3)
+        print(f"{g['ad']}: hareket {hb}. karede başlıyor, {ho}. karede oturuyor")
     sil = [siluet(f[..., 3], k * UNIT, eksen(f[..., 3])) for f in fr]
     hedef = eski[g['hedef']]
     if g['ad'] == 'gbasla':
@@ -133,7 +164,7 @@ for g in GECIS:
         im = Image.fromarray(f, 'RGBA').crop((x0, y0, x1, y1)).resize((fw, H_STRIP), Image.LANCZOS)
         sheet.paste(im, ((i % COLS) * fw, (i // COLS) * H_STRIP))
         eks.append((eksen(f[..., 3]) - (x0 + x1) / 2) * k)   # normalize kaynak px
-    yol = os.path.join(ASSETS, f"anim-garip-{g['ad']}.webp"); sheet.save(yol, 'WEBP', quality=90, method=6)
+    yol = os.path.join(ASSETS, f"anim-{GOR}-{g['ad']}.webp"); sheet.save(yol, 'WEBP', quality=90, method=6)
     src = round((y1 - y0) * k)
     sonuc[g['ad']] = dict(anim=[N, fw, H_STRIP, COLS, src], yon=g['yon'], kayBas=round(float(np.mean(eks[:3])), 1),
                           kaySon=round(float(np.mean(eks[-3:])), 1), giris=giris, cikis=cikis,
@@ -141,5 +172,5 @@ for g in GECIS:
     print(f"   {N} kare, {fw}x{H_STRIP}, {os.path.getsize(yol) // 1024} KB")
 
 json.dump(dict(gecis=sonuc, kay={st: round(v['kay'], 1) for st, v in eski.items()}),
-          open(os.path.join(BURASI, 'gecis.json'), 'w'), ensure_ascii=False, indent=1)
+          open(os.path.join(BURASI, 'gecis.json' if GOR == 'garip' else f'gecis-{GOR}.json'), 'w'), ensure_ascii=False, indent=1)
 print('✓ gecis.json')

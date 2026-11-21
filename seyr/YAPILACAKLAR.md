@@ -23,8 +23,8 @@ Son denemede (APK 1.1) geçişler yumuşadı ama donma hissi verdi. Muhtemel seb
 |---|---|---|---|
 | 1–9 | Garip | ✅ | ✅ bekleme, yürüme ×2, koşma, ufka yürüyüş, dövüş duruşu, yumruk, kaçınma (+ses) |
 | 10–19 | Yolcu | ✅ | ✅ bekleme, yürüme, sağa yürüme, ufka yürüyüş, koşu, dövüş duruşu, asayla vuruş · kaçınma (çömelip zıplar, 1.10) · koşudan fren yok |
-| 20–29 | Er | ☐ | ☐ |
-| 30–39 | Alp | ☐ | ☐ |
+| 20–29 | Er | ✅ | ✅ tüm set + darbe, yenilme, zafer, koşudan fren, bekle↔yürü (1.13) |
+| 30–39 | Alp | ✅ | ✅ tüm set + darbe, yenilme, zafer, koşudan fren (1.13) · ☐ bekle↔yürü klibi bekleniyor |
 | 40–49 | Bahadır | ☐ | ☐ |
 | 50–59 | Ulu | ☐ | ☐ |
 | 60–69 | Bilge | ☐ | ☐ |
@@ -33,7 +33,7 @@ Son denemede (APK 1.1) geçişler yumuşadı ama donma hissi verdi. Muhtemel seb
 | 90–100 | Simurg | ☐ | ☐ |
 
 Her görünüm için gereken hareketler (Garip'tekilerle aynı): bekleme, yürüme, koşma, dövüş duruşu, saldırı, kaçınma.
-İleride eklenecek: **darbe alma**, **yenilme/düşme**, **zafer** pozu.
+**Darbe alma, yenilme, zafer** oyunda (1.13): vurulunca darbe, can bitince yere düşüp kalır, dalga bitince zafer. Yolcu/Er/Alp'te var; **Garip'in üç klibi bekleniyor** (komutlar grok-komutlari.html'de).
 - [ ] Silah gelen seviyelerde (Alp: kılıç, Bahadır: yay) saldırı hareketi o silahla.
 - [ ] Seviye atlama anı: görünüm değişirken geçiş efekti.
 - [ ] Komutlar `GORSELLER.md` içinde; her biri **tek parça kopyala-yapıştır** olarak verilecek.

@@ -1,0 +1,91 @@
+{
+ "ANIM": {
+  "anim-alp-bekle": [
+   41,
+   264,
+   420,
+   6,
+   898
+  ],
+  "anim-alp-yuru": [
+   26,
+   255,
+   420,
+   6,
+   890
+  ],
+  "anim-alp-kos": [
+   32,
+   494,
+   420,
+   6,
+   861
+  ],
+  "anim-alp-yumruk": [
+   58,
+   453,
+   420,
+   6,
+   924
+  ],
+  "anim-alp-kacin": [
+   68,
+   402,
+   420,
+   6,
+   924
+  ],
+  "anim-alp-darbe": [
+   39,
+   365,
+   420,
+   6,
+   902
+  ],
+  "anim-alp-yenilme": [
+   79,
+   496,
+   420,
+   6,
+   898
+  ],
+  "anim-alp-zafer": [
+   32,
+   456,
+   420,
+   6,
+   922
+  ]
+ },
+ "FACE": {
+  "bekle": -1,
+  "yuru": -1,
+  "kos": 1,
+  "yumruk": -1,
+  "kacin": -1,
+  "darbe": -1,
+  "yenilme": -1,
+  "zafer": -1
+ },
+ "ADIM": {
+  "yuru": [
+   8.8,
+   21.8
+  ],
+  "kos": [
+   3.8,
+   9.1,
+   14.4,
+   19.8,
+   25.1,
+   30.4
+  ]
+ },
+ "ENGENIS": {
+  "yumruk": 24,
+  "kacin": 14,
+  "darbe": 5,
+  "yenilme": 78,
+  "zafer": 13
+ }
+}

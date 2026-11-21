@@ -43,14 +43,20 @@ canvas{position:fixed;inset:0;display:block}
 <script>
 'use strict';
 /* ---------- VARLIKLAR ---------- */
-const ANIM={"anim-garip-durus": [63, 320, 420, 6, 838], "anim-garip-yuru": [56, 231, 420, 6, 802], "anim-garip-yumruk": [30, 346, 420, 6, 800], "anim-garip-arka": [32, 170, 420, 6, 808], "anim-garip-kos": [29, 297, 420, 6, 790], "anim-garip-bekle": [36, 186, 420, 6, 806], "anim-garip-kacin": [30, 265, 420, 6, 792], "anim-garip-yuru2": [30, 246, 420, 6, 800], "anim-garip-gkosdur": [34, 328, 420, 6, 815], "anim-yolcu-bekle": [21, 192, 420, 6, 853], "anim-yolcu-yuru": [60, 300, 420, 6, 853], "anim-yolcu-yuru2": [67, 272, 420, 6, 838], "anim-yolcu-arka": [24, 262, 420, 6, 866], "anim-yolcu-kos": [31, 539, 420, 6, 803], "anim-yolcu-durus": [38, 411, 420, 6, 789], "anim-yolcu-yumruk": [52, 418, 420, 6, 840], "anim-yolcu-kacin": [24, 473, 420, 6, 817]};
-/* Görünümler (seviye 1-9 Garip, 10-19 Yolcu ...). Yolcu: karakter-isle.py → karakter-yolcu.json */
-const FACE_ALL={garip:{bekle:-1,yuru:-1,yuru2:1,kos:1,durus:-1,yumruk:-1,kacin:-1,arka:1,gkosdur:1},   // görselin baktığı yön
-  yolcu:{"bekle":-1,"yuru":-1,"yuru2":1,"arka":1,"kos":1,"durus":-1,"yumruk":-1,"kacin":-1}};
-let KAR='garip',FACE=FACE_ALL.garip;
-/* Köprü klipler (gecis-isle.py → gecis.json). giris: kaynak döngünün her karesine en benzeyen giriş karesi;
-   cikis: bitince hedef döngünün başlanacak karesi; dur: ayakların durduğu kare; kay: baş hizası (kaynak px, başta→sonda) */
-const GECIS_ALL={garip:{},yolcu:{}};GECIS_ALL.garip={gkosdur:{giris:[5, 11, 11, 11, 11, 5, 6, 6, 6, 5, 5, 11, 0, 11, 5, 11, 6, 6, 5, 5, 11, 11, 0, 11, 5, 6, 6, 6, 5],cikis:1,dur:29,hedef:'bekle',hiz:1.3,kay:[-59.7,35.1]}};let GECIS=GECIS_ALL.garip;
+/* KARAKTER-VERI: karakter-veri.py üretir, elle değiştirme */
+const ANIM={"anim-garip-durus": [63, 320, 420, 6, 838], "anim-garip-yuru": [56, 231, 420, 6, 802], "anim-garip-yumruk": [30, 346, 420, 6, 800], "anim-garip-arka": [32, 170, 420, 6, 808], "anim-garip-kos": [29, 297, 420, 6, 790], "anim-garip-bekle": [36, 186, 420, 6, 806], "anim-garip-kacin": [30, 265, 420, 6, 792], "anim-garip-yuru2": [30, 246, 420, 6, 800], "anim-garip-gkosdur": [34, 328, 420, 6, 815], "anim-garip-gbasla": [15, 220, 420, 6, 820], "anim-garip-gdur": [43, 214, 420, 6, 820], "anim-yolcu-bekle": [21, 192, 420, 6, 853], "anim-yolcu-yuru": [60, 300, 420, 6, 853], "anim-yolcu-yuru2": [67, 272, 420, 6, 838], "anim-yolcu-arka": [24, 262, 420, 6, 866], "anim-yolcu-kos": [31, 539, 420, 6, 803], "anim-yolcu-durus": [38, 411, 420, 6, 789], "anim-yolcu-yumruk": [52, 418, 420, 6, 840], "anim-yolcu-kacin": [24, 473, 420, 6, 817], "anim-yolcu-darbe": [35, 357, 420, 6, 900], "anim-yolcu-yenilme": [67, 536, 420, 6, 847], "anim-yolcu-zafer": [25, 197, 420, 6, 903], "anim-yolcu-gkosdur": [37, 334, 420, 6, 845], "anim-yolcu-gbasla": [13, 199, 420, 6, 847], "anim-yolcu-gdur": [43, 240, 420, 6, 855], "anim-er-bekle": [32, 212, 420, 6, 863], "anim-er-yuru": [27, 351, 420, 6, 857], "anim-er-kos": [21, 546, 420, 6, 837], "anim-er-yumruk": [46, 454, 420, 6, 859], "anim-er-kacin": [45, 361, 420, 6, 890], "anim-er-darbe": [38, 350, 420, 6, 859], "anim-er-yenilme": [64, 536, 420, 6, 857], "anim-er-zafer": [25, 379, 420, 6, 913], "anim-er-gkosdur": [37, 365, 420, 6, 859], "anim-er-gbasla": [22, 209, 420, 6, 861], "anim-er-gdur": [43, 221, 420, 6, 861], "anim-alp-bekle": [41, 264, 420, 6, 898], "anim-alp-yuru": [26, 255, 420, 6, 890], "anim-alp-kos": [32, 494, 420, 6, 861], "anim-alp-yumruk": [58, 453, 420, 6, 924], "anim-alp-kacin": [68, 402, 420, 6, 924], "anim-alp-darbe": [39, 365, 420, 6, 902], "anim-alp-yenilme": [79, 496, 420, 6, 898], "anim-alp-zafer": [32, 456, 420, 6, 922], "anim-alp-gkosdur": [37, 388, 420, 6, 867]};
+const FACE_ALL={"garip":{"bekle":-1,"yuru":-1,"yuru2":1,"kos":1,"durus":-1,"yumruk":-1,"kacin":-1,"arka":1,"gkosdur":1,"gbasla":-1,"gdur":-1},"yolcu":{"bekle":-1,"yuru":-1,"yuru2":1,"arka":1,"kos":1,"durus":-1,"yumruk":-1,"kacin":-1,"darbe":-1,"yenilme":-1,"zafer":-1,"gkosdur":1,"gbasla":-1,"gdur":-1},"er":{"bekle":-1,"yuru":-1,"kos":1,"yumruk":-1,"kacin":-1,"darbe":-1,"yenilme":-1,"zafer":-1,"gkosdur":1,"gbasla":-1,"gdur":-1},"alp":{"bekle":-1,"yuru":-1,"kos":1,"yumruk":-1,"kacin":-1,"darbe":-1,"yenilme":-1,"zafer":-1,"gkosdur":1}};   // görselin baktığı yön
+/* Köprü klipler: giris = kaynak döngünün her karesine en benzeyen giriş karesi; cikis = hedef döngünün başlanacak karesi;
+   dur = ayakların durduğu kare; kay = baş hizası (kaynak px, başta→sonda); hiz = oynatma hızı */
+const GECIS_ALL={"garip":{"gkosdur":{"cikis":1,"hedef":"bekle","hiz":1.3,"kay":[-59.7,35.1],"giris":[5,11,11,11,11,5,6,6,6,5,5,11,0,11,5,11,6,6,5,5,11,11,0,11,5,6,6,6,5],"dur":29},"gbasla":{"cikis":29,"hedef":"yuru","hiz":1.2,"kay":[-55.5,19.7]},"gdur":{"cikis":2,"hedef":"bekle","hiz":1.5,"kay":[10.3,-42.1],"giris":[9,0,0,0,0,0,0,9,9,9,9,10,12,23,14,4,5,6,6,9,9,9,0,0,15,7,7,9,9,9,11,23,14,14,5,5,7,9,9,9,0,0,5,15,7,9,9,11,11,23,3,4,5,5,23,9],"dur":36}},"yolcu":{"gkosdur":{"cikis":16,"hedef":"bekle","hiz":1.3,"kay":[-166.2,-44.8],"giris":[3,9,11,11,3,0,10,11,11,3,3,9,5,0,11,3,0,0,11,13,13,9,5,0,11,13,0,10,0,11,13],"dur":31},"gbasla":{"cikis":33,"hedef":"yuru","hiz":1.2,"kay":[-18.3,-8.1]},"gdur":{"cikis":4,"hedef":"bekle","hiz":1.5,"kay":[14.2,-4.4],"giris":[13,9,10,10,17,17,17,18,12,0,10,13,13,14,14,11,14,14,14,12,9,10,10,14,16,16,16,17,12,10,10,13,14,14,14,14,10,10,13,12,12,10,10,14,13,14,14,17,9,0,10,11,12,13,14,14,14,14,13,10],"dur":36}},"er":{"gkosdur":{"cikis":12,"hedef":"bekle","hiz":1.3,"kay":[-182.8,-42.8],"giris":[6,8,3,9,13,11,13,13,9,10,8,8,8,9,10,13,11,13,0,10,10],"dur":31},"gbasla":{"cikis":7,"hedef":"yuru","hiz":1.2,"kay":[-48.0,-40.3]},"gdur":{"cikis":3,"hedef":"bekle","hiz":1.5,"kay":[-20.9,-30.5],"giris":[16,16,19,19,19,19,6,6,23,23,23,2,2,0,0,0,0,2,2,4,4,6,6,9,9,11,11],"dur":36}},"alp":{"gkosdur":{"cikis":21,"hedef":"bekle","hiz":1.3,"kay":[-129.9,-28.6],"giris":[3,4,11,7,8,8,7,11,1,13,3,5,11,7,8,8,10,0,1,2,13,4,5,6,8,8,9,7,12,2,2,3],"dur":31}}};
+/* Ayak sesleri: ayağın yere bastığı kareler (görüntüdeki en açık adım; Garip videonun sesinden) */
+const ADIM_ALL={"garip":{"yuru":{"k":[6.1,15.4,24.7,34.1,43.4,52.7],"s":"adim","v":0.45},"kos":{"k":[0,4.8,9.6,14.4,19.3,24.1],"s":"kos","v":0.55},"gkosdur":{"k":[-1,5.5,10.2,15.1,21.3,26.3,28.9],"s":"kos","v":0.5}},"yolcu":{"yuru":{"k":[4.2,14.2,24.2,34.2,44.2,54.2],"s":"adim","v":0.45},"kos":{"k":[3.2,8.4,13.6,18.8,23.9,29.1],"s":"kos","v":0.55},"gkosdur":{"k":[0.0,5.2,10.4,15.6,20.8,26.0],"s":"kos","v":0.5}},"er":{"yuru":{"k":[2.0,15.5],"s":"adim","v":0.45},"kos":{"k":[0.0,5.2,10.5,15.8],"s":"kos","v":0.55},"gkosdur":{"k":[0.0,5.2,10.4,15.6,20.8,26.0],"s":"kos","v":0.5}},"alp":{"yuru":{"k":[8.8,21.8],"s":"adim","v":0.45},"kos":{"k":[3.8,9.1,14.4,19.8,25.1,30.4],"s":"kos","v":0.55},"gkosdur":{"k":[0.0,5.3,10.6,15.9,21.2,26.5],"s":"kos","v":0.5}}};
+const PUNCH_ALL={"garip":{"from":4,"to":11,"fps":16,"hit":7,"menzil":170},"yolcu":{"from":31,"to":43,"fps":24,"hit":38,"menzil":215},"er":{"from":21,"to":31,"fps":20,"hit":25,"menzil":185},"alp":{"from":19,"to":31,"fps":20,"hit":24,"menzil":205}};
+/* Tek seferlik hareketler: from = ilk kare, n = kare sayısı, sure = sn */
+const TEK_ALL={"garip":{"kacin":{"from":0,"n":13,"sure":0.6}},"yolcu":{"kacin":{"from":0,"n":23,"sure":0.6},"darbe":{"from":0,"n":35,"sure":0.7},"yenilme":{"from":0,"n":67,"sure":1.8},"zafer":{"from":0,"n":25,"sure":1.5}},"er":{"kacin":{"from":12,"n":22,"sure":0.6},"darbe":{"from":0,"n":38,"sure":0.7},"yenilme":{"from":0,"n":64,"sure":1.8},"zafer":{"from":0,"n":25,"sure":1.5}},"alp":{"kacin":{"from":4,"n":22,"sure":0.6},"darbe":{"from":0,"n":39,"sure":0.7},"yenilme":{"from":0,"n":79,"sure":1.8},"zafer":{"from":0,"n":32,"sure":1.92}}};
+const GORUNUM_SEVIYE=[[10,"yolcu"],[20,"er"],[30,"alp"]];
+let KAR='garip',FACE=FACE_ALL.garip,GECIS=GECIS_ALL.garip,ADIM=ADIM_ALL.garip,PUNCH=PUNCH_ALL.garip,TEK=TEK_ALL.garip;window.MENZIL=PUNCH.menzil;
+/* /KARAKTER-VERI */
 const AURL=n=>'assets/'+n+'.webp',SURL=n=>(window.SES_DOSYA&&SES_DOSYA[n])||'assets/ses/'+n+'.mp3';   /* paket SES_DOSYA: sesler.js'deki sentez SES'i onu eziyordu */
 const IMG_ALL={};for(const g in FACE_ALL){IMG_ALL[g]={};for(const k in FACE_ALL[g]){const i=new Image();i.src=AURL('anim-'+g+'-'+k);IMG_ALL[g][k]=i;}}
 let IMG=IMG_ALL.garip;
@@ -84,16 +90,6 @@ function hash(i){let h=i*374761393;h=(h^(h>>>13))*1274126177;return((h^(h>>>16))
 // yer şeridi: y = 0 (arka) .. 1 (ön)
 const P={x:0,y:.55,face:1,st:'bekle',t:0,ph:0,act:0,vx:0,vy:0,stepT:0,hitDone:false,prev:null,blend:1};
 const BLEND=.16,WALK=170,RUN=340;
-/* Ayak sesleri: ayağın yere bastığı kareler. Kaynak videoların kendi seslerinden çıkarıldı
-   (dongu-*.mp3 animasyonla aynı anda başlar; fren klibi kendi videosundan). Yolcu yürüyüşü görüntüden düzeltildi
-   (Grok'un sesi o videoda ~2 kare geride). Eskiden ses ayrı bir zamanlayıcıyla
-   çalıyordu ve adımlardan kayıyordu (yürümede ~%50 hızlı). */
-const ADIM_ALL={garip:{yuru:{k:[6.1,15.4,24.7,34.1,43.4,52.7],s:'adim',v:.45},kos:{k:[0,4.8,9.6,14.4,19.3,24.1],s:'kos',v:.55},
-  gkosdur:{k:[-1,5.5,10.2,15.1,21.3,26.3,28.9],s:'kos',v:.5}},
-  yolcu:{yuru:{k:[2.5,12.5,22.5,32.5,42.5,52.5],s:'adim',v:.45},kos:{k:[1.0, 6.2, 11.3, 16.5, 21.7, 26.8],s:'kos',v:.55}}};let ADIM=ADIM_ALL.garip;
-/* Vuruş: garip videoda 4 = gard, 7 = tam uzanma, 11 = geri çekilme; yolcu (asa): 31 = asa başın üstünde, 38 = asa iner, 43 = toparlanma.
-   menzil: asa yumruktan uzun */
-const PUNCH_ALL={garip:{from:4,to:11,fps:16,hit:7,menzil:170},yolcu:{from:31,to:43,fps:24,hit:38,menzil:215}};let PUNCH=PUNCH_ALL.garip;window.MENZIL=PUNCH.menzil;
 const DUMMY=[];for(let i=1;i<=2;i++)DUMMY.push({x:i*620+rnd(-80,80),y:rnd(.3,.8),hp:3,shake:0,down:0});
 let camX=0;const parts=[];
 
@@ -114,15 +110,16 @@ function input(){let x=0,y=0;
 
 /* ---------- EYLEMLER ---------- */
 function setSt(s){if(P.st===s)return;
-  const one=x=>x==='yumruk'||x==='kacin'||!!GECIS[x];
+  const one=x=>x==='yumruk'||!!TEK[x]||!!GECIS[x];
   P.prev={st:P.st,f:curFrame(),face:P.face,t0:performance.now(),one:one(P.st),rate:P.st==='kos'||P.st==='yuru'?Math.max(.75,P.rate||1):1};P.blend=0;
   // geçiş süresi: vuruşa hızlı, duruşa yumuşak
-  P.bdur=s==='yumruk'?.11:s==='kacin'?.1:GECIS[s]?.13:(s==='bekle'&&(P.prev.st==='kos'||P.prev.st==='yuru'))?.22:.16;
+  P.bdur=s==='yumruk'?.11:s==='kacin'?.1:s==='darbe'?.08:GECIS[s]?.13:(s==='bekle'&&(P.prev.st==='kos'||P.prev.st==='yuru'))?.22:.16;
   // yürüme <-> koşma arasında adım fazını koru
   const loop=x=>x==='yuru'||x==='kos'||x==='yuru2';P.ph=(loop(s)&&loop(P.prev.st))?P.ph:0;P.st=s;P.t=0;}
 function curFrame(){const N=ANIM['anim-'+KAR+'-'+P.st][0];
   if(P.st==='yumruk')return Math.min(PUNCH.to,PUNCH.from+Math.floor(P.t*PUNCH.fps));
-  if(GECIS[P.st])return Math.min(N-1,P.gf0+Math.floor(P.t*15*GECIS[P.st].hiz));if(P.st==='kacin')return Math.min(N-1,Math.floor(P.t*15*(KAR==='yolcu'?2.6:1.4)));
+  if(GECIS[P.st])return Math.min(N-1,P.gf0+Math.floor(P.t*15*GECIS[P.st].hiz));
+  const T=TEK[P.st];if(T)return Math.min(N-1,T.from+T.n-1,T.from+Math.floor(P.t/T.sure*T.n));   // kaçınma, darbe, yenilme, zafer (sonda kalır)
   return Math.floor(P.ph)%N;}
 /* Animasyonun sürekli konumu (kare cinsinden, döngülerde sarılmadan) */
 /* Telefonda ses ekrandan geç duyulur (Android'de ~0,1 sn). Sesi o kadar erken tetikle. */
@@ -138,7 +135,14 @@ function dodge(){if((P.act>0&&P.st!=='yumruk')||P.hurtT>0||P.hp<=0)return;setSt(
 
 function update(dt){
   const [ix,iy,m]=(P.hurtT>0||P.hp<=0)?[0,0,0]:input();
-  if(P.act>0){
+  // darbe: yeni vurulduysa (savas.js hurtT verir) o görünümde darbe klibi varsa oynat
+  if(P.hurtT>0&&!P.darbeGordu){P.darbeGordu=true;if(TEK.darbe&&P.hp>0){setSt('darbe');P.act=TEK.darbe.sure;}}
+  if(P.hurtT<=0)P.darbeGordu=false;
+  if(P.hp<=0&&TEK.yenilme){                        // düştü: yenilme klibi son karesinde kalır, yeniden doğunca kalkar
+    if(P.st!=='yenilme'){setSt('yenilme');P.act=0;}P.vx*=Math.pow(.02,dt);P.vy=0;
+  }else if(P.st==='yenilme'){setSt('bekle');
+  }else if(P.act>0){
+    if(P.st==='zafer'&&m>.12)P.act=0;              // zafer sırasında yürümek isterse bırak
     P.act-=dt;
     if(P.st==='kacin'){const k=P.act/.6;P.vx=-P.face*420*k;}else P.vx*=Math.pow(.02,dt);  // geriye sıçrar
     if(P.st==='yumruk'&&!P.hitSes&&P.t*PUNCH.fps+PUNCH.from>=PUNCH.hit-sesGecikme()*PUNCH.fps){P.hitSes=true;play('vur',.9);}
@@ -150,12 +154,22 @@ function update(dt){
     if(P.act<=0)setSt('bekle');
   }else{
     const G=GECIS[P.st];
-    if(G&&m<=.12&&P.hurtT<=0){                    // köprü klip oynuyor ve oyuncu durmak istiyor
+    if(P.st==='gbasla'){                          // bekleden yürümeye: hız klibin ilerleyişiyle artar
+      const f=curFrame(),N=ANIM['anim-'+KAR+'-gbasla'][0],p=clamp(f/(N-1),0,1);
+      if(m<=.12||P.hurtT>0){setSt('bekle');P.vx=0;P.vy=0;}
+      else{const tvx=ix*WALK*(.25+.75*p),tvy=iy*.35*p;P.vx+=(tvx-P.vx)*Math.min(1,7*dt);P.vy+=(tvy-P.vy)*Math.min(1,7*dt);
+        if(Math.abs(ix)>.15)P.face=ix>0?1:-1;if(m>.85)P.kosT=performance.now();
+        if(f>=N-1){const c=G.cikis;setSt(m>.85?'kos':'yuru');P.ph=c;}}
+    }else if(G&&m<=.12&&P.hurtT<=0){              // köprü klip oynuyor ve oyuncu durmak istiyor
       const f=curFrame(),N=ANIM['anim-'+KAR+'-'+P.st][0],p=clamp((f-P.gf0)/Math.max(1,G.dur-P.gf0),0,1);
       P.vx=P.gv0*Math.pow(1-p,1.6);P.vy=P.gvy0*Math.pow(1-p,1.6);
       if(f>=N-1){const c=G.cikis;setSt(G.hedef);P.ph=c;P.vx=0;P.vy=0;}
     }else if(P.st==='kos'&&GECIS.gkosdur&&m<=.12&&P.hurtT<=0&&performance.now()-(P.kosT||0)<300&&Math.abs(P.vx)>RUN*.6){   // koşudan fren: o anki adıma en yakın kareden gir
       const k=curFrame(),G2=GECIS.gkosdur;if(!G2){}else{setSt('gkosdur');P.gf0=G2.giris[k%G2.giris.length];P.gv0=P.vx;P.gvy0=P.vy;}
+    }else if(P.st==='yuru'&&GECIS.gdur&&m<=.12&&P.hurtT<=0&&Math.abs(P.vx)+Math.abs(P.vy)*400>40){   // yürürken durma
+      const k=curFrame(),G2=GECIS.gdur;setSt('gdur');P.gf0=G2.giris[k%G2.giris.length];P.gv0=P.vx;P.gvy0=P.vy;
+    }else if(P.st==='bekle'&&GECIS.gbasla&&m>.12&&m<=.85&&P.hurtT<=0){   // bekleden yürümeye başlama
+      setSt('gbasla');P.gf0=0;if(Math.abs(ix)>.15)P.face=ix>0?1:-1;
     }else{
     const run=m>.85,tvx=m>.12?ix*(run?RUN:WALK):0,tvy=m>.12?iy*(run?.55:.35):0;
     const acc=m>.12?7:6.5;                       // hızlanma / yavaşlama
@@ -247,11 +261,13 @@ window.__s={P,DUMMY,attack,dodge,update,joy,set run(v){running=v}};
 // defter ile bağ: güç → vuruş, defter açıkken oyun durur
 let paused=false,GUCLU={dmg:2},onizleme=null,seviyeKar='garip';
 /* Görünüm değiştir: tabloları o görünümünkilerle değiştirir; o görünümde olmayan bir köprü klipteyse bekleye döner */
-function setKar(k){if(!FACE_ALL[k]||k===KAR)return;KAR=k;FACE=FACE_ALL[k];GECIS=GECIS_ALL[k];IMG=IMG_ALL[k];PUNCH=PUNCH_ALL[k];ADIM=ADIM_ALL[k];
+function setKar(k){if(!FACE_ALL[k]||k===KAR)return;KAR=k;FACE=FACE_ALL[k];GECIS=GECIS_ALL[k];IMG=IMG_ALL[k];PUNCH=PUNCH_ALL[k];ADIM=ADIM_ALL[k];TEK=TEK_ALL[k];
   window.MENZIL=PUNCH.menzil;if(!FACE[P.st]){P.st='bekle';P.act=0;}P.prev=null;P.blend=1;P.t=0;}
-const seviyeGorunum=L=>L>=10?'yolcu':'garip';
+const seviyeGorunum=L=>{let k='garip';for(const [s,g] of GORUNUM_SEVIYE)if(L>=s&&FACE_ALL[g])k=g;return k;};
+/* dalga temizlenince savas.js çağırır: o görünümde zafer klibi varsa oynat */
+window.ZAFER=()=>{if(TEK.zafer&&P.hp>0&&P.act<=0&&P.hurtT<=0){setSt('zafer');P.act=TEK.zafer.sure;P.vx=0;P.vy=0;}};
 /* GEÇİCİ deneme düğmesi: oyun ekranında görünümler arasında dolaşır (kayda/seviyeye dokunmaz). Sonra kaldırılacak. */
-{const SIRA=['garip','yolcu'],AD={garip:'GARİP',yolcu:'YOLCU'},b=document.getElementById('gorBtn');
+{const SIRA=Object.keys(FACE_ALL),AD={garip:'GARİP',yolcu:'YOLCU',er:'ER',alp:'ALP'},b=document.getElementById('gorBtn');
  const yaz=()=>{b.textContent=AD[KAR];};
  b.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();const k=SIRA[(SIRA.indexOf(KAR)+1)%SIRA.length];
    onizleme=k;window.__onizleme=k;setKar(k);yaz();});

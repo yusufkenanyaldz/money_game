@@ -29,6 +29,9 @@ Canavarlar nefsin huylarıdır. **Oyun içinde ameller açıkça yazılmaz**, ef
 - `ses-wav.py` — oyunda çalınan 19 sesi 32 kHz mono WAV'a çevirir, her birini vuruştan 5 ms önce başlatır (MP3 baş sessizliği yok), `assets/ses/ses.js`'e `window.SES_DOSYA` olarak gömer.
 - `gecis-isle.py` — köprü klipler: ölçeği bekleme boyuna eşitler, baş hizasını ölçer, giriş karesini o anki adıma en benzeyen pozdan seçer → `assets/anim-garip-g*.webp` + `gecis.json` (index.html'deki `GECIS` tablosu buradan).
 - `tek-html.py` — tek dosya HTML: `python3 tek-html.py . Seyr.html <kalite> <küçültme>`. İki görünümle 9,5 MB'a sığması için `82 0.6` (şeritler %60 boyda; APK tam boy).
+- `karakter-veri.py` — `index.html`'deki `/* KARAKTER-VERI */` bloğunu (ANIM, FACE_ALL, GECIS_ALL, ADIM_ALL, PUNCH_ALL, TEK_ALL, GORUNUM_SEVIYE) json'lardan yeniden yazar. Vuruş kareleri, kaçınma aralığı, görünüm seviyeleri bu betikte elle ayarlanır. **Yeni görünüm ekleme sırası:** `karakter-isle.py <ad>` → `gecis-isle.py <video> <geçici> <ad>` → `karakter-veri.py` (GORUNUMLER/PUNCH/TEK/SEVIYE'ye ekle).
+- `gecis-isle.py` artık görünüm adı alır; 'oto' geçişlerde aralıkları kendi bulur. Çıktı `gecis-<ad>.json` (Garip: `gecis.json`).
+- **Adım sesleri:** adımın düştüğü kare görüntüden (adımın en açık olduğu an), çünkü Grok'un sesi bazı videolarda 2-5 kare geride. Garip'te görüntü ve ses birebir tutuyor.
 - `karakter-isle.py` — yeni görünümün (Yolcu, Er, ...) Grok videolarını şeritlere çevirir: her videoda ayrı ölçek (ayakta boydan), zemin ayaklardan, yatay orta baştan, ayak sesleri görüntüdeki adım aralığı + videonun sesi. Çıktı `karakter-<ad>.json` → index.html'de `FACE_ALL`, `ADIM_ALL`, `PUNCH_ALL`, `ANIM`.
 - Görünüm seçimi: `setKar()`; seviye ≥10 → Yolcu. Defter › Güçler › **Görünüm önizleme** ile seviyeye gelmeden denenir (geçici).
 - `GORSELLER.md` — karakter görünüm komutları (10 unvan).
@@ -38,7 +41,7 @@ Canavarlar nefsin huylarıdır. **Oyun içinde ameller açıkça yazılmaz**, ef
 
 ## İmza anahtarı
 `seyr.p12` (alias `seyr`) ve şifresi **kullanıcıda**, repoda yok. Yeni APK gerekince kullanıcıdan dosyayı ve şifreyi iste;
-aynı anahtar olmazsa güncelleme eskisinin üstüne kurulmaz. Son sürüm: **1.12 (VCODE 13)** — video sesleri ilk kez gerçekten çalıyor (isim çakışması), kırpılmış WAV. Önceki: **1.11 (VCODE 12)** — oyun ekranında geçici görünüm düğmesi (GARİP/YOLCU, DEFTER'in solunda; `gorBtn`, sonra kaldırılacak).
+aynı anahtar olmazsa güncelleme eskisinin üstüne kurulmaz. Son sürüm: **1.13 (VCODE 14)** — Er (20+) ve Alp (30+) görünümleri; darbe/yenilme/zafer; bekle↔yürü köprüleri; adım fazı görüntüden. Önceki: **1.12 (VCODE 13)** — video sesleri ilk kez gerçekten çalıyor (isim çakışması), kırpılmış WAV. Önceki: **1.11 (VCODE 12)** — oyun ekranında geçici görünüm düğmesi (GARİP/YOLCU, DEFTER'in solunda; `gorBtn`, sonra kaldırılacak).
 
 ## Bilinen tuzaklar
 - `const` ile tanımlanan modüller `window`'a düşmez: `window.SAVAS=SAVAS` gibi açıkça ata.
