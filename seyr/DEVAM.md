@@ -26,6 +26,7 @@ Canavarlar nefsin huylarıdır. **Oyun içinde ameller açıkça yazılmaz**, ef
 - `assets/ses/` — videolardan kesilmiş sesler + `ses.js` (WebView'de fetch engelli olduğu için sesler script olarak gömülü).
 - `animasyon-isle.py` — videodan kare şeridi: magenta temizleme, **doğal döngü noktası** bulma (harmanlama yok). İçindeki dosya yolları önceki oturuma ait; yeniden kullanırken `U`, `T`, `O` yollarını ve `V` listesini güncelle.
 - `ses-kes.py` — videolardan ses efekti kesme.
+- `ses-wav.py` — oyunda çalınan 19 sesi 32 kHz mono WAV'a çevirir, her birini vuruştan 5 ms önce başlatır (MP3 baş sessizliği yok), `assets/ses/ses.js`'e `window.SES_DOSYA` olarak gömer.
 - `gecis-isle.py` — köprü klipler: ölçeği bekleme boyuna eşitler, baş hizasını ölçer, giriş karesini o anki adıma en benzeyen pozdan seçer → `assets/anim-garip-g*.webp` + `gecis.json` (index.html'deki `GECIS` tablosu buradan).
 - `tek-html.py` — tek dosya HTML: `python3 tek-html.py . Seyr.html <kalite> <küçültme>`. İki görünümle 9,5 MB'a sığması için `82 0.6` (şeritler %60 boyda; APK tam boy).
 - `karakter-isle.py` — yeni görünümün (Yolcu, Er, ...) Grok videolarını şeritlere çevirir: her videoda ayrı ölçek (ayakta boydan), zemin ayaklardan, yatay orta baştan, ayak sesleri görüntüdeki adım aralığı + videonun sesi. Çıktı `karakter-<ad>.json` → index.html'de `FACE_ALL`, `ADIM_ALL`, `PUNCH_ALL`, `ANIM`.
@@ -36,10 +37,11 @@ Canavarlar nefsin huylarıdır. **Oyun içinde ameller açıkça yazılmaz**, ef
 
 ## İmza anahtarı
 `seyr.p12` (alias `seyr`) ve şifresi **kullanıcıda**, repoda yok. Yeni APK gerekince kullanıcıdan dosyayı ve şifreyi iste;
-aynı anahtar olmazsa güncelleme eskisinin üstüne kurulmaz. Son sürüm: **1.11 (VCODE 12)** — oyun ekranında geçici görünüm düğmesi (GARİP/YOLCU, DEFTER'in solunda; `gorBtn`, sonra kaldırılacak).
+aynı anahtar olmazsa güncelleme eskisinin üstüne kurulmaz. Son sürüm: **1.12 (VCODE 13)** — video sesleri ilk kez gerçekten çalıyor (isim çakışması), kırpılmış WAV. Önceki: **1.11 (VCODE 12)** — oyun ekranında geçici görünüm düğmesi (GARİP/YOLCU, DEFTER'in solunda; `gorBtn`, sonra kaldırılacak).
 
 ## Bilinen tuzaklar
 - `const` ile tanımlanan modüller `window`'a düşmez: `window.SAVAS=SAVAS` gibi açıkça ata.
+- **İsim çakışması:** ses paketi `window.SES_DOSYA`, sentez sesler (`sesler.js`) `window.SES`. Paket eskiden `SES` idi ve `sesler.js` onu eziyordu → video sesleri hiç çalmıyordu (1.12'de düzeldi).
 - Satır içinde `//` yorum kullanma (tek satırlık kodlarda geri kalanı yorum yapar), `/* */` kullan.
 - Yumruk videosu kol uzanmış başlıyor; temiz vuruş kare 4–11 (PUNCH ayarı).
 - Bekleme hareketi için yanlış (renkli yamalı) video kullanılmamalı; doğru kaynaklar animasyon-isle.py içindeki V listesinde.

@@ -51,7 +51,7 @@ let KAR='garip',FACE=FACE_ALL.garip;
 /* Köprü klipler (gecis-isle.py → gecis.json). giris: kaynak döngünün her karesine en benzeyen giriş karesi;
    cikis: bitince hedef döngünün başlanacak karesi; dur: ayakların durduğu kare; kay: baş hizası (kaynak px, başta→sonda) */
 const GECIS_ALL={garip:{},yolcu:{}};GECIS_ALL.garip={gkosdur:{giris:[5, 11, 11, 11, 11, 5, 6, 6, 6, 5, 5, 11, 0, 11, 5, 11, 6, 6, 5, 5, 11, 11, 0, 11, 5, 6, 6, 6, 5],cikis:1,dur:29,hedef:'bekle',hiz:1.3,kay:[-59.7,35.1]}};let GECIS=GECIS_ALL.garip;
-const AURL=n=>'assets/'+n+'.webp',SURL=n=>(window.SES&&SES[n])||'assets/ses/'+n+'.mp3';
+const AURL=n=>'assets/'+n+'.webp',SURL=n=>(window.SES_DOSYA&&SES_DOSYA[n])||'assets/ses/'+n+'.mp3';   /* paket SES_DOSYA: sesler.js'deki sentez SES'i onu eziyordu */
 const IMG_ALL={};for(const g in FACE_ALL){IMG_ALL[g]={};for(const k in FACE_ALL[g]){const i=new Image();i.src=AURL('anim-'+g+'-'+k);IMG_ALL[g][k]=i;}}
 let IMG=IMG_ALL.garip;
 const SFX={adim:['adim-1','adim-2','adim-3','adim-4','adim-5'],kos:['kosu-adim-1','kosu-adim-2','kosu-adim-3','kosu-adim-4','kosu-adim-5','kosu-adim-6'],
@@ -59,10 +59,17 @@ const SFX={adim:['adim-1','adim-2','adim-3','adim-4','adim-5'],kos:['kosu-adim-1
 
 /* ---------- SES ---------- */
 let AC=null,sesOn=true;const BUF={};
-async function initAudio(){if(!AC){AC=new (window.AudioContext||window.webkitAudioContext)();
+/* Ses bağlamı sayfa açılır açılmaz kurulur ve sesler hemen çözülür (ilk dokunuşta hazır olsunlar).
+   Tarayıcı dokunmadan çalmaya izin vermez; ilk dokunuşta initAudio() bağlamı uyandırır. */
+function kurAudio(){if(AC)return;const C=window.AudioContext||window.webkitAudioContext;if(!C)return;
+  try{AC=new C({latencyHint:'interactive'});}catch(e){AC=new C();}
   for(const g in SFX)for(const n of SFX[g])fetch(SURL(n)).then(r=>r.arrayBuffer()).then(a=>AC.decodeAudioData(a)).then(b=>BUF[n]=b).catch(()=>{});}
-  if(AC.state==='suspended')AC.resume();}
-function play(g,vol){if(!AC||!sesOn)return;const L=SFX[g],n=L[(Math.random()*L.length)|0],b=BUF[n];if(!b)return;
+async function initAudio(){kurAudio();if(AC&&AC.state!=='running')try{await AC.resume();}catch(e){}}
+kurAudio();
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&AC)AC.resume().catch(()=>{});});
+function play(g,vol){if(!AC||!sesOn)return;if(AC.state!=='running')AC.resume().catch(()=>{});
+  /* seçilen ses henüz çözülmediyse hazır olan başka bir ses çalsın */
+  const L=SFX[g].filter(n=>BUF[n]);if(!L.length)return;const b=BUF[L[(Math.random()*L.length)|0]];
   const s=AC.createBufferSource(),v=AC.createGain();s.buffer=b;s.playbackRate.value=.94+Math.random()*.12;v.gain.value=vol??.8;s.connect(v);v.connect(AC.destination);s.start();}
 document.getElementById('ses').onclick=()=>{sesOn=!sesOn;document.getElementById('ses').textContent=sesOn?'🔊':'🔇';};
 
