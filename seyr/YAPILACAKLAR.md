@@ -12,6 +12,7 @@ Son denemede (APK 1.1) geçişler yumuşadı ama donma hissi verdi. Muhtemel seb
 - [x] Yumruk başında bekleme pozu sönerken gard pozu geliyor → yumruğa geçiş daha kısa olsun (Grok önerisi: 120 ms), her geçişe ayrı süre.
 - [x] Köprü klip: **koşudan fren** (APK 1.7, telefonda denenecek). Koşarken çubuk bırakılınca o anki adıma en yakın kareden girer, hız klibe göre söner, bekleme duruşuna iner.
 - [x] Ayak sesleri adımla eşzamanlı (1.8): ses artık zamanlayıcıyla değil, ayağın yere bastığı karelerde çalar (`ADIM` tablosu; kareler kaynak videoların sesinden çıkarıldı). Darbe yiyip geri itilince koşu/fren animasyonu oynamıyor.
+- [x] Ses gecikmesi (1.10): telefonda ses ekrandan geç duyulduğu için adım ve vuruş sesleri ölçülen gecikme kadar (bilinmiyorsa 0,1 sn) erken tetiklenir. Yolcu yürüyüş adımları görüntüden düzeltildi (Grok sesi ~2 kare gerideydi).
 - [ ] Köprü klip: **bekle ↔ yürü** — 21 Kasım setinde heybe rengi/yamalar değiştiği için kullanılmadı; Grok'tan yeniden istenecek.
 - [ ] Köprü klip: vuruştan bekleye — gelen klip bekleme duruşuna varmıyordu; şimdiki hızlı geçiş yeterli, gerekirse yeniden.
 
@@ -21,7 +22,7 @@ Son denemede (APK 1.1) geçişler yumuşadı ama donma hissi verdi. Muhtemel seb
 | Seviye | Unvan | Görsel | Hareketler |
 |---|---|---|---|
 | 1–9 | Garip | ✅ | ✅ bekleme, yürüme ×2, koşma, ufka yürüyüş, dövüş duruşu, yumruk, kaçınma (+ses) |
-| 10–19 | Yolcu | ✅ | ✅ bekleme, yürüme, sağa yürüme, ufka yürüyüş, koşu, dövüş duruşu, asayla vuruş · ⚠️ kaçınma geçici (gerçek kaçınma değil), koşudan fren yok (APK 1.9) |
+| 10–19 | Yolcu | ✅ | ✅ bekleme, yürüme, sağa yürüme, ufka yürüyüş, koşu, dövüş duruşu, asayla vuruş · kaçınma (çömelip zıplar, 1.10) · koşudan fren yok |
 | 20–29 | Er | ☐ | ☐ |
 | 30–39 | Alp | ☐ | ☐ |
 | 40–49 | Bahadır | ☐ | ☐ |

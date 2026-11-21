@@ -28,7 +28,7 @@ GORUNUMLER = {
         'kos':    ('9a0deb78', 1.5, 'dongu', 1, 845),
         'durus':  ('89c29d8b', .3, 'dongu', -1, 867),
         'yumruk': ('b19d42f4', 1.2, ('tek', 52), -1, 867),
-        'kacin':  ('9b87d316', 1.55, ('tek', 20), -1, None),   # gerçek kaçınma değil: geriye kaykılma kısmı (geçici)
+        'kacin':  ('26b1753b', 1.7, ('tek', 24), -1, None),    # çömelip zıplar, iner (11-03-52)
         # 'gkosdur': ('ff308d38', 1.4, ('tek', 36), 1, 845),  kullanılmadı: ortada kesme var, sonda asa yatay (bekleme duruşuyla buluşmuyor)
     }),
 }

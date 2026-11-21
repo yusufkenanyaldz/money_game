@@ -41,7 +41,7 @@ canvas{position:fixed;inset:0;display:block}
 <script>
 'use strict';
 /* ---------- VARLIKLAR ---------- */
-const ANIM={"anim-garip-durus": [63, 320, 420, 6, 838], "anim-garip-yuru": [56, 231, 420, 6, 802], "anim-garip-yumruk": [30, 346, 420, 6, 800], "anim-garip-arka": [32, 170, 420, 6, 808], "anim-garip-kos": [29, 297, 420, 6, 790], "anim-garip-bekle": [36, 186, 420, 6, 806], "anim-garip-kacin": [30, 265, 420, 6, 792], "anim-garip-yuru2": [30, 246, 420, 6, 800], "anim-garip-gkosdur": [34, 328, 420, 6, 815], "anim-yolcu-bekle": [21, 192, 420, 6, 853], "anim-yolcu-yuru": [60, 300, 420, 6, 853], "anim-yolcu-yuru2": [67, 272, 420, 6, 838], "anim-yolcu-arka": [24, 262, 420, 6, 866], "anim-yolcu-kos": [31, 539, 420, 6, 803], "anim-yolcu-durus": [38, 411, 420, 6, 789], "anim-yolcu-yumruk": [52, 418, 420, 6, 840], "anim-yolcu-kacin": [20, 279, 420, 6, 845]};
+const ANIM={"anim-garip-durus": [63, 320, 420, 6, 838], "anim-garip-yuru": [56, 231, 420, 6, 802], "anim-garip-yumruk": [30, 346, 420, 6, 800], "anim-garip-arka": [32, 170, 420, 6, 808], "anim-garip-kos": [29, 297, 420, 6, 790], "anim-garip-bekle": [36, 186, 420, 6, 806], "anim-garip-kacin": [30, 265, 420, 6, 792], "anim-garip-yuru2": [30, 246, 420, 6, 800], "anim-garip-gkosdur": [34, 328, 420, 6, 815], "anim-yolcu-bekle": [21, 192, 420, 6, 853], "anim-yolcu-yuru": [60, 300, 420, 6, 853], "anim-yolcu-yuru2": [67, 272, 420, 6, 838], "anim-yolcu-arka": [24, 262, 420, 6, 866], "anim-yolcu-kos": [31, 539, 420, 6, 803], "anim-yolcu-durus": [38, 411, 420, 6, 789], "anim-yolcu-yumruk": [52, 418, 420, 6, 840], "anim-yolcu-kacin": [24, 473, 420, 6, 817]};
 /* Görünümler (seviye 1-9 Garip, 10-19 Yolcu ...). Yolcu: karakter-isle.py → karakter-yolcu.json */
 const FACE_ALL={garip:{bekle:-1,yuru:-1,yuru2:1,kos:1,durus:-1,yumruk:-1,kacin:-1,arka:1,gkosdur:1},   // görselin baktığı yön
   yolcu:{"bekle":-1,"yuru":-1,"yuru2":1,"arka":1,"kos":1,"durus":-1,"yumruk":-1,"kacin":-1}};
@@ -76,11 +76,12 @@ function hash(i){let h=i*374761393;h=(h^(h>>>13))*1274126177;return((h^(h>>>16))
 const P={x:0,y:.55,face:1,st:'bekle',t:0,ph:0,act:0,vx:0,vy:0,stepT:0,hitDone:false,prev:null,blend:1};
 const BLEND=.16,WALK=170,RUN=340;
 /* Ayak sesleri: ayağın yere bastığı kareler. Kaynak videoların kendi seslerinden çıkarıldı
-   (dongu-*.mp3 animasyonla aynı anda başlar; fren klibi kendi videosundan). Eskiden ses ayrı bir zamanlayıcıyla
+   (dongu-*.mp3 animasyonla aynı anda başlar; fren klibi kendi videosundan). Yolcu yürüyüşü görüntüden düzeltildi
+   (Grok'un sesi o videoda ~2 kare geride). Eskiden ses ayrı bir zamanlayıcıyla
    çalıyordu ve adımlardan kayıyordu (yürümede ~%50 hızlı). */
 const ADIM_ALL={garip:{yuru:{k:[6.1,15.4,24.7,34.1,43.4,52.7],s:'adim',v:.45},kos:{k:[0,4.8,9.6,14.4,19.3,24.1],s:'kos',v:.55},
   gkosdur:{k:[-1,5.5,10.2,15.1,21.3,26.3,28.9],s:'kos',v:.5}},
-  yolcu:{yuru:{k:[4.5, 14.5, 24.5, 34.5, 44.5, 54.5],s:'adim',v:.45},kos:{k:[1.0, 6.2, 11.3, 16.5, 21.7, 26.8],s:'kos',v:.55}}};let ADIM=ADIM_ALL.garip;
+  yolcu:{yuru:{k:[2.5,12.5,22.5,32.5,42.5,52.5],s:'adim',v:.45},kos:{k:[1.0, 6.2, 11.3, 16.5, 21.7, 26.8],s:'kos',v:.55}}};let ADIM=ADIM_ALL.garip;
 /* Vuruş: garip videoda 4 = gard, 7 = tam uzanma, 11 = geri çekilme; yolcu (asa): 31 = asa başın üstünde, 38 = asa iner, 43 = toparlanma.
    menzil: asa yumruktan uzun */
 const PUNCH_ALL={garip:{from:4,to:11,fps:16,hit:7,menzil:170},yolcu:{from:31,to:43,fps:24,hit:38,menzil:215}};let PUNCH=PUNCH_ALL.garip;window.MENZIL=PUNCH.menzil;
@@ -112,15 +113,18 @@ function setSt(s){if(P.st===s)return;
   const loop=x=>x==='yuru'||x==='kos'||x==='yuru2';P.ph=(loop(s)&&loop(P.prev.st))?P.ph:0;P.st=s;P.t=0;}
 function curFrame(){const N=ANIM['anim-'+KAR+'-'+P.st][0];
   if(P.st==='yumruk')return Math.min(PUNCH.to,PUNCH.from+Math.floor(P.t*PUNCH.fps));
-  if(GECIS[P.st])return Math.min(N-1,P.gf0+Math.floor(P.t*15*GECIS[P.st].hiz));if(P.st==='kacin')return Math.min(N-1,Math.floor(P.t*15*1.4));
+  if(GECIS[P.st])return Math.min(N-1,P.gf0+Math.floor(P.t*15*GECIS[P.st].hiz));if(P.st==='kacin')return Math.min(N-1,Math.floor(P.t*15*(KAR==='yolcu'?2.6:1.4)));
   return Math.floor(P.ph)%N;}
 /* Animasyonun sürekli konumu (kare cinsinden, döngülerde sarılmadan) */
+/* Telefonda ses ekrandan geç duyulur (Android'de ~0,1 sn). Sesi o kadar erken tetikle. */
+function sesGecikme(){if(!AC)return .1;const L=(AC.outputLatency||0)+(AC.baseLatency||0);return clamp(L>.005?L:.1,.03,.25);}
 function animPos(){return GECIS[P.st]?P.gf0+P.t*15*GECIS[P.st].hiz:P.ph;}
 function adimSesi(st0,a0,a1){const A=ADIM[st0];if(!A||P.st!==st0||a1<=a0)return;
+  const on=sesGecikme()*15*(GECIS[st0]?GECIS[st0].hiz:(P.rate||1));a0+=on;a1+=on;   // erken tetik
   const N=ANIM['anim-'+KAR+'-'+st0][0],loop=!GECIS[st0];
   A.k.forEach((c,i)=>{const gecti=loop?Math.floor((a1-c)/N)>Math.floor((a0-c)/N):(a0<c&&a1>=c);
     if(gecti){const son=!loop&&i===A.k.length-1;play(son?'adim':A.s,loop?A.v:A.v*(1-.55*i/A.k.length));}});}
-function attack(){if(P.act>0||P.hurtT>0||P.hp<=0)return;setSt('yumruk');P.act=(PUNCH.to-PUNCH.from+1)/PUNCH.fps;P.hitDone=false;P.vx*=.35;}
+function attack(){if(P.act>0||P.hurtT>0||P.hp<=0)return;setSt('yumruk');P.act=(PUNCH.to-PUNCH.from+1)/PUNCH.fps;P.hitDone=false;P.hitSes=false;P.vx*=.35;}
 function dodge(){if((P.act>0&&P.st!=='yumruk')||P.hurtT>0||P.hp<=0)return;setSt('kacin');P.act=.6;play('kac',.9);}
 
 function update(dt){
@@ -128,7 +132,8 @@ function update(dt){
   if(P.act>0){
     P.act-=dt;
     if(P.st==='kacin'){const k=P.act/.6;P.vx=-P.face*420*k;}else P.vx*=Math.pow(.02,dt);  // geriye sıçrar
-    if(P.st==='yumruk'&&!P.hitDone&&curFrame()>=PUNCH.hit){P.hitDone=true;play('vur',.9);
+    if(P.st==='yumruk'&&!P.hitSes&&P.t*PUNCH.fps+PUNCH.from>=PUNCH.hit-sesGecikme()*PUNCH.fps){P.hitSes=true;play('vur',.9);}
+    if(P.st==='yumruk'&&!P.hitDone&&curFrame()>=PUNCH.hit){P.hitDone=true;
       for(const d of DUMMY){if(d.down>0)continue;const dx=(d.x-P.x)*P.face,dy=Math.abs(d.y-P.y);
         if(dx>20&&dx<PUNCH.menzil&&dy<.18){d.hp-=GUCLU.dmg;d.shake=.35;for(let i=0;i<14;i++)parts.push({x:d.x,gy:d.y,h:rnd(70,150),vx:P.face*rnd(60,260),vh:rnd(60,260),l:rnd(.4,.8),c:Math.random()<.5?'#c9a24a':'#e8cf8a'});
           if(d.hp<=0){d.down=4;d.hp=3;}}}
