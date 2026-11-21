@@ -55,6 +55,27 @@
    420,
    6,
    817
+  ],
+  "anim-yolcu-darbe": [
+   35,
+   357,
+   420,
+   6,
+   900
+  ],
+  "anim-yolcu-yenilme": [
+   67,
+   536,
+   420,
+   6,
+   847
+  ],
+  "anim-yolcu-zafer": [
+   25,
+   197,
+   420,
+   6,
+   903
   ]
  },
  "FACE": {
@@ -65,7 +86,10 @@
   "kos": 1,
   "durus": -1,
   "yumruk": -1,
-  "kacin": -1
+  "kacin": -1,
+  "darbe": -1,
+  "yenilme": -1,
+  "zafer": -1
  },
  "ADIM": {
   "yuru": [
@@ -84,5 +108,10 @@
    21.7,
    26.8
   ]
+ },
+ "ENGENIS": {
+  "darbe": 13,
+  "yenilme": 65,
+  "zafer": 12
  }
 }

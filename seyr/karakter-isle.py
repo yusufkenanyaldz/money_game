@@ -19,7 +19,8 @@ GORUNUMLER = {
     # boy: oyundaki ayakta duruş boyu (Garip'in bekle şeridi = 806). Yolcu sarıklı ve biraz serpilmiş: %4 uzun.
     'yolcu': dict(boy=838, klip={
         # hareket: (dosya adı başı, başlangıç sn, tür, yön, ayakta boy ölçüsü)
-        #   tür: 'dongu' (doğal döngü noktası aranır) | ('tek', kare sayısı) | 'gecis' (aşağıda)
+        #   tür: 'dongu' (doğal döngü noktası aranır) | ('tek', kare sayısı) | ('oto', son pay): hareketin başı ve sonu
+        #        kendiliğinden bulunur (ilk kareden farkın başladığı ve bittiği yer)
         #   ayakta: bu videoda karakter ayaktayken boyu (px); None → videonun ilk karesi (Grok'un verilen görseli)
         'bekle':  ('e311d723', .3, 'dongu', -1, None),
         'yuru':   ('e6f5a958', 1.0, 'dongu', -1, None),
@@ -30,6 +31,21 @@ GORUNUMLER = {
         'yumruk': ('b19d42f4', 1.2, ('tek', 52), -1, 867),
         'kacin':  ('26b1753b', 1.7, ('tek', 24), -1, None),    # çömelip zıplar, iner (11-03-52)
         # 'gkosdur': ('ff308d38', 1.4, ('tek', 36), 1, 845),  kullanılmadı: ortada kesme var, sonda asa yatay (bekleme duruşuyla buluşmuyor)
+        #   yerine 21 Kasım 13:21 klibi gecis-isle.py ile işlenir.
+        'darbe':  ('6d41aa1c', 0, ('oto', 3), -1, None),
+        'yenilme': ('275beec9', 0, ('oto', 4), -1, None),
+        'zafer':  ('8d98c9b7', 0, ('oto', 3), -1, None),
+    }),
+    # Er: dolgulu tunik, çizme, elinde kıvrık hançer (21 Kasım 13:26-13:31 seti)
+    'er': dict(boy=850, klip={
+        'bekle':  ('45e469f9', .3, 'dongu', -1, None),
+        'yuru':   ('4bfb279c', 1.0, 'dongu', -1, None),
+        'kos':    ('07de6d46', 1.3, 'dongu', 1, 'b5b15726'),     # koşu kesmeyle yakınlaşıyor: ölçek fren klibinin sonundaki ayakta duruştan
+        'yumruk': ('3146b225', 0, ('oto', 3), -1, None),
+        'kacin':  ('5694e021', 0, ('oto', 3), -1, None),
+        'darbe':  ('e8c0e8c3', 0, ('oto', 3), -1, None),
+        'yenilme': ('a2cdc089', 0, ('oto', 4), -1, None),
+        'zafer':  ('4c23c63b', 0, ('oto', 3), -1, None),
     }),
 }
 
@@ -96,6 +112,9 @@ def duzenli(ons, N, sil):
 meta = dict(ANIM={}, FACE={}, ADIM={})
 for st, (dosya, bas, tur, yon, ayakta) in G['klip'].items():
     F = kareler(dosya, bas)
+    if isinstance(ayakta, str):   # başka bir videonun son karesindeki ayakta duruş
+        kareler(ayakta, 0); son = key(np.asarray(Image.open(sorted(glob.glob(os.path.join(T, ayakta, '*.png')))[-1]).convert('RGB')))
+        _, b0, t0 = gövde(son[..., 3]); ayakta = b0 - t0
     if ayakta is None:   # videonun ilk karesi = Grok'a verilen ayakta görsel
         ilk = key(np.asarray(Image.open(sorted(glob.glob(os.path.join(T, dosya, '*.png')))[0]).convert('RGB')))
         _, b0, t0 = gövde(ilk[..., 3]); ayakta = b0 - t0
@@ -106,6 +125,20 @@ for st, (dosya, bas, tur, yon, ayakta) in G['klip'].items():
         err, N = min(sc); print(f'{st}: döngü {N} kare ({N / FPS:.2f} sn), fark {err:.1f}')
         R = [key(f) for f in F[:N]]; K = 3
         R = [(R[i].astype(float) * (i / K) + key(F[N + i]).astype(float) * (1 - i / K)).astype(np.uint8) if i < K and N + i < len(F) else R[i] for i in range(N)]
+    elif tur[0] == 'oto':
+        A = [key(f)[..., 3] for f in F]
+        sil = [np.asarray(Image.fromarray(a).resize((96, 96))).astype(float) / 255 for a in A]
+        d = [np.abs(sil[i] - sil[0]).mean() for i in range(len(F))]
+        hareketli = [i for i in range(len(F)) if d[i] > .012]
+        b0 = max(0, hareketli[0] - 2)
+        # son: hareketin durduğu yer (art arda 4 kare neredeyse aynı) ya da ilk kareye dönüş
+        b1 = len(F) - 1
+        for i in range(hareketli[0] + 4, len(F) - 4):
+            if all(np.abs(sil[i + k] - sil[i]).mean() < .004 for k in range(1, 5)): b1 = min(len(F) - 1, i + tur[1]); break
+        F = F[b0:b1 + 1]; N = len(F); R = [key(f) for f in F]
+        gen = [np.ptp(np.where(r[..., 3] > 128)[1]) for r in R]
+        print(f'{st}: {N} kare (oto: {b0 / FPS + bas:.2f}–{b1 / FPS + bas:.2f} sn), en geniş kare {int(np.argmax(gen))}')
+        meta.setdefault('ENGENIS', {})[st] = int(np.argmax(gen))
     else:
         N = min(tur[1], len(F)); R = [key(f) for f in F[:N]]; print(f'{st}: {N} kare (tek seferlik)')
     gv = [gövde(r[..., 3]) for r in R]
