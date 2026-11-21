@@ -17,7 +17,13 @@ dokunulmadan duruyor; Defter (`seyr/defter.js`) buraya taşınacak.
   `python3 pixel-isle.py kaynak/video.mp4 <hareket> [--bas sn] [--sure sn] [--dongu] [--yon 1|-1]`
 - `assets/<hareket>.png` yatay şerit, `assets/karakter.json` kare sayısı/boyut/fps/yön.
 - `kaynak/` Gemini videoları.
-- `onizleme.py` → `onizleme.html`: şeritleri gömülü, telefonda açılan önizleme (ok tuşları / ekran düğmeleri).
+- `oyun.js` — 1. bölüm (Gaflet Ovası): 320x180, tam kat büyütme. Savaş kuralı: düşman saldırmadan önce hazırlanır
+  (gözler kızarır, "!"); hazırlanırken vurulursa kılıç seker ("tok!"); saldırısı tam zamanında kaçınılırsa sersemler, o arada
+  vuruş 2 kat. Kızıl Dev sopayla vurunca iki yana şok dalgası; vuruştan sonra hep sersemler; yarı canında hızlanır.
+  Gruplar 260/620/980'de (2/3/4 gölge), dev 1320'de. Ölünce son temiz gruptan devam. Düşmanlar şimdilik kodla çizilmiş yer tutucu.
+  Bot testi: kuralı bilen bot 70 sn'de hiç düşmeden bitiriyor; düşünmeden vuran bot 9 kez düşüp devi geçemiyor.
+- `onizleme.py` → `onizleme.html`: oyun.js ve şeritler gömülü, telefonda açılan tek dosya (yayınlanmış sayfa).
+- `GEMINI-ARAYUZ.md` — düğme, çerçeve, kalp ve dört güç simgesi için resim komutları.
 
 ## Durum
 - Palet saldırı klibinden (kılıç izinin açık mavisi için), 28 renk. Yeni palet gerekirse `assets/palet.png` silinip önce saldırı işlenir.

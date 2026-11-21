@@ -1,74 +1,32 @@
-# Seyr Pixel — assets/ şeritlerini gömerek telefonda açılan tek dosyalık önizleme üretir: onizleme.html
+# Seyr Pixel — oyunu (oyun.js) ve assets/ şeritlerini gömerek telefonda açılan tek dosya üretir: onizleme.html
 import base64, json, os
 BURASI = os.path.dirname(os.path.abspath(__file__)); A = os.path.join(BURASI, 'assets')
 meta = json.load(open(os.path.join(A, 'karakter.json')))
 seritler = {k: 'data:image/png;base64,' + base64.b64encode(open(os.path.join(A, k + '.png'), 'rb').read()).decode() for k in meta}
+oyun = open(os.path.join(BURASI, 'oyun.js'), encoding='utf-8').read()
 SAYFA = r'''<title>Seyr Pixel</title>
 <meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap">
 <style>
-/* Tek ekran oyun önizlemesi: koyu gece paleti, tek tema. Oyun 320x180 çizilir, tam kat büyütülür. */
+/* Tek ekran oyun: koyu gece paleti, tek tema. Oyun 320x180 çizilir, tam katla büyütülür. */
 :root{--zemin:#14161f;--yazi:#e8e2d0;--soluk:#8a8fa3;--altin:#d9ad4f;color-scheme:dark}
-html,body{height:100%;margin:0;background:var(--zemin);color:var(--yazi);font:14px/1.4 system-ui,sans-serif;overflow:hidden}
+html,body{height:100%;margin:0;background:var(--zemin);color:var(--yazi);font:14px/1.4 system-ui,sans-serif;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none}
 #sahne{position:fixed;inset:0;display:grid;place-items:center}
 canvas{image-rendering:pixelated;image-rendering:crisp-edges;display:block}
-#bilgi{position:fixed;top:calc(8px + env(safe-area-inset-top,0px));left:max(16px,env(safe-area-inset-left,0px));right:max(16px,env(safe-area-inset-right,0px));color:var(--soluk);font-size:12px;text-align:center;pointer-events:none}
-.tus{position:fixed;bottom:calc(18px + env(safe-area-inset-bottom,0px));width:64px;height:64px;border-radius:50%;border:2px solid var(--altin);background:rgba(20,22,31,.6);color:var(--altin);font:700 22px system-ui;touch-action:none;user-select:none;-webkit-user-select:none}
-#sol{left:max(18px,env(safe-area-inset-left,0px))}.tus.sagda{font-size:14px;letter-spacing:.08em}
-#vur{right:max(18px,env(safe-area-inset-right,0px))}#kac{right:calc(max(18px,env(safe-area-inset-right,0px)) + 78px)}#sag{left:calc(max(18px,env(safe-area-inset-left,0px)) + 78px)}
+.tus{position:fixed;bottom:calc(16px + env(safe-area-inset-bottom,0px));width:62px;height:62px;border-radius:50%;border:2px solid var(--altin);background:rgba(20,22,31,.55);color:var(--altin);font:12px "Press Start 2P",monospace;touch-action:none;-webkit-tap-highlight-color:transparent}
+#sol{left:max(16px,env(safe-area-inset-left,0px))}#sag{left:calc(max(16px,env(safe-area-inset-left,0px)) + 74px)}
+#vur{right:max(16px,env(safe-area-inset-right,0px));width:72px;height:72px}#kac{right:calc(max(16px,env(safe-area-inset-right,0px)) + 84px)}
 .tus.on{background:var(--altin);color:var(--zemin)}
+#yardim{position:fixed;top:calc(6px + env(safe-area-inset-top,0px));left:0;right:0;text-align:center;color:var(--soluk);font-size:11px;pointer-events:none}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
-<div id="sahne"><canvas id="c" width="320" height="180" aria-label="Seyr Pixel önizleme"></canvas></div>
-<p id="bilgi">Seyr Pixel · ◀ ▶ yürü (basılı tut: koş) · VUR · KAÇ — klavyede ← → J K</p>
-<button class="tus" id="sol" aria-label="Sola yürü">◀</button><button class="tus" id="sag" aria-label="Sağa yürü">▶</button>
-<button class="tus sagda" id="kac" aria-label="Kaç">KAÇ</button><button class="tus sagda" id="vur" aria-label="Vur">VUR</button>
-<script>
-const META=__META__,SERIT=__SERIT__;
-const cv=document.getElementById('c'),ctx=cv.getContext('2d');ctx.imageSmoothingEnabled=false;
-const IMG={};for(const k in SERIT){const i=new Image();i.src=SERIT[k];IMG[k]=i;}
-function boyutla(){const k=Math.max(1,Math.floor(Math.min(innerWidth/320,innerHeight/180)));cv.style.width=320*k+'px';cv.style.height=180*k+'px';}
-addEventListener('resize',boyutla);boyutla();
-/* Yer: döşeme mantığı, sabit palet */
-const PAL={gok1:'#1e2440',gok2:'#3a3f66',dag:'#2b2f4d',dag2:'#383d63',ot:'#3f6b3a',ot2:'#335a30',toprak:'#6b4a2f',toprak2:'#56391f',yildiz:'#e8e2d0'};
-function zemin(kam){
-  const g=ctx.createLinearGradient(0,0,0,120);g.addColorStop(0,PAL.gok1);g.addColorStop(1,PAL.gok2);ctx.fillStyle=g;ctx.fillRect(0,0,320,140);
-  ctx.fillStyle=PAL.yildiz;for(let i=0;i<30;i++){const x=((i*73+11)%320-kam*.05+640)%320,y=(i*37)%70;ctx.fillRect(Math.round(x),y,1,1);}
-  for(const [renk,h,par,per] of [[PAL.dag,40,.2,90],[PAL.dag2,28,.4,60]]){ctx.fillStyle=renk;
-    for(let x=0;x<320;x++){const w=x+kam*par;const y=128-h*(.5+.5*Math.sin(w/per)*Math.cos(w/(per*1.7)));ctx.fillRect(x,Math.round(y),1,140-Math.round(y));}}
-  for(let x=-16;x<336;x+=16){const wx=Math.floor((x+kam)/16),ox=Math.round(x-((kam%16)+16)%16);
-    ctx.fillStyle=PAL.ot;ctx.fillRect(ox,140,16,4);ctx.fillStyle=PAL.ot2;ctx.fillRect(ox+((wx*5)&7),140,3,1);
-    ctx.fillStyle=(wx&1)?PAL.toprak:PAL.toprak2;ctx.fillRect(ox,144,16,36);}
-}
-const P={x:0,yon:1,t:0,bas:0,eylem:null,et:0};const tus={sol:false,sag:false};
-/* tek seferlik hareketler: oyun için hızlandırılmış oynatma */
-const TEK={saldiri:{hiz:1.6},kacin:{hiz:1.7}};
-function eylem(ad){if(P.eylem||!META[ad])return;P.eylem=ad;P.et=0;}
-addEventListener('keydown',e=>{if(e.key==='ArrowLeft')tus.sol=true;if(e.key==='ArrowRight')tus.sag=true;if(e.key==='j'||e.key==='J')eylem('saldiri');if(e.key==='k'||e.key==='K')eylem('kacin');});
-addEventListener('keyup',e=>{if(e.key==='ArrowLeft')tus.sol=false;if(e.key==='ArrowRight')tus.sag=false;});
-for(const id of ['sol','sag']){const b=document.getElementById(id);
-  b.addEventListener('pointerdown',e=>{e.preventDefault();tus[id]=true;b.classList.add('on');});
-  for(const ev of ['pointerup','pointercancel','pointerleave'])b.addEventListener(ev,()=>{tus[id]=false;b.classList.remove('on');});}
-for(const [id,ad] of [['vur','saldiri'],['kac','kacin']]){const b=document.getElementById(id);
-  b.addEventListener('pointerdown',e=>{e.preventDefault();b.classList.add('on');eylem(ad);});
-  for(const ev of ['pointerup','pointercancel','pointerleave'])b.addEventListener(ev,()=>b.classList.remove('on'));}
-let son=performance.now(),tbek=0;
-function ciz(st,f){const M=META[st],im=IMG[st];if(!im||!im.complete||!im.naturalWidth)return;
-  const x=Math.round(160-M.w/2),y=144-M.h;ctx.save();if(P.yon!==M.yon){ctx.translate(320,0);ctx.scale(-1,1);}
-  ctx.fillStyle='rgba(0,0,0,.35)';ctx.fillRect(Math.round(160-14),143,28,2);
-  ctx.drawImage(im,f*M.w,0,M.w,M.h,x,y,M.w,M.h);ctx.restore();}
-function kare(now){const dt=Math.min(.05,(now-son)/1000);son=now;
-  const yon=P.eylem?0:(tus.sag?1:0)-(tus.sol?1:0);if(yon){P.yon=yon;P.bas+=dt;}else P.bas=0;
-  const kos=yon&&P.bas>.5&&META.kos;let hiz=yon*(kos?82:34);
-  if(P.eylem==='kacin')hiz=-P.yon*70*Math.max(0,1-P.et/.6);
-  P.x+=hiz*dt;zemin(P.x);
-  if(P.eylem){const M=META[P.eylem];P.et+=dt;const f=Math.floor(P.et*M.fps*TEK[P.eylem].hiz);
-    if(f>=M.n){P.eylem=null;}else{ciz(P.eylem,f);requestAnimationFrame(kare);return;}}
-  if(yon){P.t+=dt;const st=kos?'kos':'yuru';ciz(st,Math.floor(P.t*META[st].fps)%META[st].n);}
-  else{tbek+=dt;const st=META.bekle?'bekle':'yuru';ciz(st,META.bekle?Math.floor(tbek*META.bekle.fps)%META.bekle.n:0);}
-  requestAnimationFrame(kare);}
-requestAnimationFrame(kare);
-</script>
+<div id="sahne"><canvas id="c" width="320" height="180" aria-label="Seyr Pixel: Gaflet Ovası"></canvas></div>
+<p id="yardim">◀ ▶ yürü (basılı tut: koş) · VUR · KAÇ — düşman kızarınca kaç, sersemleyince vur · klavye ← → J K</p>
+<button class="tus" id="sol" aria-label="Sola">◀</button><button class="tus" id="sag" aria-label="Sağa">▶</button>
+<button class="tus" id="kac" aria-label="Kaç">KAÇ</button><button class="tus" id="vur" aria-label="Vur">VUR</button>
+<script>window.META=__META__;window.SERIT=__SERIT__;</script>
+<script>__OYUN__</script>
 '''
-html = SAYFA.replace('__META__', json.dumps(meta)).replace('__SERIT__', json.dumps(seritler))
+html = SAYFA.replace('__META__', json.dumps(meta)).replace('__SERIT__', json.dumps(seritler)).replace('__OYUN__', oyun.replace('</script', '<\\/script'))
 open(os.path.join(BURASI, 'onizleme.html'), 'w', encoding='utf-8').write(html)
 print('✓ onizleme.html', os.path.getsize(os.path.join(BURASI, 'onizleme.html')) // 1024, 'KB')
