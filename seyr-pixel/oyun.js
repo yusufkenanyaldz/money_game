@@ -75,6 +75,7 @@ function kacin() {
   P.eylem = 'kacin'; P.et = 0; P.kacti = false; SES.kac();
 }
 const saldiriKare = () => SALDIRI.bas + Math.floor(P.et * META.saldiri.fps * SALDIRI.hiz);
+const tekKare = (ad, hiz) => Math.min(META[ad].n - 1, Math.floor(P.et * META[ad].fps * hiz));
 const kacinKare = () => Math.floor(P.et * META.kacin.fps * KACIN.hiz);
 const dokunulmaz = () => P.inv > 0 || (P.eylem === 'kacin' && kacinKare() >= KACIN.dokunulmaz[0] && kacinKare() <= KACIN.dokunulmaz[1]);
 
@@ -83,7 +84,8 @@ function oyuncuVuruldu(hasar, kaynakX) {
     if (!P.kacti) { P.kacti = true; yazi(P.x, 'kaçtın', '#9fd6ff'); SES.kactin(); }
     return 'kacti';
   }
-  P.can -= hasar; P.inv = 1; P.yara = .25; P.eylem = null; SES.yara(); titret(3, .2);
+  P.can -= hasar; P.inv = 1; P.yara = .25; SES.yara(); titret(3, .2);
+  P.eylem = META.darbe ? 'darbe' : null; P.et = 0;
   P.x += Math.sign(P.x - kaynakX || -P.yon) * 16;
   yazi(P.x, '-' + hasar, '#ff7b6b');
   if (P.can <= 0) { P.can = 0; OYUN.durum = 'dustu'; OYUN.t = 0; SES.ol(); }
@@ -161,7 +163,7 @@ const BOLUM = {
 };
 const OYUN = { durum: 'giris', t: 0, kam: 0, grup: 0, kilit: null, devOldu: false, devGeldi: false, kontrol: 40, titre: 0, tsure: 0 };
 function yeniden() {
-  sesAc();
+  sesAc(); if (OYUN.durum === 'dustu' && OYUN.t < 2.2) return;
   if (OYUN.durum === 'bitti') { OYUN.grup = 0; OYUN.kontrol = 40; OYUN.devGeldi = false; OYUN.devOldu = false; }
   E.length = 0; dalgalar.length = 0;
   P.x = OYUN.kontrol; P.can = P.max; P.inv = 1; P.eylem = null; P.yon = 1;
@@ -201,6 +203,8 @@ function guncelle(dt) {
     P.et += dt; const f = saldiriKare();
     if (!P.isabet && f >= SALDIRI.isabet) { P.isabet = true; vurusKontrol(); }
     if (f >= META.saldiri.n) P.eylem = null;
+  } else if (P.eylem === 'darbe') {
+    P.et += dt; if (P.et * META.darbe.fps * 1.6 >= META.darbe.n) P.eylem = null;
   } else if (P.eylem === 'kacin') {
     P.et += dt; const f = kacinKare();
     P.x -= P.yon * KACIN.geri * Math.max(0, 1 - P.et / .55) * dt;
@@ -256,13 +260,15 @@ function sprite(st, f, sx, yon) {
 function oyuncuCiz(kam) {
   const sx = P.x - kam;
   ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.fillRect(Math.round(sx - 12), ZEMIN, 24, 2);
-  if (P.inv > 0 && Math.floor(P.inv * 16) % 2 && P.eylem !== 'kacin') return;
+  if (P.inv > 0 && Math.floor(P.inv * 16) % 2 && !P.eylem && OYUN.durum === 'oyun') return;
   let st, f;
   if (P.eylem === 'saldiri') { st = 'saldiri'; f = Math.min(META.saldiri.n - 1, saldiriKare()); }
   else if (P.eylem === 'kacin') { st = 'kacin'; f = Math.min(META.kacin.n - 1, kacinKare()); }
   else if ((tus.sag || tus.sol) && OYUN.durum === 'oyun') { st = P.bas > .5 ? 'kos' : 'yuru'; f = Math.floor(P.t * META[st].fps) % META[st].n; }
   else { st = 'bekle'; f = Math.floor(P.tb * META.bekle.fps) % META.bekle.n; }
-  if (OYUN.durum === 'dustu') { st = 'bekle'; f = 0; ctx.globalAlpha = Math.max(.2, 1 - OYUN.t); }
+  if (P.eylem === 'darbe') { st = 'darbe'; f = tekKare('darbe', 1.6); }
+  if (OYUN.durum === 'dustu') { if (META.yenilme) { st = 'yenilme'; f = Math.min(META.yenilme.n - 1, Math.floor(OYUN.t * META.yenilme.fps * 1.4)); } else { st = 'bekle'; f = 0; ctx.globalAlpha = Math.max(.2, 1 - OYUN.t); } }
+  if (OYUN.durum === 'bitti' && META.zafer) { st = 'zafer'; f = Math.min(META.zafer.n - 1, Math.floor(OYUN.t * META.zafer.fps)); }
   sprite(st, f, sx, P.yon); ctx.globalAlpha = 1;
 }
 function dusmanCiz(e, kam) {
@@ -317,7 +323,7 @@ function ciz() {
   arayuz();
   if (msj) ortaYazi(msj.s, 60, '#ffd36b');
   if (OYUN.durum === 'giris') { perde(.55); ortaYazi(BOLUM.ad.toLocaleUpperCase('tr-TR'), 62, '#ffd36b'); ortaYazi('dokun ya da Enter: başla', 82, '#e8e2d0'); }
-  if (OYUN.durum === 'dustu') { perde(Math.min(.6, OYUN.t)); ortaYazi('DÜŞTÜN', 70, '#ff7b6b'); if (OYUN.t > .8) ortaYazi('dokun: son yerden devam', 90, '#e8e2d0'); }
+  if (OYUN.durum === 'dustu') { perde(Math.min(.6, OYUN.t)); ortaYazi('DÜŞTÜN', 70, '#ff7b6b'); if (OYUN.t > 2.2) ortaYazi('dokun: son yerden devam', 90, '#e8e2d0'); }
   if (OYUN.durum === 'bitti') { perde(Math.min(.6, OYUN.t)); ortaYazi('BÖLÜM TAMAM', 68, '#ffd36b'); if (OYUN.t > 1) ortaYazi('dokun: yeniden oyna', 88, '#e8e2d0'); }
 }
 function perde(a) { ctx.fillStyle = `rgba(10,10,18,${a})`; ctx.fillRect(0, 0, W, H); }

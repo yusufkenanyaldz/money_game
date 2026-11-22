@@ -38,5 +38,29 @@
   "fps": 12,
   "yon": 1,
   "dongu": false
+ },
+ "darbe": {
+  "n": 16,
+  "w": 77,
+  "h": 66,
+  "fps": 12,
+  "yon": 1,
+  "dongu": false
+ },
+ "yenilme": {
+  "n": 58,
+  "w": 103,
+  "h": 67,
+  "fps": 12,
+  "yon": 1,
+  "dongu": false
+ },
+ "zafer": {
+  "n": 36,
+  "w": 52,
+  "h": 85,
+  "fps": 12,
+  "yon": 1,
+  "dongu": false
  }
 }

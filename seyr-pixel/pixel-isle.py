@@ -19,6 +19,7 @@ ap = argparse.ArgumentParser()
 ap.add_argument('video'); ap.add_argument('hareket')
 ap.add_argument('--bas', type=float, default=0); ap.add_argument('--sure', type=float, default=0)
 ap.add_argument('--dongu', action='store_true'); ap.add_argument('--yon', type=int, default=1)
+ap.add_argument('--kesik-ust', type=int, default=0, help='kadrajın üstünde kesilen ince parçayı (kılıç ağzı) bu kadar piksel uzat')
 a = ap.parse_args()
 
 with tempfile.TemporaryDirectory() as t:
@@ -78,6 +79,10 @@ def en_yakin(rgb):
     d = ((rgb[..., None, :] - P[None, None]) ** 2).sum(-1); return d.argmin(-1), np.sqrt(d.min(-1))
 
 
+# bozuk kareleri at: karakter kaybolmuş, yalnızca efekt kalmış (görünür alan ortancanın yarısından az)
+alan = [int(m.sum()) for _, m in kucuk]; ort = float(np.median(alan))
+atilan = [i for i, x in enumerate(alan) if x < ort * .5]
+if atilan: kucuk = [k for i, k in enumerate(kucuk) if i not in atilan]; print(f'bozuk kare atıldı: {atilan}')
 out = []; once = None
 for rgb, m in kucuk:
     idx, _ = en_yakin(rgb)
@@ -87,6 +92,29 @@ for rgb, m in kucuk:
     once = idx
     q = P[idx].astype(np.uint8); out.append(np.dstack([q, m * 255]).astype(np.uint8))
 
+if a.kesik_ust:
+    # Videoda kadrajın üst kenarına değen ince parça (kılıç ağzı) kesik kalmış: üst satırdaki desen yukarı uzatılır, ucu sivriltilir.
+    # Yalnızca 9 pikselden dar parçalar uzatılır (saç vb. dokunmaz).
+    E = a.kesik_ust + 2; yeni = []; uzatilan = 0
+    for o in out:
+        u = np.zeros((o.shape[0] + E, o.shape[1], 4), np.uint8); u[E:] = o
+        dolu = [y for y in range(min(3, o.shape[0])) if o[y, :, 3].any()]
+        t0 = dolu[0] if dolu else None   # kırpma yuvarlamasıyla en üstte bir boş satır kalabiliyor
+        ust = np.where(o[t0, :, 3] > 0)[0] if t0 is not None else []
+        if len(ust):
+            parcalar = np.split(ust, np.where(np.diff(ust) > 1)[0] + 1)
+            for pc in parcalar:
+                if len(pc) > 9: continue
+                x0, x1 = pc[0], pc[-1] + 1
+                for k in range(1, a.kesik_ust + 1): u[E + t0 - k, x0:x1] = o[t0 + (k - 1) % 2, x0:x1] if o[t0 + 1, x0:x1, 3].all() else o[t0, x0:x1]
+                g = x1 - x0; uc = E + t0 - a.kesik_ust      # sivri uç: her satırda 2 piksel daralır
+                for k in range(1, 3):
+                    w = max(1, g - 2 * k); cx = x0 + (g - w) // 2; u[uc - k, cx:cx + w] = o[t0, cx:cx + w]
+                    u[uc - k, cx, :3] = u[uc - k, cx + w - 1, :3] = (16, 14, 24)   # koyu kenar
+                uzatilan += 1
+        yeni.append(u)
+    out = yeni; H += E
+    print(f'kesik üst: {uzatilan} parça {a.kesik_ust} px uzatıldı')
 deg = np.mean([np.mean(np.any(out[i][..., :3] != out[i + 1][..., :3], -1) & out[i][..., 3].astype(bool)) for i in range(len(out) - 1)]) if len(out) > 1 else 0
 serit = Image.new('RGBA', (W * len(out), H))
 for i, o in enumerate(out): serit.paste(Image.fromarray(o, 'RGBA'), (i * W, 0))

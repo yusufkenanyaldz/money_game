@@ -29,3 +29,8 @@ dokunulmadan duruyor; Defter (`seyr/defter.js`) buraya taşınacak.
 - Palet saldırı klibinden (kılıç izinin açık mavisi için), 28 renk. Yeni palet gerekirse `assets/palet.png` silinip önce saldırı işlenir.
 - Bekleme 105 kare (8,75 sn; pelerin düzensiz, kısa döngü yok) · yürüme 14 · koşu 9 · saldırı 19 · kaçınma 16 kare. Toplam ~340 KB.
 - Bekleyen: darbe, yenilme, zafer (video olarak). Gemini'nin sprite sheet'leri farklı çizimde (iri kafa, önden bakış, beyaz zemin JPEG) — kullanılmadı.
+- Darbe (16 kare, darbe anından), yenilme (58), zafer (36; Gemini'de kılıç ağzı kadraj üstünde kesikti, `--kesik-ust 11` ile 11 px uzatılıp sivriltildi) oyunda.
+- `pixel-isle.py`: `--kesik-ust N` (üst kenarda kesik ince parçayı uzatır), bozuk (karakter kaybolmuş) kareleri atar.
+- `arayuz-isle.py`: Gemini arayüz görsellerini asıl pixel boyutuna indirir → `assets/ui-*.png`. VUR, KAÇ ve yön düğmeleri oyunda;
+  defter, pencere, can çubuğu, kalp ve dört güç simgesi Defter ekranı için hazır.
+
