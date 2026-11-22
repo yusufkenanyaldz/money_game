@@ -10,6 +10,10 @@ const W = 320, H = 180, ZEMIN = 150;
 const cv = document.getElementById('c'), ctx = cv.getContext('2d');
 ctx.imageSmoothingEnabled = false;
 const META = window.META, SERIT = window.SERIT;
+/* Düşman görselleri (Gemini → pixel-isle --grup). Olmayan hareket için kodla çizilmiş yer tutucu kullanılır. */
+const DM = {}; for (const g in (window.DUSMAN || {})) { DM[g] = { meta: DUSMAN[g].meta, img: {} }; for (const k in DUSMAN[g].serit) { const i = new Image(); i.src = DUSMAN[g].serit[k]; DM[g].img[k] = i; } }
+// saldırı şeridinde hazırlanma ve vuruş kareleri: [hazırlanma başı, vuruş başı, vuruş sonu]
+const SALDIRI_KARE = { golge: [0, 20, 40], dev: [0, 0, 0] };
 const IMG = {};
 for (const k in SERIT) { const i = new Image(); i.src = SERIT[k]; IMG[k] = i; }
 function boyutla() {
@@ -108,7 +112,7 @@ function vurusKontrol() {
     if (dx < -6 || dx > SALDIRI.menzil + e.T.w / 2) continue;
     if (e.durum === 'hazir') { yazi(e.x, 'tok!', '#d9ad4f'); SES.sek(); e.flas = .1; continue; }   // hazırlanırken zırhlı
     const hasar = e.durum === 'sersem' ? 2 : 1;
-    e.can -= hasar; e.flas = .15; e.kx = P.yon * (e.tur === 'dev' ? 3 : 10); SES.isabet(); titret(e.tur === 'dev' ? 2 : 1, .1);
+    e.can -= hasar; e.flas = .15; e.darbeT = 0; e.kx = P.yon * (e.tur === 'dev' ? 3 : 10); SES.isabet(); titret(e.tur === 'dev' ? 2 : 1, .1);
     yazi(e.x, hasar > 1 ? '-2!' : '-1', hasar > 1 ? '#ffd36b' : '#ffffff');
     if (e.can <= 0) { e.durum = 'ol'; e.t = 0; SES.ol(); if (e.tur === 'dev') OYUN.devOldu = true; }
     else if (e.durum !== 'sersem' && e.tur === 'golge') { e.durum = 'geri'; e.t = 0; }
@@ -147,7 +151,8 @@ function dusmanlar(dt) {
       if (e.t >= .6) { e.durum = 'yaklas'; e.t = 0; e.bekle = rnd(.6, 1.4); }
     }
   }
-  for (let i = E.length - 1; i >= 0; i--) if (E[i].durum === 'ol' && E[i].t > .6) E.splice(i, 1);
+  for (let i = E.length - 1; i >= 0; i--) { const e = E[i], om = DM[e.tur] && DM[e.tur].meta.ol; if (e.durum === 'ol' && e.t > (om ? om.n / om.fps / 1.5 : .6)) E.splice(i, 1); }
+  for (const e of E) if (e.darbeT !== undefined) e.darbeT += dt;
   for (let i = dalgalar.length - 1; i >= 0; i--) {
     const d = dalgalar[i]; d.t += dt; d.x += d.yon * 120 * dt;
     if (!d.isabet && Math.abs(d.x - P.x) < 8) { d.isabet = true; oyuncuVuruldu(1, d.x - d.yon * 10); }
@@ -271,7 +276,34 @@ function oyuncuCiz(kam) {
   if (OYUN.durum === 'bitti' && META.zafer) { st = 'zafer'; f = Math.min(META.zafer.n - 1, Math.floor(OYUN.t * META.zafer.fps)); }
   sprite(st, f, sx, P.yon); ctx.globalAlpha = 1;
 }
+function dusmanSprite(e, kam) {
+  const D = DM[e.tur]; if (!D) return false;
+  const M = D.meta, T = e.T, sx = Math.round(e.x - kam);
+  let st = 'bekle', f = 0; const tek = (ad, p) => { st = ad; f = Math.min(M[ad].n - 1, Math.floor(p * M[ad].n)); };
+  const K = SALDIRI_KARE[e.tur];
+  if (e.durum === 'ol' && M.ol) tek('ol', e.t * 1.5 * M.ol.fps / M.ol.n);
+  else if (e.durum === 'hazir' && M.saldiri && K[1]) { st = 'saldiri'; f = K[0] + Math.floor(Math.min(1, e.t / T.hazir) * (K[1] - K[0] - 1)); }
+  else if (e.durum === 'saldir' && M.saldiri && K[2]) { st = 'saldiri'; f = K[1] + Math.floor(Math.min(1, e.t / T.saldiri) * (K[2] - K[1])); }
+  else if (e.darbeT !== undefined && M.darbe && e.darbeT < M.darbe.n / M.darbe.fps / 2.5 && e.durum !== 'hazir' && e.durum !== 'saldir') tek('darbe', e.darbeT * 2.5 * M.darbe.fps / M.darbe.n);
+  else if ((e.durum === 'yaklas' || e.durum === 'geri') && M.yuru) { st = 'yuru'; f = Math.floor(OYUN.zaman * M.yuru.fps) % M.yuru.n; }
+  else f = Math.floor(OYUN.zaman * M.bekle.fps + e.x) % M.bekle.n;
+  const m = M[st], im = D.img[st]; if (!im || !im.complete || !im.naturalWidth) return false;
+  ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.fillRect(sx - (T.w >> 1), ZEMIN, T.w, 2);
+  ctx.save(); if (e.yon !== m.yon) { ctx.translate(sx * 2, 0); ctx.scale(-1, 1); }
+  const kirmizi = e.tur === 'dev' && e.durum === 'hazir' && Math.floor(e.t * 10) % 2;   // dev'in saldırı klibi gelene kadar uyarı
+  if (kirmizi) ctx.filter = 'sepia(1) saturate(4) hue-rotate(-30deg) brightness(1.2)';
+  if (e.flas > 0) ctx.filter = 'brightness(2.2)';
+  const yy = e.tur === 'dev' && e.durum === 'saldir' ? 2 : 0;
+  ctx.drawImage(im, f * m.w, 0, m.w, m.h, Math.round(sx - m.w / 2), ZEMIN + 1 - m.h + yy, m.w, m.h); ctx.restore();
+  // durum işaretleri (sprite'ın üstünde)
+  const ust = ZEMIN - Math.round(T.h * (e.tur === 'dev' ? 1.7 : 1.9));
+  if (e.durum === 'hazir') { ctx.fillStyle = '#ffd36b'; ctx.fillRect(sx, ust - 6, 2, 5); ctx.fillRect(sx, ust, 2, 1); }
+  if (e.durum === 'sersem') { ctx.fillStyle = '#ffd36b'; const a = e.t * 8; for (let i = 0; i < 3; i++) ctx.fillRect(Math.round(sx + Math.cos(a + i * 2.1) * 7), Math.round(ust + 4 + Math.sin(a + i * 2.1) * 2), 1, 1); }
+  if (e.tur === 'dev' && e.durum !== 'ol') { ctx.fillStyle = '#16111f'; ctx.fillRect(W / 2 - 61, 18, 122, 5); ctx.fillStyle = '#c0392b'; ctx.fillRect(W / 2 - 60, 19, Math.round(120 * e.can / T.can), 3); }
+  return true;
+}
 function dusmanCiz(e, kam) {
+  if (dusmanSprite(e, kam)) return;
   const T = e.T, sx = Math.round(e.x - kam); if (sx < -60 || sx > W + 60) return;
   let w = T.w, h = T.h, lean = 0;
   if (e.durum === 'hazir') { h -= 3; lean = -2; }
@@ -332,6 +364,6 @@ function yaziCiz(s, x, y, c) { ctx.font = '8px "Press Start 2P", monospace'; ctx
 function ortaYazi(s, y, c) { yaziCiz(s, W / 2, y, c); }
 
 let son = performance.now();
-function kare(now) { const dt = Math.min(.05, (now - son) / 1000); son = now; guncelle(dt); ciz(); requestAnimationFrame(kare); }
+function kare(now) { const dt = Math.min(.05, (now - son) / 1000); son = now; OYUN.zaman = (OYUN.zaman || 0) + dt; guncelle(dt); ciz(); requestAnimationFrame(kare); }
 requestAnimationFrame(kare);
 window.__oyun = { P, E, OYUN, saldir, kacin, yeniden, dog };

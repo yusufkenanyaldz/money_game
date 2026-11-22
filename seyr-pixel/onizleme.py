@@ -4,6 +4,12 @@ BURASI = os.path.dirname(os.path.abspath(__file__)); A = os.path.join(BURASI, 'a
 meta = json.load(open(os.path.join(A, 'karakter.json')))
 ui = {k: 'data:image/png;base64,' + base64.b64encode(open(os.path.join(A, f'ui-{k}.png'), 'rb').read()).decode() for k in ('vur', 'kac', 'ok') if os.path.exists(os.path.join(A, f'ui-{k}.png'))}
 seritler = {k: 'data:image/png;base64,' + base64.b64encode(open(os.path.join(A, k + '.png'), 'rb').read()).decode() for k in meta}
+dusman = {}
+for g in ('golge', 'dev'):
+    jp = os.path.join(A, f'{g}.json')
+    if not os.path.exists(jp): continue
+    m = json.load(open(jp))
+    dusman[g] = {'meta': m, 'serit': {k: 'data:image/png;base64,' + base64.b64encode(open(os.path.join(A, f'{g}-{k}.png'), 'rb').read()).decode() for k in m}}
 oyun = open(os.path.join(BURASI, 'oyun.js'), encoding='utf-8').read()
 SAYFA = r'''<title>Seyr Pixel</title>
 <meta name="claude:viewport-fit-sides" content="cover">
@@ -29,11 +35,11 @@ canvas{image-rendering:pixelated;image-rendering:crisp-edges;display:block}
 <p id="yardim">◀ ▶ yürü (basılı tut: koş) · VUR · KAÇ — düşman kızarınca kaç, sersemleyince vur · klavye ← → J K</p>
 <button class="tus" id="sol" aria-label="Sola">◀</button><button class="tus" id="sag" aria-label="Sağa">▶</button>
 <button class="tus" id="kac" aria-label="Kaç">KAÇ</button><button class="tus" id="vur" aria-label="Vur">VUR</button>
-<script>window.META=__META__;window.SERIT=__SERIT__;</script>
+<script>window.META=__META__;window.SERIT=__SERIT__;window.DUSMAN=__DUSMAN__;</script>
 <script>__OYUN__</script>
 '''
 ek = ''.join(f"document.querySelectorAll('{s}').forEach(b=>{{b.classList.add('res');b.style.backgroundImage='url({ui[k]})'}});" for s, k in (('#vur', 'vur'), ('#kac', 'kac'), ('#sol,#sag', 'ok')) if k in ui)
 SAYFA = SAYFA.replace('<script>window.META', '<script>' + ek + '</script>\n<script>window.META')
-html = SAYFA.replace('__META__', json.dumps(meta)).replace('__SERIT__', json.dumps(seritler)).replace('__OYUN__', oyun.replace('</script', '<\\/script'))
+html = SAYFA.replace('__META__', json.dumps(meta)).replace('__SERIT__', json.dumps(seritler)).replace('__DUSMAN__', json.dumps(dusman)).replace('__OYUN__', oyun.replace('</script', '<\\/script'))
 open(os.path.join(BURASI, 'onizleme.html'), 'w', encoding='utf-8').write(html)
 print('✓ onizleme.html', os.path.getsize(os.path.join(BURASI, 'onizleme.html')) // 1024, 'KB')

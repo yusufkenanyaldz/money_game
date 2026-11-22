@@ -18,6 +18,7 @@ RENK = 28         # ortak paletteki renk sayısı (kılıç izi için birkaç a�
 ap = argparse.ArgumentParser()
 ap.add_argument('video'); ap.add_argument('hareket')
 ap.add_argument('--bas', type=float, default=0); ap.add_argument('--sure', type=float, default=0)
+ap.add_argument('--grup', default='karakter', help='karakter | golge | dev ...: ayrı palet ve json'); ap.add_argument('--boy', type=int, default=0); ap.add_argument('--enaz', type=float, default=0, help='döngü en az bu kadar sn')
 ap.add_argument('--dongu', action='store_true'); ap.add_argument('--yon', type=int, default=1)
 ap.add_argument('--kesik-ust', type=int, default=0, help='kadrajın üstünde kesilen ince parçayı (kılıç ağzı) bu kadar piksel uzat')
 a = ap.parse_args()
@@ -38,14 +39,21 @@ def perde(f):
 
 
 import io
-ilkf, ilka = perde(np.asarray(Image.open(io.BytesIO(ilk)).convert('RGB')).astype(np.float32))
+ilk0 = np.asarray(Image.open(io.BytesIO(ilk)).convert('RGB')).astype(np.float32)
+# dikey (telefon) videolarda üstte/altta siyah bant olabilir: yalnızca yeşil perdeli alanı al
+_y = np.where((ilk0[..., 1] - np.maximum(ilk0[..., 0], ilk0[..., 2]) > 30).mean(1) > .2)[0]
+_x = np.where((ilk0[..., 1] - np.maximum(ilk0[..., 0], ilk0[..., 2]) > 30).mean(0) > .2)[0]
+BY0, BY1, BX0, BX1 = _y.min(), _y.max() + 1, _x.min(), _x.max() + 1
+if (BY1 - BY0) < ilk0.shape[0] - 4 or (BX1 - BX0) < ilk0.shape[1] - 4: print(f'siyah bant kırpıldı: y {BY0}-{BY1}, x {BX0}-{BX1}')
+ilk0 = ilk0[BY0:BY1, BX0:BX1]; F = [f[BY0:BY1, BX0:BX1] for f in F]
+ilkf, ilka = perde(ilk0)
 ys, _ = np.where(ilka > .5); ayakta = ys.max() - ys.min()            # Gemini'nin ilk karesi = verilen ayakta görsel
-k = BOY / ayakta
+k = (a.boy or BOY) / ayakta
 
 FA = [perde(f) for f in F]
 if a.dongu:   # doğal döngü noktası: ilk kareye en çok benzeyen kare (en az 1 sn sonra)
     sm = [np.asarray(Image.fromarray((al * 255).astype(np.uint8)).resize((64, 64))).astype(float) for _, al in FA]
-    fark = {j: np.abs(sm[0] - sm[j]).mean() for j in range(FPS // 2, len(FA))}
+    fark = {j: np.abs(sm[0] - sm[j]).mean() for j in range(max(FPS // 2, int(a.enaz * FPS)), len(FA))}
     enaz = min(fark.values()); N = min(j for j, d in fark.items() if d <= enaz * 1.6)   # yeterince iyi olan en kısa döngü (uzun döngü yalnızca biraz daha iyi diye seçilmesin)
     FA = FA[:N]
     print(f'{a.hareket}: döngü {N} kare ({N / FPS:.2f} sn)')
@@ -67,7 +75,7 @@ for f, am in FA:
     aa = np.asarray(Image.fromarray((ka * 255).astype(np.uint8)).resize((W, H), Image.BOX)) > 110
     kucuk.append((rgb, aa))
 
-palyol = os.path.join(ASSETS, 'palet.png')
+palyol = os.path.join(ASSETS, 'palet.png' if a.grup == 'karakter' else f'palet-{a.grup}.png')
 if os.path.exists(palyol): pal = Image.open(palyol)
 else:
     hepsi = np.concatenate([r[m] for r, m in kucuk]).reshape(1, -1, 3).astype(np.uint8)
@@ -118,8 +126,8 @@ if a.kesik_ust:
 deg = np.mean([np.mean(np.any(out[i][..., :3] != out[i + 1][..., :3], -1) & out[i][..., 3].astype(bool)) for i in range(len(out) - 1)]) if len(out) > 1 else 0
 serit = Image.new('RGBA', (W * len(out), H))
 for i, o in enumerate(out): serit.paste(Image.fromarray(o, 'RGBA'), (i * W, 0))
-yol = os.path.join(ASSETS, a.hareket + '.png'); serit.save(yol, optimize=True)
-mpath = os.path.join(ASSETS, 'karakter.json'); meta = json.load(open(mpath)) if os.path.exists(mpath) else {}
+yol = os.path.join(ASSETS, (a.hareket if a.grup == 'karakter' else f'{a.grup}-{a.hareket}') + '.png'); serit.save(yol, optimize=True)
+mpath = os.path.join(ASSETS, f'{a.grup}.json'); meta = json.load(open(mpath)) if os.path.exists(mpath) else {}
 meta[a.hareket] = dict(n=len(out), w=W, h=H, fps=FPS, yon=a.yon, dongu=a.dongu)
 json.dump(meta, open(mpath, 'w'), indent=1, ensure_ascii=False)
 print(f'{a.hareket}: {len(out)} kare, {W}x{H} px, {os.path.getsize(yol) // 1024} KB, ardışık karede değişen piksel %{100 * deg:.1f}')

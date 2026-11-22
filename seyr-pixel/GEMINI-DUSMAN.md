@@ -55,3 +55,17 @@ Animate this exact pixel art red giant: he is struck by an unseen blow from the 
 ```
 Animate this exact pixel art red giant being defeated: he staggers, drops his club, falls to his knees, then crumbles into dark red smoke that drifts up and fades away completely. The last second shows only the empty green background. No blood, nothing graphic. Pixel art, 16-bit retro game sprite style, crisp hard-edged pixels, no anti-aliasing. Side view facing left. The camera does not move, no zoom, no cuts. Solid flat chroma-key green background, no ground, no text.
 ```
+
+## Kızıl Dev — yeniden (22 Kasım)
+İlk saldırı videosunda kaldırılan sopa kadrajın üstünden taştı; yürüme düzenli bir yürüme döngüsü değildi.
+Çözüm: devi kadrajda küçük istemek (boyunun yarısı kadar boşluk üstte kalsın).
+
+10b. Saldırı
+```
+Animate this exact pixel art red giant. IMPORTANT: show him SMALL in the frame, his body taking only the lower half of the frame height, with a large empty green area above his head so the raised club always stays fully inside the frame. First a slow clear wind-up for about one second: he raises the huge club straight up above his head with both hands, his eyes glowing red. Then he smashes it down hard onto the ground in front of him to the left, with a small burst of dust and rock pixels. Then he pauses bent over for a moment and returns to his standing pose. Pixel art, 16-bit retro game sprite style, crisp hard-edged pixels, no anti-aliasing, no motion blur. Side view facing left. The camera does not move, no zoom, no cuts. His design and colors stay exactly the same in every frame. Solid flat chroma-key green background, no shadow, no ground, no text.
+```
+
+9b. Yürüme
+```
+Animate this exact pixel art red giant walking slowly and heavily to the left IN PLACE, like a treadmill: a steady, repeating stomping walk cycle with the same rhythm for the whole clip, one heavy step after another without stopping, the club held low in his right hand swinging slightly with each step. He never stops, never raises the club, and stays in the middle of the frame. Show him small in the frame with empty green space around him. Pixel art, 16-bit retro game sprite style, crisp hard-edged pixels, no anti-aliasing, no motion blur. Side view facing left. The camera does not move, no zoom, no cuts. His design and colors stay exactly the same in every frame. Solid flat chroma-key green background, no shadow, no ground, no text.
+```

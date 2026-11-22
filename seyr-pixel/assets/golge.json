@@ -1,0 +1,42 @@
+{
+ "saldiri": {
+  "n": 46,
+  "w": 61,
+  "h": 50,
+  "fps": 12,
+  "yon": -1,
+  "dongu": false
+ },
+ "bekle": {
+  "n": 30,
+  "w": 41,
+  "h": 48,
+  "fps": 12,
+  "yon": -1,
+  "dongu": true
+ },
+ "yuru": {
+  "n": 6,
+  "w": 46,
+  "h": 53,
+  "fps": 12,
+  "yon": -1,
+  "dongu": true
+ },
+ "darbe": {
+  "n": 32,
+  "w": 61,
+  "h": 61,
+  "fps": 12,
+  "yon": -1,
+  "dongu": false
+ },
+ "ol": {
+  "n": 56,
+  "w": 61,
+  "h": 61,
+  "fps": 12,
+  "yon": -1,
+  "dongu": false
+ }
+}
