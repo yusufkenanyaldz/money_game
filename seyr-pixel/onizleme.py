@@ -2,7 +2,7 @@
 import base64, json, os
 BURASI = os.path.dirname(os.path.abspath(__file__)); A = os.path.join(BURASI, 'assets')
 meta = json.load(open(os.path.join(A, 'karakter.json')))
-ui = {k: 'data:image/png;base64,' + base64.b64encode(open(os.path.join(A, f'ui-{k}.png'), 'rb').read()).decode() for k in ('vur', 'kac', 'ok', 'defter', 'alp', 'kut', 'hikmet', 'cevher') if os.path.exists(os.path.join(A, f'ui-{k}.png'))}
+ui = {k: 'data:image/png;base64,' + base64.b64encode(open(os.path.join(A, f'ui-{k}.png'), 'rb').read()).decode() for k in ('vur', 'kac', 'ok', 'defter', 'pencere', 'alp', 'kut', 'hikmet', 'cevher') if os.path.exists(os.path.join(A, f'ui-{k}.png'))}
 seritler = {k: 'data:image/png;base64,' + base64.b64encode(open(os.path.join(A, k + '.png'), 'rb').read()).decode() for k in meta}
 dusman = {}
 for g in ('golge', 'dev'):
@@ -51,7 +51,7 @@ canvas{image-rendering:pixelated;image-rendering:crisp-edges;display:block}
 <script>__oyun.haklar();</script>
 '''
 ek = ''.join(f"document.querySelectorAll('{s}').forEach(b=>{{b.classList.add('res');b.style.backgroundImage='url({ui[k]})'}});" for s, k in (('#vur', 'vur'), ('#kac', 'kac'), ('#sol,#sag', 'ok'), ('#dfBtn', 'defter'), ('#y-alp', 'alp'), ('#y-kut', 'kut'), ('#y-hikmet', 'hikmet'), ('#y-cevher', 'cevher')) if k in ui)
-SAYFA = SAYFA.replace('<script>__oyun.haklar();</script>', '<script>' + ek + '__oyun.haklar();</script>')   # Defter düğmesi defter.js'te oluşur
+SAYFA = SAYFA.replace('<script>__oyun.haklar();</script>', '<script>' + ek + ("document.getElementById('df').style.setProperty('--pencere','url(" + ui['pencere'] + ")');" if 'pencere' in ui else '') + '__oyun.haklar();</script>')   # Defter düğmesi defter.js'te oluşur
 html = SAYFA.replace('__META__', json.dumps(meta)).replace('__SERIT__', json.dumps(seritler)).replace('__DUSMAN__', json.dumps(dusman)).replace('__OYUN__', oyun.replace('</script', '<\\/script')).replace('__DEFTER__', defter.replace('</script', '<\\/script'))
 open(os.path.join(BURASI, 'onizleme.html'), 'w', encoding='utf-8').write(html)
 print('✓ onizleme.html', os.path.getsize(os.path.join(BURASI, 'onizleme.html')) // 1024, 'KB')
