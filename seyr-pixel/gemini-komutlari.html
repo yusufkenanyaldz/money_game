@@ -1,0 +1,164 @@
+<title>Seyr Pixel Komutları</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@400;600&family=JetBrains+Mono&display=swap">
+<style>
+/* Tek sütun okuma kolonu, yapışkan bölüm çubuğu, her komut kopyalanabilir kart. Oyunun çelik-altın-kızıl dili. */
+:root{--zemin:#121319;--kart:#1b1d2a;--yazi:#e8e2d0;--soluk:#8a8fa3;--cizgi:#2e3242;--altin:#d9ad4f;--kizil:#9a2a2a;--tamam:#7cc48a;--kod:#0f1016;
+  --f-baslik:'Press Start 2P',monospace;--f-govde:'Inter',system-ui,sans-serif;--f-kod:'JetBrains Mono',ui-monospace,monospace;color-scheme:dark}
+body{background:var(--zemin);color:var(--yazi);font:15px/1.55 var(--f-govde)}
+.sar{max-width:860px;margin:0 auto;padding-block:20px 60px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1{font:14px/1.6 var(--f-baslik);color:var(--altin);margin:0 0 8px;letter-spacing:.06em}
+h2{font:11px/1.6 var(--f-baslik);color:var(--altin);margin:0;letter-spacing:.04em}
+h3{font-size:16px;margin:0;font-weight:600}
+p{margin:0}.not{color:var(--soluk);font-size:14px;max-width:65ch}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--zemin)}
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--zemin);border-bottom:2px solid var(--cizgi);margin:14px 0 6px;padding-block:8px;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
+nav a{flex:none;text-decoration:none;color:var(--yazi);border:2px solid var(--cizgi);background:var(--kart);padding:5px 10px;font-size:13px;white-space:nowrap}
+nav a span{color:var(--soluk);margin-left:6px;font-variant-numeric:tabular-nums}nav a.bitti span{color:var(--tamam)}
+.arac{display:flex;gap:14px;flex-wrap:wrap;align-items:center;font-size:13px;color:var(--soluk)}
+section{margin-top:30px;display:grid;gap:12px}
+.bas{display:grid;gap:6px;border-top:2px solid var(--altin);padding-top:12px}
+.grup{display:grid;gap:10px;background:var(--kart);border:2px solid var(--cizgi);padding:14px}
+.etiket{font:8px var(--f-baslik);color:var(--altin);letter-spacing:.1em}
+.kart{display:grid;gap:8px;border-top:1px solid var(--cizgi);padding-top:10px}.kart:first-of-type{border-top:0;padding-top:0}
+.kbas{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.kbas b{font-weight:600}.kbas .tr{color:var(--soluk);font-size:13px;flex:1 1 180px;min-width:0}
+pre{margin:0;background:var(--kod);border:1px solid var(--cizgi);padding:10px 12px;font:12.5px/1.55 var(--f-kod);white-space:pre-wrap;word-break:break-word;color:var(--yazi)}
+button.kop{font:8px var(--f-baslik);border:2px solid var(--altin);color:var(--altin);background:transparent;padding:7px 10px;cursor:pointer}
+button.kop:hover{background:var(--altin);color:var(--zemin)}button.kop.oldu{border-color:var(--tamam);color:var(--tamam);background:transparent}
+.yap{display:flex;gap:6px;align-items:center;font-size:13px;color:var(--soluk);cursor:pointer}.yap input{width:18px;height:18px;accent-color:var(--tamam)}
+.kart.tamam pre{opacity:.4}.kart.tamam .kbas b{text-decoration:line-through;color:var(--soluk)}body.gizle .kart.tamam{display:none}
+:focus-visible{outline:2px solid var(--altin);outline-offset:2px}
+</style>
+<div class="sar">
+  <h1>SEYR PIXEL · GEMINI KOMUTLARI</h1>
+  <p class="not">Her seferinde tek komut. Görsel komutlarında şövalyenin görselini de ekleyin (tarz ve ölçek ona uysun); videolarda o karakterin kendi görselini verin. Yön tutmazsa dert değil, ben çeviririm. İşaretler bu telefonda hatırlanır.</p>
+  <nav id="nav" aria-label="Bölümler"></nav>
+  <div class="arac"><label class="yap"><input type="checkbox" id="gizleKutu"> Yapılanları gizle</label><span id="toplam"></span></div>
+  <main id="icerik"></main>
+</div>
+<script>
+const PIX = "Pixel art, 16-bit retro game sprite style, crisp hard-edged pixels, limited color palette, no anti-aliasing, no motion blur.";
+const YESIL = "Solid flat chroma-key green background, no shadow, no ground, no text.";
+const SABIT = " The character stays centered and the same size in the frame, small enough that the whole body and weapon always stay inside the frame; the camera does not move, no zoom, no cuts. Every detail of the design, colors and equipment stays exactly the same in every frame. ";
+
+/* ---------- Kahraman: aynı şövalye büyür ---------- */
+const ONCEKI = "This is the same pixel art knight from the reference image at his previous stage. Create his NEXT stage: same face, same hair, same body proportions, same pixel art style, same scale and framing, clearly the same young man but grown stronger. He still holds a straight sword in his right hand and a round shield in his left. ";
+const HSON = " Side view facing right, full body, centered. " + PIX + " " + YESIL;
+const GORUNUM = [
+  ['10','Yolcu','He now wears a hooded brown travel cloak over his dark steel armor, a leather shoulder guard, a small leather satchel at his hip, worn leather boots, a faint short beard.'],
+  ['20','Er','He now wears a full chainmail shirt under a deep red tabard with a simple gold border, a steel nasal helmet worn over his hair, steel greaves, a sturdier wooden shield with an iron rim.'],
+  ['30','Alp','He now wears polished steel plate armor with gold trim, a long flowing dark red cape, a round steel shield with a gold rim and a gold boss, and his sword is now a slightly curved Ottoman sword (pala). No helmet, his hair visible.'],
+  ['40','Bahadır','He now wears ornate lamellar armor with decorated shoulder plates over a crimson kaftan, a steel helmet wrapped with a cream turban and a small red plume, a round shield painted with gold floral patterns.'],
+  ['50','Ulu','He now wears lapis-blue and gold armor with golden floral engravings, a fur-trimmed deep blue cape, a jeweled belt, a tall turban helmet with a feather aigrette, a gold-rimmed blue shield.'],
+  ['60','Bilge','He now wears deep green and gold layered armor and robes, a leather scroll case at his side, a calm wise expression with a full short beard, a green shield with a gold eight-pointed star pattern (no letters).'],
+  ['70','Kutlu','He now wears golden armor with softly glowing patterns, a white cape, a faint warm light on the armor only (no glow around the body), a few tiny golden leaves drifting near him, a golden shield.'],
+  ['80','Nurlu','He now wears white and gold armor and flowing white robes, soft warm golden light on the armor, a few small golden motes of light around him (no halo, no glow around the head), a white and gold shield, a serene expression.'],
+  ['90','Simurg','His final legendary form: armor patterned with feathers of a great mythical bird, a long cape shaped like spread wings of turquoise, emerald and gold feathers, a single majestic feather crest on his helmet, a feather-patterned shield, gentle light on the armor, majestic yet humble.'],
+];
+const HAREKET = [
+  ['bekle','Bekleme','Döngü olacak.',"Animate this exact pixel art knight standing still in an idle loop: slow breathing, cape and clothes moving gently, a small natural shift of weight, sword and shield held exactly as in the image. A seamless loop that ends in the starting pose. Side view facing right."],
+  ['yuru','Yürüme','Yerinde yürüyüş.',"Animate this exact pixel art knight walking calmly to the right in place: a steady, repeating walk cycle for the whole clip, sword and shield carried naturally. He walks in place and stays in the middle of the frame. Side view facing right."],
+  ['kos','Koşu','Yerinde koşu.',"Animate this exact pixel art knight running fast to the right in place: a strong, continuous running cycle, cape flowing back with the speed, sword and shield carried securely. He runs in place and stays in the middle of the frame for the whole clip. Side view facing right."],
+  ['saldiri','Saldırı','Tek hızlı vuruş.',"Animate this exact pixel art knight: from a ready stance he performs ONE fast, strong horizontal sword slash to the right, then returns to the ready stance and holds still. The slash itself is quick, under half a second. He never turns his back and keeps facing right. Side view facing right."],
+  ['kacin','Kaçınma','Geriye sıçrayış.',"Animate this exact pixel art knight: a quick dodge backward, a fast light hop back to the left while leaning away from an incoming blow, shield raised, cape flaring, then he lands balanced and settles back into his standing pose, still facing right. One quick dodge, about half a second of action, then he holds still. Side view facing right."],
+  ['darbe','Darbe alma','',"Animate this exact pixel art knight: he is hit by an unseen blow from the right: a sharp flinch, his head and shoulders jerk back and he staggers half a step backward, then he recovers into his standing pose and holds still. About half a second of action. No blood. No flying effects across the frame. Side view facing right."],
+  ['yenilme','Yenilme','',"Animate this exact pixel art knight being defeated: he staggers, drops to one knee, then falls onto his side on the ground and lies still for the last seconds. No blood, nothing graphic. Side view facing right."],
+  ['zafer','Zafer','Kılıç kadrajdan taşmasın.',"Animate this exact pixel art knight: a calm victory moment. He raises his sword high above his head with quiet pride, holds the pose for a moment, then lowers it back into his standing pose and holds still. Leave plenty of empty space above his head so the raised sword stays fully inside the frame. Dignified, not boastful. Side view facing right."],
+];
+const hareketKart = (on, onAd) => HAREKET.map(([id, ad, tr, m]) => ({ id: on + '-' + id, ad, tr, metin: m + SABIT + PIX + " " + YESIL }));
+
+/* ---------- Canavarlar ---------- */
+const CSTIL = " Same pixel art style and scale logic as the knight in the reference image. Side view facing LEFT, full body, centered, the whole body inside the image. " + PIX + " No blood, not gory. " + YESIL;
+const CHAREKET = (kim, vur, ol) => [
+  ['bekle','Bekleme','Döngü.',`Animate this exact pixel art ${kim} in an idle loop: slow menacing breathing, small shifts of weight, eyes alive. A seamless loop that ends in the starting pose. Side view facing left.`],
+  ['yuru','İlerleme','Yerinde, düzenli döngü.',`Animate this exact pixel art ${kim} moving forward to the left IN PLACE, like on a treadmill: a steady, repeating movement cycle with the same rhythm for the whole clip, never stopping. It stays in the middle of the frame. Side view facing left.`],
+  ['saldiri','Saldırı','Belirgin hazırlanma, sonra tek vuruş.',`Animate this exact pixel art ${kim}: first a clear wind-up for about half a second to one second (it rears back, its eyes flash bright red), then ONE fast attack to the left: ${vur}. Then it returns to its starting pose and holds still. Side view facing left.`],
+  ['darbe','Darbe alma','',`Animate this exact pixel art ${kim}: it is struck by an unseen blow from the left: it recoils sharply, then recovers into its starting pose and holds still. About half a second of action. No flying effects across the frame. Side view facing left.`],
+  ['ol','Yok olma','Sonda boş zemin.',`Animate this exact pixel art ${kim} being defeated: ${ol}. The last second shows only the empty green background. Nothing graphic. Side view facing left.`],
+].map(([id, ad, tr, m]) => ({ id, ad, tr, metin: m + SABIT + PIX + " " + YESIL }));
+const DUMAN = 'it falters, sinks down and breaks apart into dark pixel smoke puffs that drift up and fade away';
+const BOLUM = [
+  { no: 2, bolge: 'Fısıltı Bataklığı', patron: ['yilan','Yedi Dilli Yılan','serpent','A giant rearing serpent boss, about twice the knight\'s height, ornate turquoise and gold patterned scales, its open mouth showing seven long forked tongues fanning out, cold yellow eyes.','it lunges forward and strikes with its jaws, its seven tongues snapping out','it collapses into its coils and dissolves into dark smoke that fades away'],
+    yardak: ['fisilti','Fısıltı Yılanı','small serpent','A small rearing serpent minion, about half the knight\'s height, turquoise and gold scales, two long forked tongues.','it strikes forward with a quick bite',DUMAN],
+    yadigar: ['muhur','Sessiz Ejder Mührü','a round bronze seal stamp with the relief of a coiled sleeping dragon, a little dark red wax beneath it, no letters'] },
+  { no: 3, bolge: 'Bin Ayna Çarşısı', patron: ['gulyabani','Bin Yüzlü Gulyabani','ghoul','A tall gaunt ghoul boss (gulyabani), about one and a half times the knight\'s height, wrapped in tattered grey-green robes covered with many small mask-like faces, long clawed fingers, a smiling false white mask over its real face.','it swipes forward with its long claws while the small faces on its robes change expression','its masks crack and fall away one by one and it dissolves into grey smoke that fades away'],
+    yardak: ['maske','Maskeli','masked ghoul','A small hunched ghoul minion in tattered grey-green rags, hiding its face behind a smiling white mask, clawed hands, about two thirds of the knight\'s height.','it swipes with its claws','its mask cracks and it dissolves into grey smoke that fades away'],
+    yadigar: ['ayna','İskender\'in Aynası','a round polished bronze hand mirror with an ornate gold frame and a soft reflection'] },
+  { no: 4, bolge: 'Uyku Ormanı', patron: ['karabasan','Karabasan','nightmare creature','A heavy squat nightmare creature boss of deep indigo and black, as wide as it is tall, drowsy half-closed yellow eyes, wrapped in a thick dark shroud like a heavy blanket, very long arms reaching to the ground.','it leaps forward and slams down hard with both long arms','its shroud collapses empty and dissolves into indigo smoke that fades away'],
+    yardak: ['uyku','Uyku Gölgesi','sleepy shadow','A small drowsy indigo shadow creature minion with heavy half-closed yellow eyes and a little dark shroud, about two thirds of the knight\'s height.','it lunges and pushes forward with both hands',DUMAN],
+    yadigar: ['seher','Seher Halkası','a gold ring set with a pale dawn-blue stone, a tiny morning star shining just above it'] },
+  { no: 5, bolge: 'Sis Vadisi', patron: ['albasti','Sis Albastısı','hag spirit','A pale hag spirit boss (albasti), about one and a half times the knight\'s height, very long ash-grey hair flowing into stylized mist swirls drawn as solid opaque pixel shapes (not transparent), pale blue-grey skin, long nails, eyes like two dim lanterns.','it lunges forward with its long nails while its opaque mist swirls curl forward','it unravels into opaque grey mist swirls that drift away and fade'],
+    yardak: ['sis','Sis Kuklası','mist puppet','A small grey wisp puppet minion with long hair, drawn as solid opaque pixel mist shapes (not transparent), dim lantern eyes, about two thirds of the knight\'s height.','it lunges with its long nails','it unravels into opaque grey mist that fades away'],
+    yadigar: ['yanki','Kaf Dağı Yankısı','a small bronze bell shaped like a mountain peak with an emerald-green summit'] },
+  { no: 6, bolge: 'Zifiri Bozkır', patron: ['boru','Zifiri Börü','giant wolf','A giant wolf boss with pitch-black fur shaded with deep blue, eyes like two bright stars, flame-like tufts of fur, bared white fangs, as tall at the shoulder as the knight.','it pounces forward snapping its jaws','it howls, falls and dissolves into dark blue smoke and fading stars'],
+    yardak: ['kurt','Zifiri Kurt','black wolf','A lean black wolf minion with deep blue shading and small star-like eyes, smaller than a great wolf.','it leaps forward snapping',DUMAN],
+    yadigar: ['nal','Tozkoparan Nalı','a gleaming silver horseshoe with gold nails and a little trail of golden dust behind it'] },
+  { no: 7, bolge: 'Kızgın Çöl', patron: ['ifrit','Ateş İfriti','fire ifrit','A towering ifrit boss made of stylized pixel flames in orange, vermilion and gold drawn as solid opaque shapes (not transparent), a dark smoky core, burning eyes, iron chain bracelets on its wrists, about twice the knight\'s height.','it hurls a burst of opaque pixel flame forward with both hands','its flames shrink and gutter out into dark smoke that fades away'],
+    yardak: ['kivilcim','Kıvılcım','fire sprite','A small fire sprite minion made of opaque orange and gold pixel flames with bright eyes, about half the knight\'s height.','it throws a small opaque flame forward','it gutters out into smoke that fades away'],
+    yadigar: ['su','Âb-ı Hayat Kadehi','a small gold cup filled with clear glowing turquoise water'] },
+  { no: 8, bolge: 'Haset Kayalıkları', patron: ['ejder','Yeşil Gözlü Ejder','dragon','A Persian miniature style dragon boss (ejderha) with a long serpentine body, jade and gold scales, a flame-like mane, piercing bright green eyes, four clawed legs, about twice the knight\'s height.','it lunges forward biting with its jaws','it coils up, falls and dissolves into green smoke that fades away'],
+    yardak: ['kertenkele','Yeşil Kertenkele','lizard','A jade-green lizard minion with gold-edged scales, a small flame-like crest and bright green eyes, about half the knight\'s height.','it lunges forward biting',DUMAN],
+    yadigar: ['kandil','Ezel Kandili','an ancient bronze oil lamp with a calm eternal flame and engraved gold patterns'] },
+  { no: 9, bolge: 'Kibir Sarayı Bahçeleri', patron: ['tavus','Tavus Şah','peacock tyrant','A vain tyrant king boss with peacock features: a jeweled crown, robes of iridescent blue and green, a huge fanned peacock tail behind him full of eye patterns in blue, green and gold only (no pink), holding a jeweled scepter, about one and a half times the knight\'s height.','he swings his jeweled scepter forward while his tail flares open','his tail feathers fall away, he crumples and dissolves into golden dust that fades away'],
+    yardak: ['muhafiz','Tavus Muhafızı','palace guard','A palace guard minion with a peacock-feather crest on his helmet (blue, green and gold only, no pink), blue and green uniform, holding a spear, the same height as the knight.','he thrusts his spear forward','he falls and dissolves into golden dust that fades away'],
+    yadigar: ['kalem','Lokman\'ın Kalemi','a reed pen resting across a small lapis and gold inkwell'] },
+  { no: 10, bolge: 'Sırça Saray', patron: ['sirca','Sırça Saray Cini','crystal jinn','A jinn boss whose body is made of faceted crystal and mirror glass in pale turquoise and silver, drawn fully opaque (no transparency), a crown shaped like a domed palace, glowing white eyes, about twice the knight\'s height.','it thrusts both arms forward and shoots a spray of sharp crystal shards','it cracks all over and shatters into crystal shards that fade away'],
+    yardak: ['kukla','Cam Kukla','crystal puppet','A small puppet minion made of faceted pale turquoise crystal, fully opaque, with silver joints and glowing white eyes, about two thirds of the knight\'s height.','it swings its crystal arm forward','it shatters into shards that fade away'],
+    yadigar: ['kabuk','Yedi Deniz Kabuğu','a spiral seashell with seven bands of sea colors and a pearl at its opening'] },
+  { no: 11, bolge: 'Dahhâk Kalesi (son)', patron: ['dahhak','Dahhâk','tyrant king','The final boss, the tyrant king Zahhak of the Shahnameh: a pale cruel king in black and dark gold robes with a tall dark crown, two black serpents growing from his shoulders rising and hissing, holding a dark curved sword, about one and a half times the knight\'s height.','his two shoulder serpents strike forward while he thrusts his dark sword','he falls to his knees, his serpents wither, and he dissolves into black smoke that fades away'],
+    yardak: ['yilanasker','Yılan Askeri','serpent soldier','A soldier minion in black and dark gold armor with a helmet shaped like a serpent\'s head, holding a curved sword, the same height as the knight.','he slashes forward with his curved sword','he falls to his knees and dissolves into black smoke that fades away'],
+    yadigar: ['gevher','Sonsuz Gevher Dizisi','a long looped string of polished round gemstones with a gold tassel'] },
+];
+const YSTIL = " A single pixel art item icon for a game, 16-bit retro style, crisp hard-edged pixels, limited palette, clean dark outline, no anti-aliasing, front view, centered, filling most of the image, readable at small size. Flat solid chroma-key green background (#00B140), no green on the item, nothing else in the image, no text, no letters.";
+
+const BOLUMLER = [
+  { id: 'kahraman', ad: 'Kahraman', not: 'Şövalye her 10 seviyede büyür. Sırayla gidin: her görünümün görselini, bir öncekinin görselini vererek isteyin. Sonra aynı 8 hareket komutunu o yeni görselle tekrarlayın. İlk ikisi (Yolcu, Er) yeterli; gerisi zamanla.',
+    gruplar: GORUNUM.map(([sev, ad, t]) => ({ etiket: sev + '. seviye', baslik: ad, not: '', kartlar: [{ id: 'k' + sev + '-gorsel', ad: 'Görsel', tr: 'Bir önceki görünümün görselini ekleyin.', metin: ONCEKI + t + HSON }, ...hareketKart('k' + sev)] })) },
+  ...BOLUM.map(b => ({ id: 'b' + b.no, ad: b.no + '. ' + b.bolge, not: 'Görsellerde şövalyenin görselini de ekleyin; videolarda canavarın kendi görselini.', gruplar: [
+    { etiket: 'Bölüm sonu', baslik: b.patron[1], not: '', kartlar: [{ id: b.patron[0] + '-gorsel', ad: 'Görsel', tr: 'Şövalye görselini ekleyin.', metin: 'Using the same pixel art style as the knight in the reference image, create a boss enemy for the same game: ' + b.patron[3] + CSTIL },
+      ...CHAREKET(b.patron[2], b.patron[4], b.patron[5]).map(k => ({ ...k, id: b.patron[0] + '-' + k.id }))] },
+    { etiket: 'Yardakçı', baslik: b.yardak[1], not: '', kartlar: [{ id: b.yardak[0] + '-gorsel', ad: 'Görsel', tr: 'Şövalye görselini ekleyin.', metin: 'Using the same pixel art style as the knight in the reference image, create a small enemy minion for the same game: ' + b.yardak[3] + CSTIL },
+      ...CHAREKET(b.yardak[2], b.yardak[4], b.yardak[5]).map(k => ({ ...k, id: b.yardak[0] + '-' + k.id }))] },
+    { etiket: 'Yadigâr', baslik: b.yadigar[1], not: '', kartlar: [{ id: 'y-' + b.yadigar[0], ad: 'Simge', tr: 'Resim.', metin: 'A single pixel art item icon: ' + b.yadigar[2] + '.' + YSTIL }] },
+  ] })),
+];
+
+const oku = id => { try { return localStorage.getItem('pk:' + id) === '1'; } catch (e) { return false; } };
+const yaz = (id, v) => { try { v ? localStorage.setItem('pk:' + id, '1') : localStorage.removeItem('pk:' + id); } catch (e) {} };
+const esc = s => s.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+let html = '';
+for (const b of BOLUMLER) {
+  html += `<section id="${b.id}"><div class="bas"><h2>${b.ad.toLocaleUpperCase('tr-TR')}</h2><p class="not">${b.not}</p><p class="not" data-say="${b.id}"></p></div>`;
+  for (const g of b.gruplar) {
+    html += `<div class="grup"><span class="etiket">${g.etiket.toLocaleUpperCase('tr-TR')}</span><h3>${g.baslik}</h3>`;
+    for (const k of g.kartlar) html += `<div class="kart" data-id="${k.id}" data-b="${b.id}"><div class="kbas"><b>${k.ad}</b><span class="tr">${k.tr || ''}</span><button class="kop" type="button">KOPYALA</button><label class="yap"><input type="checkbox" id="c-${k.id}"> Yapıldı</label></div><pre>${esc(k.metin)}</pre></div>`;
+    html += `</div>`;
+  }
+  html += `</section>`;
+}
+document.getElementById('icerik').innerHTML = html;
+const nav = document.getElementById('nav');
+function say() {
+  let ty = 0, th = 0; nav.innerHTML = '';
+  for (const b of BOLUMLER) {
+    const ks = [...document.querySelectorAll(`.kart[data-b="${b.id}"]`)], y = ks.filter(k => k.classList.contains('tamam')).length; ty += y; th += ks.length;
+    document.querySelector(`[data-say="${b.id}"]`).textContent = `${y} / ${ks.length} yapıldı`;
+    const a = document.createElement('a'); a.href = '#' + b.id; a.innerHTML = `${b.ad}<span>${y}/${ks.length}</span>`; if (y === ks.length) a.classList.add('bitti'); nav.appendChild(a);
+  }
+  document.getElementById('toplam').textContent = `Toplam ${ty} / ${th}`;
+}
+document.querySelectorAll('.kart').forEach(k => {
+  const id = k.dataset.id, cb = k.querySelector('input'), pre = k.querySelector('pre'), btn = k.querySelector('.kop');
+  cb.checked = oku(id); k.classList.toggle('tamam', cb.checked);
+  cb.addEventListener('change', () => { yaz(id, cb.checked); k.classList.toggle('tamam', cb.checked); say(); });
+  btn.addEventListener('click', () => {
+    const ok = () => { btn.textContent = 'KOPYALANDI'; btn.classList.add('oldu'); setTimeout(() => { btn.textContent = 'KOPYALA'; btn.classList.remove('oldu'); }, 1500); };
+    const sec = () => { const r = document.createRange(); r.selectNodeContents(pre); const s = getSelection(); s.removeAllRanges(); s.addRange(r); btn.textContent = 'SEÇİLDİ'; };
+    try { navigator.clipboard.writeText(pre.textContent).then(ok, sec); } catch (e) { sec(); }
+  });
+});
+const gk = document.getElementById('gizleKutu'); try { gk.checked = localStorage.getItem('pk:gizle') === '1'; } catch (e) {}
+document.body.classList.toggle('gizle', gk.checked);
+gk.addEventListener('change', () => { document.body.classList.toggle('gizle', gk.checked); try { localStorage.setItem('pk:gizle', gk.checked ? '1' : '0'); } catch (e) {} });
+say();
+</script>
