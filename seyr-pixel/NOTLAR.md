@@ -40,3 +40,4 @@ dokunulmadan duruyor; Defter (`seyr/defter.js`) buraya taşınacak.
 - **Dört güç amellerden:** bugünkü amellerin güç payı (`bugunGuc`), her 15 dk = 1 kullanım hakkı, günde en çok 3 (`haklar`, `kullan`; `D.kullan`).
   Alp → Güçlü Darbe (sonraki vuruş 3 hasar, hazırlanan düşmanın zırhını deler ve sersemletir) · Kut → Nur Kalkanı (bir darbeyi karşılar)
   · Hikmet → Sezgi (3 sn düşmanlar %40 hızda) · Cevher → Sabır (+1 kalp). Klavye 1-4. Her 10 seviyede +1 kalp.
+- **Yadigâr:** Kızıl Dev ölünce Âb-ı Hayat Damlası düşer; üstünden geçince alınır (ilk seferde pencere açılır), `D.yadigar` içinde kalıcı. Etki: düşmanlar %30 uzun sersem (`sersemSure`). Bölüm, damla alınınca biter. Defter › Güçler › Yadigârlar; gizli anlamı (sakin kalmak) yalnızca anahtarda. Simge `ui-abihayat.png`, oyun içi küçük `ui-abihayat-k.png` (15x18).

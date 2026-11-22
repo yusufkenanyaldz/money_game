@@ -14,6 +14,11 @@ const META = window.META, SERIT = window.SERIT;
 const DM = {}; for (const g in (window.DUSMAN || {})) { DM[g] = { meta: DUSMAN[g].meta, img: {} }; for (const k in DUSMAN[g].serit) { const i = new Image(); i.src = DUSMAN[g].serit[k]; DM[g].img[k] = i; } }
 // saldırı şeridinde hazırlanma ve vuruş kareleri: [hazırlanma başı, vuruş başı, vuruş sonu]
 // [hazırlanma başı, vuruş başı, vuruş sonu, (dev) sersemken oynayan son kare]
+/* Yadigârlar: bölüm sonu canavarından düşer, kalıcıdır (Defter kaydında). */
+const YADIGAR = { abihayat: { ad: 'Âb-ı Hayat Damlası', etki: 'Düşmanlar %30 daha uzun sersem kalır.' } };
+const varMi = k => !!(window.__defter && __defter.D.yadigar && __defter.D.yadigar[k]);
+const sersemSure = T => T.sersem * (varMi('abihayat') ? 1.3 : 1);
+const YIMG = {}; for (const k in (window.UI || {})) { const i = new Image(); i.src = UI[k]; YIMG[k] = i; }
 const SALDIRI_KARE = { golge: [0, 20, 40], dev: [0, 27, 33, 62] };
 const IMG = {};
 for (const k in SERIT) { const i = new Image(); i.src = SERIT[k]; IMG[k] = i; }
@@ -127,7 +132,7 @@ function vurusKontrol() {
     if (P.gucluVurus) { hasar = 3; if (e.durum === 'hazir' || e.durum === 'yaklas') { e.durum = 'sersem'; e.t = 0; } titret(3, .15); }
     e.can -= hasar; e.flas = .15; e.darbeT = 0; e.kx = P.yon * (e.tur === 'dev' ? 3 : 10); SES.isabet(); titret(e.tur === 'dev' ? 2 : 1, .1);
     yazi(e.x, hasar > 1 ? '-2!' : '-1', hasar > 1 ? '#ffd36b' : '#ffffff');
-    if (e.can <= 0) { e.durum = 'ol'; e.t = 0; SES.ol(); if (e.tur === 'dev') OYUN.devOldu = true; }
+    if (e.can <= 0) { e.durum = 'ol'; e.t = 0; SES.ol(); if (e.tur === 'dev') { OYUN.devOldu = true; OYUN.dusen = { k: 'abihayat', x: e.x, y: ZEMIN - 70, vy: -40, t: 0 }; } }
     else if (e.durum !== 'sersem' && e.tur === 'golge') { e.durum = 'geri'; e.t = 0; }
   }
 }
@@ -158,7 +163,7 @@ function dusmanlar(dt) {
         else { e.durum = 'geri'; e.t = 0; }
       }
     } else if (e.durum === 'sersem') {
-      if (e.t >= T.sersem) { e.durum = 'geri'; e.t = 0; }
+      if (e.t >= sersemSure(T)) { e.durum = 'geri'; e.t = 0; }
     } else if (e.durum === 'geri') {
       e.x -= Math.sign(dx) * T.hiz * .8 * dt;
       if (e.t >= .6) { e.durum = 'yaklas'; e.t = 0; e.bekle = rnd(.6, 1.4); }
@@ -188,6 +193,15 @@ function yeniden() {
   if (OYUN.devGeldi && !OYUN.devOldu) { OYUN.devGeldi = false; }
   OYUN.kilit = null; OYUN.durum = 'oyun'; OYUN.t = 0;
 }
+function yadigarAl(d) {
+  d.alindi = true; const yeni = !varMi(d.k);
+  if (yeni && window.__defter) __defter.yadigar(d.k);
+  SES.guc(); setTimeout(() => SES.bitti(), 250);
+  const y = YADIGAR[d.k], el = document.getElementById('yadigar');
+  if (el && yeni) { el.querySelector('b').textContent = y.ad; el.querySelector('p').textContent = y.etki; el.hidden = false; durdu = true;
+    el.onclick = () => { el.hidden = true; durdu = false; son = performance.now(); }; }
+  else yazi(P.x, y.ad, '#9fe8ff');
+}
 function bolumGuncelle() {
   const g = BOLUM.gruplar[OYUN.grup];
   if (g && P.x > g.x - 120 && !OYUN.kilit) {
@@ -201,7 +215,12 @@ function bolumGuncelle() {
     OYUN.devGeldi = true; OYUN.kontrol = BOLUM.dev - 200; dog('dev', BOLUM.dev + 60); OYUN.kilit = [BOLUM.dev - 170, BOLUM.dev + 150];
     mesaj('KIZIL DEV', 2);
   }
-  if (OYUN.devOldu && OYUN.durum === 'oyun' && E.length === 0) { OYUN.durum = 'bitti'; OYUN.t = 0; SES.bitti(); }
+  const d = OYUN.dusen;
+  if (d && !d.alindi) {   // yadigâr düşer, karakter üstünden geçince alınır
+    d.t += 1 / 60; d.vy += 220 / 60; d.y = Math.min(ZEMIN - 18, d.y + d.vy / 60);
+    if (d.y >= ZEMIN - 18 && Math.abs(P.x - d.x) < 12) yadigarAl(d);
+  }
+  if (OYUN.devOldu && OYUN.durum === 'oyun' && E.length === 0 && (!d || d.alindi)) { OYUN.durum = 'bitti'; OYUN.t = 0; SES.bitti(); }
 }
 
 /* ---------- Efektler ---------- */
@@ -300,7 +319,7 @@ function dusmanSprite(e, kam) {
   if (e.durum === 'ol' && M.ol) tek('ol', e.t * 1.5 * M.ol.fps / M.ol.n);
   else if (e.durum === 'hazir' && M.saldiri && K[1]) { st = 'saldiri'; f = K[0] + Math.floor(Math.min(1, e.t / T.hazir) * (K[1] - K[0] - 1)); }
   else if (e.durum === 'saldir' && M.saldiri && K[2]) { st = 'saldiri'; f = K[1] + Math.floor(Math.min(1, e.t / T.saldiri) * (K[2] - K[1])); }
-  else if (e.durum === 'sersem' && M.saldiri && K[3] && e.t < T.sersem) { st = 'saldiri'; f = K[2] + Math.floor(Math.min(1, e.t / T.sersem) * (K[3] - K[2])); }   // yere vurmuş, toz kalkıyor
+  else if (e.durum === 'sersem' && M.saldiri && K[3]) { st = 'saldiri'; f = K[2] + Math.floor(Math.min(1, e.t / sersemSure(T)) * (K[3] - K[2])); }   // yere vurmuş, toz kalkıyor
   else if (e.darbeT !== undefined && M.darbe && e.darbeT < M.darbe.n / M.darbe.fps / 2.5 && e.durum !== 'hazir' && e.durum !== 'saldir') tek('darbe', e.darbeT * 2.5 * M.darbe.fps / M.darbe.n);
   else if ((e.durum === 'yaklas' || e.durum === 'geri') && M.yuru) { st = 'yuru'; f = Math.floor(OYUN.zaman * M.yuru.fps) % M.yuru.n; }
   else f = Math.floor(OYUN.zaman * M.bekle.fps + e.x) % M.bekle.n;
@@ -368,6 +387,9 @@ function ciz() {
   if (OYUN.kilit) { ctx.fillStyle = 'rgba(217,173,79,.5)'; for (const sx of OYUN.kilit) { const x = Math.round(sx - kam); for (let y = ZEMIN - 40; y < ZEMIN; y += 4) ctx.fillRect(x, y, 1, 2); } }
   for (const d of dalgalar) { const x = Math.round(d.x - kam); ctx.fillStyle = '#e2a15e'; ctx.fillRect(x - 3, ZEMIN - 5, 6, 5); ctx.fillStyle = '#f3d27a'; ctx.fillRect(x - 1, ZEMIN - 8, 2, 3); }
   for (const e of E) dusmanCiz(e, kam);
+  const dd = OYUN.dusen, yi = YIMG['abihayat-k'];
+  if (dd && !dd.alindi && yi && yi.complete) { const by = Math.round(dd.y + (dd.y >= ZEMIN - 18 ? Math.sin(OYUN.zaman * 4) * 1.5 : 0));
+    ctx.fillStyle = 'rgba(159,232,255,.25)'; ctx.fillRect(Math.round(dd.x - kam) - 9, by - 2, 18, 22); ctx.drawImage(yi, Math.round(dd.x - kam) - 7, by); }
   oyuncuCiz(kam);
   ctx.restore();
   for (const y of yazilar) yaziCiz(y.s, Math.round(y.x - kam), Math.round(y.y), y.c);

@@ -110,6 +110,8 @@ const css=`
 .guc div{border:2px solid rgba(217,173,79,.5);background:rgba(10,11,16,.5)}
 #df .ust .bilgi,.not,.dfs .ad small{font-style:normal}
 #zm .daire{border:4px solid #d9ad4f;box-shadow:0 0 0 4px #000,0 0 30px rgba(217,173,79,.25)}#zm .daire b{font-family:"Press Start 2P",monospace;font-size:min(9vh,9vw)}
+.yadigarlar{border-top:2px solid rgba(217,173,79,.35);margin-top:8px;padding-top:8px}.yadigarlar>b{font-family:"Press Start 2P",monospace;font-size:9px;color:#ffd36b}
+.yd{display:flex;gap:10px;align-items:center;padding:6px 0}.yd i{width:36px;height:44px;background:var(--abihayat) center/contain no-repeat;image-rendering:pixelated}.yd b{display:block}.yd small{color:#b9a77c}
 #seviyeAtla span{font-family:"Press Start 2P",monospace;font-size:10px;color:#e8e2d0}`;
 document.head.insertAdjacentHTML('beforeend','<style>'+css+'</style>');
 document.body.insertAdjacentHTML('beforeend',`
@@ -159,6 +161,7 @@ function ciz(){const G=$('#dfGovde'),g=gun(secili());G.innerHTML='';
     const besler=k=>[...EMANET.filter(e=>e.guc[k]).map(e=>e.ad),...(k==='cevher'?['Yıldız Defteri']:[])].join(', ');
     G.insertAdjacentHTML('beforeend',`<div class="guc">${Object.keys(GUC).map(k=>`<div><small>${GUC[k].toLocaleUpperCase('tr-TR')} · ${YET[k]}</small><b>${Math.floor(h.g[k])}</b>
       <small>bugün: ${hk[k].kalan} / ${hk[k].toplam} hak · ${Math.floor(hk[k].dk)} dk</small><small style="display:block;margin-top:4px">besleyen: ${besler(k)}</small></div>`).join('')}</div>
+      <div class="yadigarlar"><b>YADİGÂRLAR</b>${Object.keys(D.yadigar||{}).length?Object.keys(D.yadigar).map(k=>`<div class="yd"><i data-yd="${k}"></i><span><b>${({abihayat:'Âb-ı Hayat Damlası'})[k]||k}</b><small>${({abihayat:'Düşmanlar %30 daha uzun sersem kalır'})[k]||''}${anahtar?' · '+(({abihayat:'Sakin kalmak (Kızıl Dev: öfke)'})[k]||''):''}</small></span></div>`).join(''):'<small> Henüz yok. Bölüm sonu canavarlarından düşer.</small>'}</div>
       <p class="not">Her ${HAK_DK} dakikalık amel o güce bir kullanım hakkı verir (günde en çok ${HAK_EN}). Haklar gece yarısı yenilenir.</p>`);
     const c=AHLAK.filter(a=>D.cig[a.id]).map(a=>`${a.ad}: ${D.cig[a.id]} çiy → ${a.canavar}`).join('<br>');
     G.insertAdjacentHTML('beforeend',`<p class="not">Seher Çiyi<br>${c||'Henüz yok.'}</p><p class="not">Toplam tecrübe: ${Math.floor(h.xp)} · Seri: ${h.seri} gün</p>`);
@@ -230,6 +233,7 @@ const HAK_DK=15,HAK_EN=3;
 function haklar(){const g=bugunGuc(),u=(D.kullan||{})[bugun()]||{},o={};for(const k in g){const t=Math.min(HAK_EN,Math.floor(g[k]/HAK_DK));o[k]={toplam:t,kalan:Math.max(0,t-(u[k]||0)),dk:g[k]};}return o;}
 function kullan(k){const h=haklar()[k];if(!h||h.kalan<=0)return false;D.kullan=D.kullan||{};const gk=bugun();
   for(const x in D.kullan)if(x!==gk)delete D.kullan[x];(D.kullan[gk]=D.kullan[gk]||{})[k]=(D.kullan[gk][k]||0)+1;save();return true;}
-window.__defter={hesap,ekle,D,need,levelOf,kodla,coz,haklar,kullan,bugunGuc};
+function yadigar(k){D.yadigar=D.yadigar||{};if(!D.yadigar[k]){D.yadigar[k]=Date.now();save();}}
+window.__defter={hesap,ekle,D,need,levelOf,kodla,coz,haklar,kullan,bugunGuc,yadigar};
 ust();
 })();
