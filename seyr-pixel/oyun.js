@@ -13,7 +13,8 @@ const META = window.META, SERIT = window.SERIT;
 /* Düşman görselleri (Gemini → pixel-isle --grup). Olmayan hareket için kodla çizilmiş yer tutucu kullanılır. */
 const DM = {}; for (const g in (window.DUSMAN || {})) { DM[g] = { meta: DUSMAN[g].meta, img: {} }; for (const k in DUSMAN[g].serit) { const i = new Image(); i.src = DUSMAN[g].serit[k]; DM[g].img[k] = i; } }
 // saldırı şeridinde hazırlanma ve vuruş kareleri: [hazırlanma başı, vuruş başı, vuruş sonu]
-const SALDIRI_KARE = { golge: [0, 20, 40], dev: [0, 0, 0] };
+// [hazırlanma başı, vuruş başı, vuruş sonu, (dev) sersemken oynayan son kare]
+const SALDIRI_KARE = { golge: [0, 20, 40], dev: [0, 27, 33, 62] };
 const IMG = {};
 for (const k in SERIT) { const i = new Image(); i.src = SERIT[k]; IMG[k] = i; }
 function boyutla() {
@@ -284,16 +285,17 @@ function dusmanSprite(e, kam) {
   if (e.durum === 'ol' && M.ol) tek('ol', e.t * 1.5 * M.ol.fps / M.ol.n);
   else if (e.durum === 'hazir' && M.saldiri && K[1]) { st = 'saldiri'; f = K[0] + Math.floor(Math.min(1, e.t / T.hazir) * (K[1] - K[0] - 1)); }
   else if (e.durum === 'saldir' && M.saldiri && K[2]) { st = 'saldiri'; f = K[1] + Math.floor(Math.min(1, e.t / T.saldiri) * (K[2] - K[1])); }
+  else if (e.durum === 'sersem' && M.saldiri && K[3] && e.t < T.sersem) { st = 'saldiri'; f = K[2] + Math.floor(Math.min(1, e.t / T.sersem) * (K[3] - K[2])); }   // yere vurmuş, toz kalkıyor
   else if (e.darbeT !== undefined && M.darbe && e.darbeT < M.darbe.n / M.darbe.fps / 2.5 && e.durum !== 'hazir' && e.durum !== 'saldir') tek('darbe', e.darbeT * 2.5 * M.darbe.fps / M.darbe.n);
   else if ((e.durum === 'yaklas' || e.durum === 'geri') && M.yuru) { st = 'yuru'; f = Math.floor(OYUN.zaman * M.yuru.fps) % M.yuru.n; }
   else f = Math.floor(OYUN.zaman * M.bekle.fps + e.x) % M.bekle.n;
   const m = M[st], im = D.img[st]; if (!im || !im.complete || !im.naturalWidth) return false;
   ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.fillRect(sx - (T.w >> 1), ZEMIN, T.w, 2);
   ctx.save(); if (e.yon !== m.yon) { ctx.translate(sx * 2, 0); ctx.scale(-1, 1); }
-  const kirmizi = e.tur === 'dev' && e.durum === 'hazir' && Math.floor(e.t * 10) % 2;   // dev'in saldırı klibi gelene kadar uyarı
+  const kirmizi = e.tur === 'dev' && e.durum === 'hazir' && !M.saldiri && Math.floor(e.t * 10) % 2;   // saldırı klibi yoksa uyarı
   if (kirmizi) ctx.filter = 'sepia(1) saturate(4) hue-rotate(-30deg) brightness(1.2)';
   if (e.flas > 0) ctx.filter = 'brightness(2.2)';
-  const yy = e.tur === 'dev' && e.durum === 'saldir' ? 2 : 0;
+  const yy = 0;
   ctx.drawImage(im, f * m.w, 0, m.w, m.h, Math.round(sx - m.w / 2), ZEMIN + 1 - m.h + yy, m.w, m.h); ctx.restore();
   // durum işaretleri (sprite'ın üstünde)
   const ust = ZEMIN - Math.round(T.h * (e.tur === 'dev' ? 1.7 : 1.9));

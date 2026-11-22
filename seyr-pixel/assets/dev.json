@@ -22,5 +22,21 @@
   "fps": 12,
   "yon": -1,
   "dongu": false
+ },
+ "saldiri": {
+  "n": 63,
+  "w": 166,
+  "h": 93,
+  "fps": 12,
+  "yon": -1,
+  "dongu": false
+ },
+ "yuru": {
+  "n": 24,
+  "w": 166,
+  "h": 93,
+  "fps": 12,
+  "yon": -1,
+  "dongu": true
  }
 }
