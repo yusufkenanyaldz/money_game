@@ -25,13 +25,13 @@ canvas{image-rendering:pixelated;image-rendering:crisp-edges;display:block}
 #sol{left:max(16px,env(safe-area-inset-left,0px))}#sag{left:calc(max(16px,env(safe-area-inset-left,0px)) + 74px)}
 #vur{right:max(16px,env(safe-area-inset-right,0px));width:72px;height:72px}#kac{right:calc(max(16px,env(safe-area-inset-right,0px)) + 84px)}
 .tus.on{background:var(--altin);color:var(--zemin)}
-#yet{position:fixed;top:calc(64px + env(safe-area-inset-top,0px));right:max(12px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:6px;z-index:4}
+#yet{position:fixed;top:calc(8px + env(safe-area-inset-top,0px));right:calc(max(12px,env(safe-area-inset-right,0px)) + 56px);display:flex;flex-direction:row;gap:6px;z-index:4}
 .yet{position:relative;width:44px;height:44px;border:0;padding:0;background:center/contain no-repeat;image-rendering:pixelated;touch-action:none;-webkit-tap-highlight-color:transparent}
 .yet.bos{filter:grayscale(1) brightness(.55)}.yet.on{transform:translateY(2px);filter:brightness(1.3)}
 .yet::after{content:attr(data-kalan);position:absolute;right:-2px;bottom:-2px;min-width:14px;height:14px;border-radius:7px;background:#14161f;border:1px solid var(--altin);color:var(--altin);font:8px/14px "Press Start 2P",monospace;text-align:center}
-#hud{position:fixed;top:calc(8px + env(safe-area-inset-top,0px));left:max(12px,env(safe-area-inset-left,0px));color:var(--altin);font:9px/1.6 "Press Start 2P",monospace;letter-spacing:.05em;text-shadow:0 1px 0 #000;pointer-events:none;z-index:4}
+#hud{position:fixed;top:calc(34px + env(safe-area-inset-top,0px));left:max(12px,env(safe-area-inset-left,0px));color:var(--altin);font:9px/1.6 "Press Start 2P",monospace;letter-spacing:.05em;text-shadow:0 1px 0 #000;pointer-events:none;z-index:4}
 #hud small{display:block;color:var(--soluk);font-size:7px}
-#lvBar{top:calc(38px + env(safe-area-inset-top,0px))!important;left:max(12px,env(safe-area-inset-left,0px))!important;width:110px!important;height:4px!important;border-radius:0!important;z-index:4}
+#lvBar{top:calc(64px + env(safe-area-inset-top,0px))!important;left:max(12px,env(safe-area-inset-left,0px))!important;width:110px!important;height:4px!important;border-radius:0!important;z-index:4}
 .tus.res{border:0;border-radius:0;background:center/contain no-repeat;image-rendering:pixelated;color:transparent;filter:drop-shadow(0 2px 0 rgba(0,0,0,.5))}
 .tus.res.on{background-color:transparent;filter:brightness(.7);transform:translateY(2px)}
 #sol.res{transform:scaleX(-1)}#sol.res.on{transform:scaleX(-1) translateY(2px)}

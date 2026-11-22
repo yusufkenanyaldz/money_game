@@ -1,12 +1,12 @@
 'use strict';
 /* =========================================================================
    SEYR PIXEL — 1. bölüm: Gaflet Ovası
-   Oyun 320x180 çizilir, ekrana tam katla büyütülür (keskin piksel).
+   Oyun 180 piksel yükseklikte çizilir; genişlik ekranın oranına göre (280–480). Ekranı tam doldurur.
    Savaşın kuralı: düşman saldırmadan önce hazırlanır (gözleri kızarır, "!").
    Hazırlanırken vurursan kılıç seker. Saldırısını tam zamanında kaçınırsan
    düşman sersemler ve o arada vuruşun iki kat işler.
    ========================================================================= */
-const W = 320, H = 180, ZEMIN = 150;
+let W = 320; const H = 180, ZEMIN = 150;
 const cv = document.getElementById('c'), ctx = cv.getContext('2d');
 ctx.imageSmoothingEnabled = false;
 const META = window.META, SERIT = window.SERIT;
@@ -18,8 +18,13 @@ const SALDIRI_KARE = { golge: [0, 20, 40], dev: [0, 27, 33, 62] };
 const IMG = {};
 for (const k in SERIT) { const i = new Image(); i.src = SERIT[k]; IMG[k] = i; }
 function boyutla() {
-  const k = Math.max(1, Math.floor(Math.min(innerWidth / W, innerHeight / H)));
-  cv.style.width = W * k + 'px'; cv.style.height = H * k + 'px';
+  // ekranın tamamını kapla: yükseklik 180 oyun pikseli, genişlik ekran oranından. Telefonun yüksek piksel yoğunluğunda
+  // tam sayı olmayan büyütme göze batmaz.
+  const vw = innerWidth, vh = innerHeight;
+  W = Math.max(280, Math.min(480, Math.round(vw / (vh / H))));
+  const k = Math.min(vh / H, vw / W);
+  if (cv.width !== W) { cv.width = W; ctx.imageSmoothingEnabled = false; }
+  cv.style.width = Math.round(W * k) + 'px'; cv.style.height = Math.round(H * k) + 'px';
 }
 addEventListener('resize', boyutla); boyutla();
 const rnd = (a, b) => a + Math.random() * (b - a), clamp = (v, a, b) => v < a ? a : v > b ? b : v;
@@ -311,7 +316,7 @@ function dusmanSprite(e, kam) {
   const ust = ZEMIN - Math.round(T.h * (e.tur === 'dev' ? 1.7 : 1.9));
   if (e.durum === 'hazir') { ctx.fillStyle = '#ffd36b'; ctx.fillRect(sx, ust - 6, 2, 5); ctx.fillRect(sx, ust, 2, 1); }
   if (e.durum === 'sersem') { ctx.fillStyle = '#ffd36b'; const a = e.t * 8; for (let i = 0; i < 3; i++) ctx.fillRect(Math.round(sx + Math.cos(a + i * 2.1) * 7), Math.round(ust + 4 + Math.sin(a + i * 2.1) * 2), 1, 1); }
-  if (e.tur === 'dev' && e.durum !== 'ol') { ctx.fillStyle = '#16111f'; ctx.fillRect(W / 2 - 61, 18, 122, 5); ctx.fillStyle = '#c0392b'; ctx.fillRect(W / 2 - 60, 19, Math.round(120 * e.can / T.can), 3); }
+  if (e.tur === 'dev' && e.durum !== 'ol') { ctx.fillStyle = '#16111f'; ctx.fillRect(W / 2 - 61, 14, 122, 5); ctx.fillStyle = '#c0392b'; ctx.fillRect(W / 2 - 60, 15, Math.round(120 * e.can / T.can), 3); }
   return true;
 }
 function dusmanCiz(e, kam) {
@@ -341,15 +346,16 @@ function dusmanCiz(e, kam) {
   if (e.durum === 'hazir') { ctx.fillStyle = '#ffd36b'; ctx.fillRect(sx, ZEMIN - h - 10, 2, 5); ctx.fillRect(sx, ZEMIN - h - 4, 2, 1); }
   if (e.durum === 'sersem') { ctx.fillStyle = '#ffd36b'; const a = e.t * 8; for (let i = 0; i < 3; i++) ctx.fillRect(Math.round(sx + Math.cos(a + i * 2.1) * 7), Math.round(ZEMIN - h - 5 + Math.sin(a + i * 2.1) * 2), 1, 1); }
   if (e.tur === 'dev' && e.durum !== 'ol') {   // can çubuğu
-    ctx.fillStyle = '#16111f'; ctx.fillRect(W / 2 - 61, 18, 122, 5); ctx.fillStyle = '#c0392b'; ctx.fillRect(W / 2 - 60, 19, Math.round(120 * e.can / T.can), 3);
+    ctx.fillStyle = '#16111f'; ctx.fillRect(W / 2 - 61, 14, 122, 5); ctx.fillStyle = '#c0392b'; ctx.fillRect(W / 2 - 60, 15, Math.round(120 * e.can / T.can), 3);
   }
 }
 function arayuz() {
   if (OYUN.sezgi > 0) { ctx.fillStyle = `rgba(90,150,220,${Math.min(.18, OYUN.sezgi * .1)})`; ctx.fillRect(0, 0, W, H); }
   for (let i = 0; i < P.max; i++) kalp(8 + i * 11, 8, i < P.can);
   const ilerleme = clamp(P.x / BOLUM.uzunluk, 0, 1);
-  ctx.fillStyle = '#16111f'; ctx.fillRect(W - 86, 10, 78, 3); ctx.fillStyle = '#d9ad4f'; ctx.fillRect(W - 86, 10, Math.round(78 * ilerleme), 3);
-  ctx.fillStyle = '#e8e2d0'; ctx.fillRect(W - 86 + Math.round(78 * ilerleme) - 1, 8, 2, 7);
+  const px = Math.round(W / 2 - 39);   // bölüm ilerlemesi: üst ortada
+  ctx.fillStyle = '#16111f'; ctx.fillRect(px, 6, 78, 3); ctx.fillStyle = '#d9ad4f'; ctx.fillRect(px, 6, Math.round(78 * ilerleme), 3);
+  ctx.fillStyle = '#e8e2d0'; ctx.fillRect(px + Math.round(78 * ilerleme) - 1, 4, 2, 7);
 }
 function kalp(x, y, dolu) {
   const s = ['.##.##.', '#######', '#######', '.#####.', '..###..', '...#...'];
