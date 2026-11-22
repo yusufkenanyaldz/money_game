@@ -52,13 +52,13 @@ canvas{image-rendering:pixelated;image-rendering:crisp-edges;display:block}
 <div id="hud"></div>
 <div id="yadigar" hidden><div><i></i><small>YADİGÂR</small><b></b><p></p><em>dokun: devam</em></div></div>
 <button class="tus" id="kac" aria-label="Kaç">KAÇ</button><button class="tus" id="vur" aria-label="Vur">VUR</button>
-<script>window.UI=__UI__;window.META=__META__;window.SERIT=__SERIT__;window.DUSMAN=__DUSMAN__;</script>
+<script>window.SESLER=__SESLER__;window.UI=__UI__;window.META=__META__;window.SERIT=__SERIT__;window.DUSMAN=__DUSMAN__;</script>
 <script>__OYUN__</script>
 <script>__DEFTER__</script>
 <script>__oyun.haklar();</script>
 '''
 ek = ''.join(f"document.querySelectorAll('{s}').forEach(b=>{{b.classList.add('res');b.style.backgroundImage='url({ui[k]})'}});" for s, k in (('#vur', 'vur'), ('#kac', 'kac'), ('#sol,#sag', 'ok'), ('#dfBtn', 'defter'), ('#y-alp', 'alp'), ('#y-kut', 'kut'), ('#y-hikmet', 'hikmet'), ('#y-cevher', 'cevher')) if k in ui)
 SAYFA = SAYFA.replace('<script>__oyun.haklar();</script>', '<script>' + ek + ''.join(f"document.documentElement.style.setProperty('--{k}','url({ui[k]})');" for k in ('pencere', 'abihayat') if k in ui) + '__oyun.haklar();</script>')   # Defter düğmesi defter.js'te oluşur
-html = SAYFA.replace('__META__', json.dumps(meta)).replace('__SERIT__', json.dumps(seritler)).replace('__DUSMAN__', json.dumps(dusman)).replace('__UI__', json.dumps({k: ui[k] for k in ('abihayat-k',) if k in ui})).replace('__OYUN__', oyun.replace('</script', '<\\/script')).replace('__DEFTER__', defter.replace('</script', '<\\/script'))
+html = SAYFA.replace('__META__', json.dumps(meta)).replace('__SERIT__', json.dumps(seritler)).replace('__DUSMAN__', json.dumps(dusman)).replace('__SESLER__', open(os.path.join(A, 'ses.json')).read() if os.path.exists(os.path.join(A, 'ses.json')) else '{}').replace('__UI__', json.dumps({k: ui[k] for k in ('abihayat-k',) if k in ui})).replace('__OYUN__', oyun.replace('</script', '<\\/script')).replace('__DEFTER__', defter.replace('</script', '<\\/script'))
 open(os.path.join(BURASI, 'onizleme.html'), 'w', encoding='utf-8').write(html)
 print('✓ onizleme.html', os.path.getsize(os.path.join(BURASI, 'onizleme.html')) // 1024, 'KB')

@@ -41,3 +41,5 @@ dokunulmadan duruyor; Defter (`seyr/defter.js`) buraya taşınacak.
   Alp → Güçlü Darbe (sonraki vuruş 3 hasar, hazırlanan düşmanın zırhını deler ve sersemletir) · Kut → Nur Kalkanı (bir darbeyi karşılar)
   · Hikmet → Sezgi (3 sn düşmanlar %40 hızda) · Cevher → Sabır (+1 kalp). Klavye 1-4. Her 10 seviyede +1 kalp.
 - **Yadigâr:** Kızıl Dev ölünce Âb-ı Hayat Damlası düşer; üstünden geçince alınır (ilk seferde pencere açılır), `D.yadigar` içinde kalıcı. Etki: düşmanlar %30 uzun sersem (`sersemSure`). Bölüm, damla alınınca biter. Defter › Güçler › Yadigârlar; gizli anlamı (sakin kalmak) yalnızca anahtarda. Simge `ui-abihayat.png`, oyun içi küçük `ui-abihayat-k.png` (15x18).
+- **Sesler videoların kendisinden** (`ses-isle.py` → `assets/ses.json`, 22 kHz WAV, gömülü): şövalye saldırı/kaçınma/darbe/yenilme/zafer, gölge ve dev saldırı/darbe/ölüm. Her ses, şeridin zaman aralığından vuruşun başladığı yerden kesilir. Yüklenmemişse sentez sese düşer.
+- `kaynak/k10/`: 10. seviye (Yolcu) Gemini görseli + Flow videoları (8 hareketin hepsi, sesli). Henüz işlenmedi.

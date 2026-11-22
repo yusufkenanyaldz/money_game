@@ -36,7 +36,13 @@ const rnd = (a, b) => a + Math.random() * (b - a), clamp = (v, a, b) => v < a ? 
 
 /* ---------- Ses (sentez, şimdilik) ---------- */
 let AC = null;
-function sesAc() { if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)({ latencyHint: 'interactive' }); } catch (e) {} } if (AC && AC.state !== 'running') AC.resume().catch(() => {}); }
+/* Videoların kendi sesleri (ses-isle.py → window.SESLER). Yüklenmemişse sentez sese düşer. */
+const BUF = {}; let sesYuklendi = false;
+function sesYukle() { if (sesYuklendi || !AC || !window.SESLER) return; sesYuklendi = true;
+  for (const k in SESLER) fetch(SESLER[k]).then(r => r.arrayBuffer()).then(a => AC.decodeAudioData(a)).then(b => BUF[k] = b).catch(() => {}); }
+function dosya(k, vol = .8) { if (!AC || !BUF[k]) return false; const s = AC.createBufferSource(), g = AC.createGain();
+  s.buffer = BUF[k]; s.playbackRate.value = .96 + Math.random() * .08; g.gain.value = vol; s.connect(g); g.connect(AC.destination); s.start(); return true; }
+function sesAc() { if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)({ latencyHint: 'interactive' }); } catch (e) {} } if (AC && AC.state !== 'running') AC.resume().catch(() => {}); sesYukle(); }
 function ton(f, sure, tip = 'square', vol = .06, kay = 0) {
   if (!AC) return; const t = AC.currentTime, o = AC.createOscillator(), g = AC.createGain();
   o.type = tip; o.frequency.setValueAtTime(f, t); if (kay) o.frequency.exponentialRampToValueAtTime(Math.max(30, f + kay), t + sure);
@@ -84,14 +90,14 @@ const P = { x: 40, yon: 1, can: 5, max: 5, guclu: false, kalkan: 0, inv: 0, eyle
 
 function saldir() {
   if (OYUN.durum !== 'oyun' || P.eylem) return;
-  P.eylem = 'saldiri'; P.et = 0; P.isabet = false; SES.vur();
+  P.eylem = 'saldiri'; P.et = 0; P.isabet = false; if (!BUF['p-saldiri']) SES.vur();
 }
 function kacin() {
   if (OYUN.durum !== 'oyun') return;
   if (P.eylem === 'kacin') return;
   // saldırıyı isabetten önce kesemezsin (karar ver); isabetten sonra kaçınabilirsin
   if (P.eylem === 'saldiri' && saldiriKare() < SALDIRI.isabet + 2) return;
-  P.eylem = 'kacin'; P.et = 0; P.kacti = false; SES.kac();
+  P.eylem = 'kacin'; P.et = 0; P.kacti = false; dosya('p-kacin', .7) || SES.kac();
 }
 const saldiriKare = () => SALDIRI.bas + Math.floor(P.et * META.saldiri.fps * SALDIRI.hiz);
 const tekKare = (ad, hiz) => Math.min(META[ad].n - 1, Math.floor(P.et * META[ad].fps * hiz));
@@ -104,11 +110,11 @@ function oyuncuVuruldu(hasar, kaynakX) {
     if (!P.kacti) { P.kacti = true; yazi(P.x, 'kaçtın', '#9fd6ff'); SES.kactin(); }
     return 'kacti';
   }
-  P.can -= hasar; P.inv = 1; P.yara = .25; SES.yara(); titret(3, .2);
+  P.can -= hasar; P.inv = 1; P.yara = .25; dosya('p-darbe', .8) || SES.yara(); titret(3, .2);
   P.eylem = META.darbe ? 'darbe' : null; P.et = 0;
   P.x += Math.sign(P.x - kaynakX || -P.yon) * 16;
   yazi(P.x, '-' + hasar, '#ff7b6b');
-  if (P.can <= 0) { P.can = 0; OYUN.durum = 'dustu'; OYUN.t = 0; SES.ol(); }
+  if (P.can <= 0) { P.can = 0; OYUN.durum = 'dustu'; OYUN.t = 0; dosya('p-yenilme', .8) || SES.ol(); }
   return 'yara';
 }
 
@@ -130,9 +136,9 @@ function vurusKontrol() {
     if (e.durum === 'hazir' && !P.gucluVurus) { yazi(e.x, 'tok!', '#d9ad4f'); SES.sek(); e.flas = .1; continue; }   // hazırlanırken zırhlı
     let hasar = e.durum === 'sersem' ? 2 : 1;
     if (P.gucluVurus) { hasar = 3; if (e.durum === 'hazir' || e.durum === 'yaklas') { e.durum = 'sersem'; e.t = 0; } titret(3, .15); }
-    e.can -= hasar; e.flas = .15; e.darbeT = 0; e.kx = P.yon * (e.tur === 'dev' ? 3 : 10); SES.isabet(); titret(e.tur === 'dev' ? 2 : 1, .1);
+    e.can -= hasar; e.flas = .15; e.darbeT = 0; e.kx = P.yon * (e.tur === 'dev' ? 3 : 10); SES.isabet(); dosya(e.tur === 'dev' ? 'd-darbe' : 'g-darbe', .6); titret(e.tur === 'dev' ? 2 : 1, .1);
     yazi(e.x, hasar > 1 ? '-2!' : '-1', hasar > 1 ? '#ffd36b' : '#ffffff');
-    if (e.can <= 0) { e.durum = 'ol'; e.t = 0; SES.ol(); if (e.tur === 'dev') { OYUN.devOldu = true; OYUN.dusen = { k: 'abihayat', x: e.x, y: ZEMIN - 70, vy: -40, t: 0 }; } }
+    if (e.can <= 0) { e.durum = 'ol'; e.t = 0; dosya(e.tur === 'dev' ? 'd-ol' : 'g-ol', .8) || SES.ol(); if (e.tur === 'dev') { OYUN.devOldu = true; OYUN.dusen = { k: 'abihayat', x: e.x, y: ZEMIN - 70, vy: -40, t: 0 }; } }
     else if (e.durum !== 'sersem' && e.tur === 'golge') { e.durum = 'geri'; e.t = 0; }
   }
 }
@@ -149,7 +155,7 @@ function dusmanlar(dt) {
       if (ux <= T.menzil + 4 && e.bekle <= 0 && (!saldiranVar || e.tur === 'dev') && OYUN.durum === 'oyun') { e.durum = 'hazir'; e.t = 0; SES.hazir(); }
     } else if (e.durum === 'hazir') {
       const hazir = T.hazir * (e.tur === 'dev' && e.can <= T.can / 2 ? .75 : 1);   // dev yarı canında hızlanır
-      if (e.t >= hazir) { e.durum = 'saldir'; e.t = 0; e.isabet = false; if (e.tur === 'dev') { SES.dev(); titret(4, .3); } }
+      if (e.t >= hazir) { e.durum = 'saldir'; e.t = 0; e.isabet = false; dosya(e.tur === 'dev' ? 'd-saldiri' : 'g-saldiri', .75); if (e.tur === 'dev') { if (!BUF['d-saldiri']) SES.dev(); titret(4, .3); } }
     } else if (e.durum === 'saldir') {
       e.x += e.yon * T.hamle * dt;
       if (!e.isabet && e.t >= T.saldiri * .5) {
@@ -221,7 +227,7 @@ function bolumGuncelle() {
     if (d.y >= ZEMIN - 18) { d.yer = (d.yer || 0) + 1 / 60; if (d.yer > .8) d.x += Math.sign(P.x - d.x) * Math.min(Math.abs(P.x - d.x), 70 / 60); }   // yere inince oyuncuya süzülür
     if (d.y >= ZEMIN - 18 && Math.abs(P.x - d.x) < 12) yadigarAl(d);
   }
-  if (OYUN.devOldu && OYUN.durum === 'oyun' && E.length === 0 && (!d || d.alindi)) { OYUN.durum = 'bitti'; OYUN.t = 0; SES.bitti(); }
+  if (OYUN.devOldu && OYUN.durum === 'oyun' && E.length === 0 && (!d || d.alindi)) { OYUN.durum = 'bitti'; OYUN.t = 0; SES.bitti(); setTimeout(() => dosya('p-zafer', .7), 300); }
 }
 
 /* ---------- Efektler ---------- */
@@ -239,7 +245,7 @@ function guncelle(dt) {
   P.inv = Math.max(0, P.inv - dt); P.yara = Math.max(0, P.yara - dt);
   if (P.eylem === 'saldiri') {
     P.et += dt; const f = saldiriKare();
-    if (!P.isabet && f >= SALDIRI.isabet) { P.isabet = true; vurusKontrol(); }
+    if (!P.isabet && f >= SALDIRI.isabet) { P.isabet = true; dosya('p-saldiri', .7); vurusKontrol(); }
     if (f >= META.saldiri.n) P.eylem = null;
   } else if (P.eylem === 'darbe') {
     P.et += dt; if (P.et * META.darbe.fps * 1.6 >= META.darbe.n) P.eylem = null;
