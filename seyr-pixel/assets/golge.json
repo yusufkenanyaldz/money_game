@@ -4,7 +4,7 @@
   "w": 61,
   "h": 50,
   "fps": 12,
-  "yon": -1,
+  "yon": 1,
   "dongu": false
  },
  "bekle": {
@@ -12,7 +12,7 @@
   "w": 41,
   "h": 48,
   "fps": 12,
-  "yon": -1,
+  "yon": 1,
   "dongu": true
  },
  "yuru": {
@@ -20,7 +20,7 @@
   "w": 46,
   "h": 53,
   "fps": 12,
-  "yon": -1,
+  "yon": 1,
   "dongu": true
  },
  "darbe": {
@@ -28,7 +28,7 @@
   "w": 61,
   "h": 61,
   "fps": 12,
-  "yon": -1,
+  "yon": 1,
   "dongu": false
  },
  "ol": {
@@ -36,7 +36,7 @@
   "w": 61,
   "h": 61,
   "fps": 12,
-  "yon": -1,
+  "yon": 1,
   "dongu": false
  }
 }

@@ -34,5 +34,5 @@ dokunulmadan duruyor; Defter (`seyr/defter.js`) buraya taşınacak.
 - `arayuz-isle.py`: Gemini arayüz görsellerini asıl pixel boyutuna indirir → `assets/ui-*.png`. VUR, KAÇ ve yön düğmeleri oyunda;
   defter, pencere, can çubuğu, kalp ve dört güç simgesi Defter ekranı için hazır.
 - Düşmanlar: `pixel-isle.py --grup golge|dev --boy N --yon -1` → ayrı palet (`palet-<grup>.png`) ve `assets/<grup>.json`. Dikey videolardaki siyah bant otomatik kırpılır; `--enaz` en kısa döngü süresi.
-  Gölge: bekle, yürü, saldırı (0–19 hazırlanma, 20–40 vuruş), darbe, ölüm. Kızıl Dev: bekle, yürü, saldırı (0–26 sopa kalkar, 27–33 iner, 33–62 yere vurmuş + toz: sersemken oynar), darbe, ölüm.
+  Gölge görseli SAĞA bakıyor (`--yon 1`; Gemini sola istense de sağa çizdi). Gölge: bekle, yürü, saldırı (0–19 hazırlanma, 20–40 vuruş), darbe, ölüm. Kızıl Dev: bekle, yürü, saldırı (0–26 sopa kalkar, 27–33 iner, 33–62 yere vurmuş + toz: sersemken oynar), darbe, ölüm.
 
