@@ -218,6 +218,7 @@ function bolumGuncelle() {
   const d = OYUN.dusen;
   if (d && !d.alindi) {   // yadigâr düşer, karakter üstünden geçince alınır
     d.t += 1 / 60; d.vy += 220 / 60; d.y = Math.min(ZEMIN - 18, d.y + d.vy / 60);
+    if (d.y >= ZEMIN - 18) { d.yer = (d.yer || 0) + 1 / 60; if (d.yer > .8) d.x += Math.sign(P.x - d.x) * Math.min(Math.abs(P.x - d.x), 70 / 60); }   // yere inince oyuncuya süzülür
     if (d.y >= ZEMIN - 18 && Math.abs(P.x - d.x) < 12) yadigarAl(d);
   }
   if (OYUN.devOldu && OYUN.durum === 'oyun' && E.length === 0 && (!d || d.alindi)) { OYUN.durum = 'bitti'; OYUN.t = 0; SES.bitti(); }
