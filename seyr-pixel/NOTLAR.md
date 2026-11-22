@@ -36,3 +36,7 @@ dokunulmadan duruyor; Defter (`seyr/defter.js`) buraya taşınacak.
 - Düşmanlar: `pixel-isle.py --grup golge|dev --boy N --yon -1` → ayrı palet (`palet-<grup>.png`) ve `assets/<grup>.json`. Dikey videolardaki siyah bant otomatik kırpılır; `--enaz` en kısa döngü süresi.
   Gölge görseli SAĞA bakıyor (`--yon 1`; Gemini sola istense de sağa çizdi). Gölge: bekle, yürü, saldırı (0–19 hazırlanma, 20–40 vuruş), darbe, ölüm. Kızıl Dev: bekle, yürü, saldırı (0–26 sopa kalkar, 27–33 iner, 33–62 yere vurmuş + toz: sersemken oynar), darbe, ölüm.
 
+- **Defter** (`defter.js`, eski Seyr'den): ameller, Yıldız Defteri, seviye, gizli anahtar, yedek. Kayıt anahtarı `seyr_pixel_v1` (eski Seyr'den ayrı).
+- **Dört güç amellerden:** bugünkü amellerin güç payı (`bugunGuc`), her 15 dk = 1 kullanım hakkı, günde en çok 3 (`haklar`, `kullan`; `D.kullan`).
+  Alp → Güçlü Darbe (sonraki vuruş 3 hasar, hazırlanan düşmanın zırhını deler ve sersemletir) · Kut → Nur Kalkanı (bir darbeyi karşılar)
+  · Hikmet → Sezgi (3 sn düşmanlar %40 hızda) · Cevher → Sabır (+1 kalp). Klavye 1-4. Her 10 seviyede +1 kalp.

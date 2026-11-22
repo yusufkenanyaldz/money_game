@@ -39,6 +39,10 @@ const SES = {
   kactin: () => { ton(660, .08, 'square', .04); setTimeout(() => ton(990, .12, 'square', .04), 70); },
   yara: () => ton(110, .25, 'sawtooth', .07, -60), hazir: () => ton(330, .1, 'square', .025),
   ol: () => ton(200, .3, 'triangle', .06, -150), dev: () => { ton(55, .5, 'sawtooth', .1, -20); ton(80, .35, 'square', .06, -40); },
+  amel: () => { ton(784, .1, 'triangle', .04); setTimeout(() => ton(1046, .14, 'triangle', .04), 80); },
+  tesbih: n => ton(n % 33 === 0 ? 1320 : 880, .05, 'triangle', .03),
+  guc: () => [392, 523, 659].forEach((f, i) => setTimeout(() => ton(f, .12, 'triangle', .05), i * 50)),
+  bos: () => ton(150, .1, 'square', .03),
   bitti: () => [523, 659, 784, 1046].forEach((f, i) => setTimeout(() => ton(f, .18, 'square', .04), i * 120)),
 };
 
@@ -66,7 +70,7 @@ cv.addEventListener('pointerdown', () => { basla(); if (OYUN.durum !== 'oyun') y
 // saldırı: videonun 6. karesinden (kılıç kalkmış) oynat; 9. karede kılıç izi başlar = isabet
 const SALDIRI = { bas: 6, isabet: 9, hiz: 1.8, menzil: 44 };
 const KACIN = { hiz: 1.7, dokunulmaz: [1, 11], geri: 70 };
-const P = { x: 40, yon: 1, can: 5, max: 5, inv: 0, eylem: null, et: 0, isabet: false, bas: 0, t: 0, tb: 0, yara: 0, kacti: false };
+const P = { x: 40, yon: 1, can: 5, max: 5, guclu: false, kalkan: 0, inv: 0, eylem: null, et: 0, isabet: false, bas: 0, t: 0, tb: 0, yara: 0, kacti: false };
 
 function saldir() {
   if (OYUN.durum !== 'oyun' || P.eylem) return;
@@ -85,6 +89,7 @@ const kacinKare = () => Math.floor(P.et * META.kacin.fps * KACIN.hiz);
 const dokunulmaz = () => P.inv > 0 || (P.eylem === 'kacin' && kacinKare() >= KACIN.dokunulmaz[0] && kacinKare() <= KACIN.dokunulmaz[1]);
 
 function oyuncuVuruldu(hasar, kaynakX) {
+  if (P.kalkan > 0 && !dokunulmaz()) { P.kalkan = 0; P.inv = .6; yazi(P.x, 'nur kalkanı', '#ffe9a8'); SES.kactin(); titret(1, .1); return 'kacti'; }
   if (dokunulmaz()) {           // tam zamanında kaçtı
     if (!P.kacti) { P.kacti = true; yazi(P.x, 'kaçtın', '#9fd6ff'); SES.kactin(); }
     return 'kacti';
@@ -107,12 +112,14 @@ function dog(tur, x) { const T = TUR[tur]; E.push({ tur, T, x, can: T.can, durum
 const dalgalar = [];   // şok dalgaları (Kızıl Dev)
 
 function vurusKontrol() {
+  P.gucluVurus = P.guclu; P.guclu = false;   // Alp: hazırlanmış güçlü darbe bu vuruşta harcanır
   for (const e of E) {
     if (e.durum === 'ol') continue;
     const dx = (e.x - P.x) * P.yon;
     if (dx < -6 || dx > SALDIRI.menzil + e.T.w / 2) continue;
-    if (e.durum === 'hazir') { yazi(e.x, 'tok!', '#d9ad4f'); SES.sek(); e.flas = .1; continue; }   // hazırlanırken zırhlı
-    const hasar = e.durum === 'sersem' ? 2 : 1;
+    if (e.durum === 'hazir' && !P.gucluVurus) { yazi(e.x, 'tok!', '#d9ad4f'); SES.sek(); e.flas = .1; continue; }   // hazırlanırken zırhlı
+    let hasar = e.durum === 'sersem' ? 2 : 1;
+    if (P.gucluVurus) { hasar = 3; if (e.durum === 'hazir' || e.durum === 'yaklas') { e.durum = 'sersem'; e.t = 0; } titret(3, .15); }
     e.can -= hasar; e.flas = .15; e.darbeT = 0; e.kx = P.yon * (e.tur === 'dev' ? 3 : 10); SES.isabet(); titret(e.tur === 'dev' ? 2 : 1, .1);
     yazi(e.x, hasar > 1 ? '-2!' : '-1', hasar > 1 ? '#ffd36b' : '#ffffff');
     if (e.can <= 0) { e.durum = 'ol'; e.t = 0; SES.ol(); if (e.tur === 'dev') OYUN.devOldu = true; }
@@ -222,7 +229,8 @@ function guncelle(dt) {
   P.x += yon * (kos ? 82 : 36) * dt;
   const sinir = OYUN.kilit || [10, BOLUM.uzunluk];
   P.x = clamp(P.x, sinir[0] + 10, sinir[1] - 10);
-  dusmanlar(dt); bolumGuncelle();
+  if (OYUN.sezgi > 0) OYUN.sezgi -= dt;
+  dusmanlar(OYUN.sezgi > 0 ? dt * .4 : dt); bolumGuncelle();
   const hedef = clamp(P.x - W / 2 + P.yon * 30, 0, BOLUM.uzunluk - W);
   OYUN.kam += (hedef - OYUN.kam) * Math.min(1, dt * 5);
   if (OYUN.tsure > 0) { OYUN.tsure -= dt; if (OYUN.tsure <= 0) OYUN.titre = 0; }
@@ -275,7 +283,9 @@ function oyuncuCiz(kam) {
   if (P.eylem === 'darbe') { st = 'darbe'; f = tekKare('darbe', 1.6); }
   if (OYUN.durum === 'dustu') { if (META.yenilme) { st = 'yenilme'; f = Math.min(META.yenilme.n - 1, Math.floor(OYUN.t * META.yenilme.fps * 1.4)); } else { st = 'bekle'; f = 0; ctx.globalAlpha = Math.max(.2, 1 - OYUN.t); } }
   if (OYUN.durum === 'bitti' && META.zafer) { st = 'zafer'; f = Math.min(META.zafer.n - 1, Math.floor(OYUN.t * META.zafer.fps)); }
-  sprite(st, f, sx, P.yon); ctx.globalAlpha = 1;
+  if (P.guclu) ctx.filter = `drop-shadow(0 0 2px #ffd36b) brightness(${1.1 + .15 * Math.sin(OYUN.zaman * 12)})`;
+  sprite(st, f, sx, P.yon); ctx.globalAlpha = 1; ctx.filter = 'none';
+  if (P.kalkan > 0) { ctx.strokeStyle = `rgba(255,233,168,${.55 + .25 * Math.sin(OYUN.zaman * 6)})`; ctx.lineWidth = 1; ctx.beginPath(); ctx.ellipse(Math.round(sx) + .5, ZEMIN - 30.5, 20, 33, 0, 0, 7); ctx.stroke(); }
 }
 function dusmanSprite(e, kam) {
   const D = DM[e.tur]; if (!D) return false;
@@ -335,6 +345,7 @@ function dusmanCiz(e, kam) {
   }
 }
 function arayuz() {
+  if (OYUN.sezgi > 0) { ctx.fillStyle = `rgba(90,150,220,${Math.min(.18, OYUN.sezgi * .1)})`; ctx.fillRect(0, 0, W, H); }
   for (let i = 0; i < P.max; i++) kalp(8 + i * 11, 8, i < P.can);
   const ilerleme = clamp(P.x / BOLUM.uzunluk, 0, 1);
   ctx.fillStyle = '#16111f'; ctx.fillRect(W - 86, 10, 78, 3); ctx.fillStyle = '#d9ad4f'; ctx.fillRect(W - 86, 10, Math.round(78 * ilerleme), 3);
@@ -366,6 +377,30 @@ function yaziCiz(s, x, y, c) { ctx.font = '8px "Press Start 2P", monospace'; ctx
 function ortaYazi(s, y, c) { yaziCiz(s, W / 2, y, c); }
 
 let son = performance.now();
-function kare(now) { const dt = Math.min(.05, (now - son) / 1000); son = now; OYUN.zaman = (OYUN.zaman || 0) + dt; guncelle(dt); ciz(); requestAnimationFrame(kare); }
+function kare(now) { const dt = durdu ? 0 : Math.min(.05, (now - son) / 1000); son = now; OYUN.zaman = (OYUN.zaman || 0) + dt; guncelle(dt); ciz(); requestAnimationFrame(kare); }
 requestAnimationFrame(kare);
-window.__oyun = { P, E, OYUN, saldir, kacin, yeniden, dog };
+/* ---------- Dört güç: haklar Defter'den (bugünkü ameller) ---------- */
+const YETENEK = {
+  alp:    { ad: 'Güçlü Darbe', yap: () => { if (P.guclu) return false; P.guclu = true; yazi(P.x, 'güçlü darbe', '#ffd36b'); return true; } },
+  kut:    { ad: 'Nur Kalkanı', yap: () => { if (P.kalkan) return false; P.kalkan = 1; yazi(P.x, 'nur kalkanı', '#ffe9a8'); return true; } },
+  hikmet: { ad: 'Sezgi', yap: () => { if (OYUN.sezgi > 0) return false; OYUN.sezgi = 3; yazi(P.x, 'sezgi', '#9fd6ff'); return true; } },
+  cevher: { ad: 'Sabır', yap: () => { if (P.can >= P.max) return false; P.can++; yazi(P.x, '+1', '#ff9b8a'); return true; } },
+};
+function yetenek(k) {
+  if (OYUN.durum !== 'oyun' || !window.__defter) return;
+  const h = __defter.haklar()[k];
+  if (!h || h.kalan <= 0) { SES.bos(); yazi(P.x, h && h.toplam ? 'bugünlük bitti' : 'defterle beslen', '#8a8fa3'); return; }
+  if (!YETENEK[k].yap()) { SES.bos(); return; }
+  __defter.kullan(k); SES.guc(); haklarGoster();
+}
+function haklarGoster() {
+  if (!window.__defter) return; const h = __defter.haklar();
+  for (const k in YETENEK) { const b = document.getElementById('y-' + k); if (!b) continue; b.dataset.kalan = h[k].kalan; b.classList.toggle('bos', h[k].kalan <= 0); b.title = `${YETENEK[k].ad}: ${h[k].kalan}/${h[k].toplam}`; }
+}
+for (const k in YETENEK) dugme('y-' + k, () => yetenek(k));
+addEventListener('keydown', e => { const m = { '1': 'alp', '2': 'kut', '3': 'hikmet', '4': 'cevher' }[e.key]; if (m) yetenek(m); });
+let durdu = false;
+window.__oyun = { P, E, OYUN, saldir, kacin, yeniden, dog, yetenek,
+  durdur(v) { durdu = v; }, haklar: haklarGoster,
+  guc(h) { const m = 5 + Math.floor((h.L - 1) / 10); if (m !== P.max) { P.can += m - P.max; P.max = m; } },   // her 10 seviyede +1 kalp
+  seviye() { SES.bitti(); } };
