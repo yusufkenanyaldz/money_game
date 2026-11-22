@@ -5,7 +5,8 @@
   "h": 66,
   "fps": 12,
   "yon": 1,
-  "dongu": false
+  "dongu": false,
+  "taban": 65
  },
  "yuru": {
   "n": 14,
@@ -13,7 +14,8 @@
   "h": 66,
   "fps": 12,
   "yon": 1,
-  "dongu": true
+  "dongu": true,
+  "taban": 65
  },
  "bekle": {
   "n": 105,
@@ -21,7 +23,8 @@
   "h": 65,
   "fps": 12,
   "yon": 1,
-  "dongu": true
+  "dongu": true,
+  "taban": 64
  },
  "kos": {
   "n": 9,
@@ -29,7 +32,8 @@
   "h": 62,
   "fps": 12,
   "yon": 1,
-  "dongu": true
+  "dongu": true,
+  "taban": 61
  },
  "kacin": {
   "n": 16,
@@ -37,7 +41,8 @@
   "h": 70,
   "fps": 12,
   "yon": 1,
-  "dongu": false
+  "dongu": false,
+  "taban": 68
  },
  "darbe": {
   "n": 16,
@@ -45,7 +50,8 @@
   "h": 66,
   "fps": 12,
   "yon": 1,
-  "dongu": false
+  "dongu": false,
+  "taban": 65
  },
  "yenilme": {
   "n": 58,
@@ -53,7 +59,8 @@
   "h": 67,
   "fps": 12,
   "yon": 1,
-  "dongu": false
+  "dongu": false,
+  "taban": 65
  },
  "zafer": {
   "n": 36,
@@ -61,6 +68,7 @@
   "h": 85,
   "fps": 12,
   "yon": 1,
-  "dongu": false
+  "dongu": false,
+  "taban": 84
  }
 }

@@ -130,4 +130,5 @@ yol = os.path.join(ASSETS, (a.hareket if a.grup == 'karakter' else f'{a.grup}-{a
 mpath = os.path.join(ASSETS, f'{a.grup}.json'); meta = json.load(open(mpath)) if os.path.exists(mpath) else {}
 meta[a.hareket] = dict(n=len(out), w=W, h=H, fps=FPS, yon=a.yon, dongu=a.dongu)
 json.dump(meta, open(mpath, 'w'), indent=1, ensure_ascii=False)
+import subprocess as _sp; _sp.run(['python3', '-I', os.path.join(BURASI, 'taban.py')], check=True, capture_output=True)   # ayak hizası
 print(f'{a.hareket}: {len(out)} kare, {W}x{H} px, {os.path.getsize(yol) // 1024} KB, ardışık karede değişen piksel %{100 * deg:.1f}')

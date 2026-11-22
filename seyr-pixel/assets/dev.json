@@ -5,7 +5,8 @@
   "h": 93,
   "fps": 12,
   "yon": -1,
-  "dongu": true
+  "dongu": true,
+  "taban": 86
  },
  "ol": {
   "n": 73,
@@ -13,7 +14,8 @@
   "h": 93,
   "fps": 12,
   "yon": -1,
-  "dongu": false
+  "dongu": false,
+  "taban": 87
  },
  "darbe": {
   "n": 24,
@@ -21,7 +23,8 @@
   "h": 93,
   "fps": 12,
   "yon": -1,
-  "dongu": false
+  "dongu": false,
+  "taban": 86
  },
  "saldiri": {
   "n": 63,
@@ -29,7 +32,8 @@
   "h": 93,
   "fps": 12,
   "yon": -1,
-  "dongu": false
+  "dongu": false,
+  "taban": 86
  },
  "yuru": {
   "n": 24,
@@ -37,6 +41,7 @@
   "h": 93,
   "fps": 12,
   "yon": -1,
-  "dongu": true
+  "dongu": true,
+  "taban": 85
  }
 }

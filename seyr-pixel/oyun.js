@@ -259,7 +259,7 @@ function arkaPlan(kam) {
 }
 function sprite(st, f, sx, yon) {
   const M = META[st], im = IMG[st]; if (!M || !im || !im.complete || !im.naturalWidth) return;
-  const x = Math.round(sx - M.w / 2), y = ZEMIN + 1 - M.h;
+  const x = Math.round(sx - M.w / 2), y = ZEMIN - (M.taban ?? M.h - 1);
   ctx.save(); if (yon !== M.yon) { ctx.translate(Math.round(sx) * 2, 0); ctx.scale(-1, 1); }
   ctx.drawImage(im, f * M.w, 0, M.w, M.h, x, y, M.w, M.h); ctx.restore();
 }
@@ -296,7 +296,7 @@ function dusmanSprite(e, kam) {
   if (kirmizi) ctx.filter = 'sepia(1) saturate(4) hue-rotate(-30deg) brightness(1.2)';
   if (e.flas > 0) ctx.filter = 'brightness(2.2)';
   const yy = 0;
-  ctx.drawImage(im, f * m.w, 0, m.w, m.h, Math.round(sx - m.w / 2), ZEMIN + 1 - m.h + yy, m.w, m.h); ctx.restore();
+  ctx.drawImage(im, f * m.w, 0, m.w, m.h, Math.round(sx - m.w / 2), ZEMIN - (m.taban ?? m.h - 1) + yy, m.w, m.h); ctx.restore();
   // durum işaretleri (sprite'ın üstünde)
   const ust = ZEMIN - Math.round(T.h * (e.tur === 'dev' ? 1.7 : 1.9));
   if (e.durum === 'hazir') { ctx.fillStyle = '#ffd36b'; ctx.fillRect(sx, ust - 6, 2, 5); ctx.fillRect(sx, ust, 2, 1); }
