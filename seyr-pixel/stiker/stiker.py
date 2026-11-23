@@ -11,8 +11,8 @@ src, cikti = sys.argv[1], sys.argv[2]; N = int(sys.argv[3]) if len(sys.argv) > 3
 with tempfile.TemporaryDirectory() as t:
     subprocess.run(['ffmpeg', '-v', 'error', '-i', src, '-vf', 'fps=12', t + '/%04d.png'], check=True)
     F = [np.asarray(Image.open(f).convert('RGB')).astype(np.float32) for f in sorted(glob.glob(t + '/*.png'))]
-g0 = F[0][..., 1] - np.maximum(F[0][..., 0], F[0][..., 2]) > 30          # yeşil alan (bantsız)
-ry, rx = np.where(g0.mean(1) > .5)[0], np.where(g0.mean(0) > .5)[0]
+siyah = F[0].max(2) < 24                                                     # siyah bant: neredeyse tamamen siyah satır/sütun
+ry, rx = np.where(siyah.mean(1) < .9)[0], np.where(siyah.mean(0) < .9)[0]
 F = [f[ry.min() + 2:ry.max() - 1, rx.min() + 2:rx.max() - 1] for f in F]
 
 
