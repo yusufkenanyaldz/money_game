@@ -1,5 +1,6 @@
 # Yeşil perdeli pixel videodan hareketli WhatsApp stikeri: 512x512 saydam WebP, 500 KB altı.
 # Kullanım: python3 stiker.py <video.mp4> <çıktı.webp> [piksel kenarı, varsayılan 112]
+#   ANAHTAR=renk python3 stiker.py ...  → sahnede yeşil eşya (koltuk vb.) varsa
 #  - siyah bantları atar, yeşil zemini saydam yapar, karakterin etrafını sıkı kırpar (ortanca kareye göre;
 #    gezici efektler kutuyu büyütmez), gerçek pixel'e indirir, ortak palete oturtur, kıpırtıyı azaltır
 #  - 500 KB'ı aşarsa kareleri seyreltir
@@ -16,7 +17,17 @@ ry, rx = np.where(siyah.mean(1) < .9)[0], np.where(siyah.mean(0) < .9)[0]
 F = [f[ry.min() + 2:ry.max() - 1, rx.min() + 2:rx.max() - 1] for f in F]
 
 
+RENK = os.environ.get('ANAHTAR') == 'renk'   # sahnede yeşil eşya varsa: yalnızca perdenin kendi rengini sil
+ZEMIN = np.median(np.concatenate([F[0][:4].reshape(-1, 3), F[0][-4:].reshape(-1, 3)]), 0)
+
+
 def key(f):
+    if RENK:
+        from scipy import ndimage
+        d = np.sqrt(((f - ZEMIN) ** 2).sum(-1)); lab, _ = ndimage.label(d < 45)   # kenara değen perde silinir, eşyanın içi kalır
+        kenar = np.unique(np.concatenate([lab[0], lab[-1], lab[:, 0], lab[:, -1]])); dis = np.isin(lab, kenar[kenar > 0])
+        a = np.where(dis, 0., 1.); a = np.minimum(a, np.clip((d - 20) / 25, 0, 1) + ~ndimage.binary_dilation(dis, iterations=2))
+        f = f.copy(); k = ndimage.binary_dilation(dis, iterations=2); f[..., 1] = np.where(k, np.minimum(f[..., 1], np.maximum(f[..., 0], f[..., 2]) + 6), f[..., 1]); return f, a
     g = f[..., 1] - np.maximum(f[..., 0], f[..., 2]); a = np.clip(1 - (g - 25) / 50, 0, 1)
     f = f.copy(); f[..., 1] = np.minimum(f[..., 1], np.maximum(f[..., 0], f[..., 2]) + 6); return f, a
 
