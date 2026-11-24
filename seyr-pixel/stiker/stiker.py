@@ -1,5 +1,6 @@
 # Yeşil perdeli pixel videodan hareketli WhatsApp stikeri: 512x512 saydam WebP, 500 KB altı.
 # Kullanım: python3 stiker.py <video.mp4> <çıktı.webp> [piksel kenarı, varsayılan 112]
+#   KALITE=yuksek python3 stiker.py ... → pixel'e indirmeden, orijinal ayrıntıyla (kayıplı WebP)
 #   ANAHTAR=renk python3 stiker.py ...  → sahnede yeşil eşya (koltuk vb.) varsa
 #  - siyah bantları atar, yeşil zemini saydam yapar, karakterin etrafını sıkı kırpar (ortanca kareye göre;
 #    gezici efektler kutuyu büyütmez), gerçek pixel'e indirir, ortak palete oturtur, kıpırtıyı azaltır
@@ -41,6 +42,17 @@ ysh, xsh = np.where(rh > rh.max() * .05)[0], np.where(ch > ch.max() * .05)[0]
 y0, y1 = min(ys.min(), ysh.min()) - 12, max(ys.max(), ysh.max()) + 12
 x0, x1 = min(xs.min(), xsh.min()) - 12, max(xs.max(), xsh.max()) + 12
 S = max(y1 - y0, x1 - x0); cy, cx = (y0 + y1) / 2, (x0 + x1) / 2; y0, x0 = int(cy - S / 2), int(cx - S / 2)
+if os.environ.get('KALITE') == 'yuksek':   # küçültme/palet yok: yalnızca arka plan silinir, kayıplı WebP (alfa korunur)
+    kar = []
+    for f, a in K:
+        cc = np.zeros((S, S, 3), np.float32); ca = np.zeros((S, S), np.float32)
+        sy, sx = max(0, y0), max(0, x0); ey, ex = min(f.shape[0], y0 + S), min(f.shape[1], x0 + S)
+        cc[sy - y0:ey - y0, sx - x0:ex - x0] = f[sy:ey, sx:ex]; ca[sy - y0:ey - y0, sx - x0:ex - x0] = a[sy:ey, sx:ex]
+        kar.append(Image.fromarray(np.dstack([cc.clip(0, 255), ca * 255]).astype(np.uint8), 'RGBA').resize((512, 512), Image.LANCZOS))
+    for adim, q in ((1, 80), (2, 80), (2, 65), (3, 70), (3, 55), (4, 60), (4, 45)):
+        fr = kar[::adim]; fr[0].save(cikti, save_all=True, append_images=fr[1:], duration=83 * adim, loop=0, quality=q, method=4)
+        if os.path.getsize(cikti) < 480 * 1024: break
+    print(f'{cikti}: yüksek kalite, {len(fr)} kare, q{q}, {os.path.getsize(cikti) // 1024} KB'); sys.exit()
 out = []
 for f, a in K:
     cc = np.zeros((S, S, 3), np.float32); ca = np.zeros((S, S), np.float32)
@@ -57,7 +69,7 @@ for rr, m in out:
     once = idx
     kar.append(Image.fromarray(np.dstack([P[idx].astype(np.uint8), m * 255]).astype(np.uint8), 'RGBA').resize((512, 512), Image.NEAREST))
 for adim in (1, 2, 3):
-    fr = kar[::adim]; fr[0].save(cikti, save_all=True, append_images=fr[1:], duration=83 * adim, loop=0, lossless=True, method=6)
+    fr = kar[::adim]; fr[0].save(cikti, save_all=True, append_images=fr[1:], duration=83 * adim, loop=0, lossless=True, method=4)
     if os.path.getsize(cikti) < 480 * 1024: break
 print(f'{cikti}: {len(fr)} kare, {len(fr) * 83 * adim / 1000:.1f} sn, {os.path.getsize(cikti) // 1024} KB')
 kontrol = Image.new('RGBA', (512 * 4, 512), (235, 235, 235, 255))
