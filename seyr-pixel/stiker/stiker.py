@@ -25,8 +25,10 @@ ZEMIN = np.median(np.concatenate([F[0][:4].reshape(-1, 3), F[0][-4:].reshape(-1,
 def key(f):
     if RENK:
         from scipy import ndimage
-        d = np.sqrt(((f - ZEMIN) ** 2).sum(-1)); lab, _ = ndimage.label(d < 45)   # kenara değen perde silinir, eşyanın içi kalır
-        kenar = np.unique(np.concatenate([lab[0], lab[-1], lab[:, 0], lab[:, -1]])); dis = np.isin(lab, kenar[kenar > 0])
+        d = np.sqrt(((f - ZEMIN) ** 2).sum(-1)); lab, _ = ndimage.label(d < 45)   # kenara değen ve büyük perde silinir, eşyanın içindeki küçük yeşil (göz bebeği, koltuk) kalır
+        kenar = np.unique(np.concatenate([lab[0], lab[-1], lab[:, 0], lab[:, -1]])); alan = np.bincount(lab.ravel())
+        buyuk = np.where(alan > f.shape[0] * f.shape[1] * .0001)[0]           # kapalı kalan büyük boşluk (kol-gövde arası) da silinir; küçük göz bebeği kalır
+        dis = np.isin(lab, np.union1d(kenar[kenar > 0], buyuk[buyuk > 0]))
         a = np.where(dis, 0., 1.); a = np.minimum(a, np.clip((d - 20) / 25, 0, 1) + ~ndimage.binary_dilation(dis, iterations=2))
         f = f.copy(); k = ndimage.binary_dilation(dis, iterations=2); f[..., 1] = np.where(k, np.minimum(f[..., 1], np.maximum(f[..., 0], f[..., 2]) + 6), f[..., 1]); return f, a
     g = f[..., 1] - np.maximum(f[..., 0], f[..., 2]); a = np.clip(1 - (g - 25) / 50, 0, 1)
